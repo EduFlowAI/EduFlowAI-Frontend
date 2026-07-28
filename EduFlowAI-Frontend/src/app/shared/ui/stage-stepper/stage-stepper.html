@@ -1,6 +1,6 @@
-<!-- Main wrapper using Flexbox to stack items vertically -->
- <div class="flex flex-col w-full" dir="ltr">
-    <!-- Loop through the steps. We also grab the '$last' variable to know if this is the final step -->
+<!-- Main wrapper using Flexbox to stack items vertically with added top margin -->
+<div class="flex flex-col w-full mt-8" dir="ltr">
+    <!-- Loop through the steps -->
     @for(step of steps(); track step.id; let last = $last){
         <div class="flex items-start gap-4">
             <!-- Left Column: The Circle and the Connecting Line -->
@@ -24,7 +24,7 @@
                     </span>
                 </div>
 
-                <!-- The connecting line. We use the new @if syntax to hide it on the last item -->
+                <!-- The connecting line -->
                 @if (!last) {
                     <div class="w-0.5 h-12 my-2 transition-colors duration-300"
                         [ngClass]="step.status === 'Passed' ? 'bg-[#166534]' : 'bg-gray-200'">
@@ -54,7 +54,6 @@
                 </span>
                 </p>
             </div>
-            
         </div>
     }
  </div>

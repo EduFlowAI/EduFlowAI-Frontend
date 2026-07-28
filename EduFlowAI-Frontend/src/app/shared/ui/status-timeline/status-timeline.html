@@ -1,32 +1,31 @@
-<div class="relative flex items-center justify-between w-full mt-4 mb-4" dir="ltr">
-    <!-- Background connecting line (Gray) -->
-     <div class="absolute top-1/2 left-4 right-4 h-0.5 bg-gray-200 -translate-y-1/2 z-0">
-        <!-- Loop through the steps signal using the new @for syntax -->
-        @for(step of steps(); track step.id){
-            <div class="relative z-10 flex flex-col items-center gap-2 w-24">
-                <!-- The circle with the icon -->
-                <div class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-sm transition-colors duration-300"
-                    [ngClass]="{
-                        'bg-[#166534] text-white': step.state === 'passed',
-                        'bg-primary text-white': step.state === 'current',
-                        'bg-surface-container-high text-on-surface-variant': step.state === 'pending'
-                    }">
-                    <!-- Material icon from Stitch design -->
-                     <span class="material-symbols-outlined text-sm font-bold">{{step.icon}}</span>
-                </div> 
+<div class="relative flex items-center justify-between w-full mt-8 mb-8" dir="ltr">
+    <!-- Background connecting line (Gray) closed immediately -->
+     <div class="absolute top-1/2 left-4 right-4 h-0.5 bg-gray-200 -translate-y-1/2 z-0"></div>
 
-                <!-- The label below the circle -->
-                <span class="font-label-sm text-label-sm text-center transition-colors duration-300"
+    <!-- Loop through the steps outside the line div -->
+    @for(step of steps(); track step.id){
+        <div class="relative z-10 flex flex-col items-center gap-2 w-24">
+            <!-- The circle with the icon -->
+            <div class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-sm transition-colors duration-300"
                 [ngClass]="{
-                  'text-[#166534] font-bold': step.state === 'passed',
-                  'text-primary font-bold': step.state === 'current',
-                  'text-on-surface-variant': step.state === 'pending'
+                    'bg-[#166534] text-white': step.state === 'passed',
+                    'bg-primary text-white': step.state === 'current',
+                    'bg-surface-container-high text-on-surface-variant': step.state === 'pending'
                 }">
-                    <!-- Display English label. Later we will bind this to a translation pipe -->
-                    {{ step.labelEn }}
-                </span>
+                <!-- Material icon from Stitch design -->
+                 <span class="material-symbols-outlined text-sm font-bold">{{step.icon}}</span>
+            </div> 
 
-            </div>
-        }
-     </div>
+            <!-- The label below the circle -->
+            <span class="font-label-sm text-label-sm text-center transition-colors duration-300"
+            [ngClass]="{
+              'text-[#166534] font-bold': step.state === 'passed',
+              'text-primary font-bold': step.state === 'current',
+              'text-on-surface-variant': step.state === 'pending'
+            }">
+                <!-- Display English label -->
+                {{ step.labelEn }}
+            </span>
+        </div>
+    }
 </div>
