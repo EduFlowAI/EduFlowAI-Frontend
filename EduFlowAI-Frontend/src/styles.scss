@@ -1,1 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
+/* Import Tailwind base, components, and utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Apply the custom font and background color globally */
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background-color: #f7f9fb;
+}
