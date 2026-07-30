@@ -1,5 +1,1 @@
-﻿import { Injectable } from '@angular/core';
-
-@Injectable({ providedIn: 'root' })
-export class AuthToken {}
-
+export const AUTH_SESSION_STORAGE_KEY = 'eduflow.auth-session';

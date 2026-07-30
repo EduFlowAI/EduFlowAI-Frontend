@@ -12,8 +12,10 @@ describe('FormField', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(FormField);
+    fixture.componentRef.setInput('label', 'Email');
+    fixture.componentRef.setInput('forId', 'email');
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {
