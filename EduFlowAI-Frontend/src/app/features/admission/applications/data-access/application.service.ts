@@ -11,7 +11,7 @@ export class ApplicationService {
     private readonly http = inject(HttpClient);
 
     // Mock API URL - Replace this with the production backend URL later
-    private readonly API_URL = `${environment.apiUrl}/applications`;
+    private readonly API_URL = `${environment.apiUrl}/api/modules/admission/applications`;
 
     /**
      * Fetch the new dashboard summary endpoint
