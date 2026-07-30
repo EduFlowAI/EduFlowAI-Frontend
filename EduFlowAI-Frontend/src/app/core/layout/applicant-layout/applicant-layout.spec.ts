@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ApplicantLayout } from './applicant-layout';
 
@@ -20,3 +20,4 @@ describe('ApplicantLayout', () => {
     expect(component).toBeTruthy();
   });
 });
+
