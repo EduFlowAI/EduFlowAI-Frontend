@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-applicant-layout',
@@ -7,3 +7,4 @@ import { Component } from '@angular/core';
   styleUrl: './applicant-layout.scss',
 })
 export class ApplicantLayout {}
+

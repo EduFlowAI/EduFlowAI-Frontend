@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-operations-layout',
@@ -7,3 +7,4 @@ import { Component } from '@angular/core';
   styleUrl: './operations-layout.scss',
 })
 export class OperationsLayout {}
+
