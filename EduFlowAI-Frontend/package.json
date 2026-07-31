@@ -11,6 +11,7 @@
   "private": true,
   "packageManager": "npm@11.17.0",
   "dependencies": {
+    "@angular/cdk": "^21.2.14",
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
     "@angular/core": "^21.2.0",
@@ -19,6 +20,8 @@
     "@angular/router": "^21.2.0",
     "@ngrx/operators": "^21.1.1",
     "@ngrx/signals": "^21.1.1",
+    "primeicons": "^8.0.0",
+    "primeng": "^21.1.9",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -36,9 +39,9 @@
   },
   "allowScripts": {
     "@parcel/watcher@2.5.6": true,
-    "lmdb@3.5.4": true,
     "msgpackr-extract@3.0.4": true,
     "esbuild@0.28.1": true,
-    "esbuild@0.27.7": true
+    "esbuild@0.27.7": true,
+    "lmdb@3.5.1": true
   }
 }
