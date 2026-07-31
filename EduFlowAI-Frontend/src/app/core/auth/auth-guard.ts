@@ -1,6 +1,19 @@
-﻿import { CanMatchFn } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanMatchFn, Router } from '@angular/router';
 
-export const authGuard: CanMatchFn = (route, segments) => {
-  return true;
+import { AuthSessionStore } from './auth-session.store';
+
+export const authGuard: CanMatchFn = (_route, segments) => {
+  const session = inject(AuthSessionStore);
+  const router = inject(Router);
+
+  if (session.ensureFresh()) {
+    return true;
+  }
+
+  const returnUrl = `/${segments.map((segment) => segment.path).join('/')}`;
+
+  return router.createUrlTree(['/auth/login'], {
+    queryParams: returnUrl === '/' ? undefined : { returnUrl },
+  });
 };
-

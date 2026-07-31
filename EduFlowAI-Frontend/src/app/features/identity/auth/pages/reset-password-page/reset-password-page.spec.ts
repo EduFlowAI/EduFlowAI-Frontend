@@ -1,22 +1,25 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { ResetPasswordPage } from './reset-password-page';
 
 describe('ResetPasswordPage', () => {
-  let component: ResetPasswordPage;
-  let fixture: ComponentFixture<ResetPasswordPage>;
-
-  beforeEach(async () => {
+  it('rejects a reset page without email and token query parameters', async () => {
     await TestBed.configureTestingModule({
       imports: [ResetPasswordPage],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ResetPasswordPage);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
-  });
+    const component = TestBed.createComponent(
+      ResetPasswordPage,
+    ).componentInstance;
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(component.state()).toBe('invalid-link');
   });
 });
