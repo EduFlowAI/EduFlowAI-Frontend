@@ -1,22 +1,31 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { LoginPage } from './login-page';
 
 describe('LoginPage', () => {
-  let component: LoginPage;
-  let fixture: ComponentFixture<LoginPage>;
-
-  beforeEach(async () => {
+  it('creates an invalid form until credentials are supplied', async () => {
     await TestBed.configureTestingModule({
       imports: [LoginPage],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LoginPage);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
-  });
+    const fixture = TestBed.createComponent(LoginPage);
+    fixture.detectChanges();
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(fixture.componentInstance.form.invalid).toBe(true);
+
+    fixture.componentInstance.form.setValue({
+      email: 'applicant@example.com',
+      password: 'Password1',
+    });
+
+    expect(fixture.componentInstance.form.valid).toBe(true);
   });
 });

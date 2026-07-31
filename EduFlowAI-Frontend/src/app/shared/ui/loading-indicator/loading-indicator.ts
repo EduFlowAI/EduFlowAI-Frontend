@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-loading-indicator',
-  imports: [],
   templateUrl: './loading-indicator.html',
   styleUrl: './loading-indicator.scss',
 })
-export class LoadingIndicator {}
+export class LoadingIndicator {
+  readonly label = input('Loading…');
+  readonly centered = input(true);
+}

@@ -12,8 +12,9 @@ describe('ErrorState', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ErrorState);
+    fixture.componentRef.setInput('title', 'Request failed');
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

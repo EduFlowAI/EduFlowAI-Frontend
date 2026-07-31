@@ -1,1 +1,34 @@
-<p>admin-layout works!</p>
+<div class="role-shell">
+  <header>
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">EF</span>
+      <span>
+        <strong>{{ locale.t('app.name') }}</strong>
+        <small>{{ locale.t('layout.admin.title') }}</small>
+      </span>
+    </div>
+    <div class="actions">
+      <button type="button" (click)="locale.toggle()">
+        <span class="material-symbols-outlined" aria-hidden="true">language</span>
+        {{ locale.t('common.language') }}
+      </button>
+      <button type="button" (click)="logout()">
+        <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+        {{ locale.t('common.logout') }}
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <span class="material-symbols-outlined" aria-hidden="true">
+        admin_panel_settings
+      </span>
+      <div>
+        <h1>{{ locale.t('layout.admin.title') }}</h1>
+        <p>{{ session.email() }}</p>
+      </div>
+    </section>
+    <router-outlet />
+  </main>
+</div>

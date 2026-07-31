@@ -12,8 +12,9 @@ describe('StatusTimeline', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(StatusTimeline);
+    fixture.componentRef.setInput('status', 'Draft');
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {
