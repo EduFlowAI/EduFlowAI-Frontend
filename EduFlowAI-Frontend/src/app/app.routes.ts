@@ -9,7 +9,11 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'auth/login',
+    title: 'ITI Admissions through EduFlowAI',
+    loadComponent: () =>
+      import('./features/landing/pages/landing-page/landing-page').then(
+        (component) => component.LandingPage,
+      ),
   },
   {
     path: 'auth',
