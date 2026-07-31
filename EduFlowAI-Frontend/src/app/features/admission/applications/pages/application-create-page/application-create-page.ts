@@ -1,4 +1,4 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -12,7 +12,7 @@ import { ApplicationRequestDto } from '../../models/application.model';
   templateUrl: './application-create-page.html',
   styleUrl: './application-create-page.scss',
 })
-export class ApplicationCreatePage {
+export class ApplicationCreatePage implements OnInit {
   readonly store = inject(ApplicationsStore);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
@@ -38,6 +38,10 @@ export class ApplicationCreatePage {
         this.router.navigate(['/applicant/preferences']);
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.store.loadActiveCycles();     // Fetch cycles when the component initializes
   }
 
   /**

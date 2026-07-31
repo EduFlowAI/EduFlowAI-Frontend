@@ -21,12 +21,14 @@
           <label for="cycleId" class="text-sm font-medium text-gray-700">Available Cycles</label>
           
           <!-- PrimeNG Dropdown for cycle selection -->
-          <!-- Note: Replace standard options with [options]="cyclesArray" from TS if you have dynamic data -->
           <select id="cycleId" formControlName="cycleId" 
                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white text-gray-700">
             <option value="" disabled selected>Select an active cycle</option>
-            <option value="cycle-2026-q3">Intake 45 - Q3 2026</option>
-            <option value="cycle-2026-q4">Intake 46 - Q4 2026</option>
+            
+            <!-- Loop through the active cycles from the store -->
+            @for (cycle of store.activeCycles(); track cycle.id) {
+                <option [value]="cycle.id">{{ cycle.label }}</option>
+            }
           </select>
         </div>
       </fieldset>

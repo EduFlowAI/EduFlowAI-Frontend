@@ -14,7 +14,8 @@ import { UpdateApplicationPreferencesDto } from '../../models/application.model'
 
 @Component({
   selector: 'app-preference-selection-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, ButtonModule],
   templateUrl: './preference-selection-page.html',
   styleUrl: './preference-selection-page.scss',
 })

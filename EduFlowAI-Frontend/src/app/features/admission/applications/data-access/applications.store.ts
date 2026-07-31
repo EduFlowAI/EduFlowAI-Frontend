@@ -8,13 +8,15 @@ import { ApplicationDashboardSummary } from '../models/application-dashboard-sum
 import { 
   ApplicationDetailsDto, 
   ApplicationRequestDto, 
-  UpdateApplicationPreferencesDto 
+  UpdateApplicationPreferencesDto,
+  ActiveAdmissionCycleDto
 } from '../models/application.model';
 
 // 1. Define the state shape tailored for the Applicant Dashboard
 type ApplicationState = {
   summaryData: ApplicationDashboardSummary | null;
   applicationDetails: ApplicationDetailsDto | null;
+  activeCycles: ActiveAdmissionCycleDto[];
   isLoading: boolean;
   error: string | null;
 };
@@ -23,6 +25,7 @@ type ApplicationState = {
 const initialState: ApplicationState = {
   summaryData: null,
   applicationDetails: null,
+  activeCycles: [],
   isLoading: false,
   error: null,
 };
@@ -59,6 +62,23 @@ export const ApplicationsStore = signalStore(
   
   // 5. Async methods to communicate with the backend API
   withMethods((store, api = inject(ApplicationService)) => ({
+    // Method to load active cycles from the backend
+    loadActiveCycles: rxMethod<void>(
+      pipe(
+        tap(() => patchState(store, { isLoading: true, error: null })),
+        switchMap(() => api.getActiveCycles().pipe(
+          tapResponse({
+            next: (response: any) => {
+              const dataPayload = response.data || response.value || response;
+              patchState(store, { activeCycles: dataPayload, isLoading: false });
+            },
+            error: (err: any) => patchState(store, { error: err.error?.message || 'Failed to load active cycles' }),
+            finalize: () => patchState(store, { isLoading: false }),
+          })
+        ))
+      )
+    ),
+
     // Method to fetch the dashboard summary
     loadDashboardSummary: rxMethod<string>(
       pipe(

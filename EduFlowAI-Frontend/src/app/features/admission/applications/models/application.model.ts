@@ -50,3 +50,13 @@ export interface ApplicationDetailsDto {
     updatedAt: string;
     preferences: PreferenceDto[];
 }
+
+/**
+ * DTO for Active Admission Cycle based on backend response
+ */
+export interface ActiveAdmissionCycleDto {
+    id: string;          // Maps to Guid
+    label: string;
+    startDate: string;   // Maps to DateOnly
+    deadlineUtc: string; // Maps to DateTimeOffset
+}
