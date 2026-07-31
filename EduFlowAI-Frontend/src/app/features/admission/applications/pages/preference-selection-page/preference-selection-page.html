@@ -1,1 +1,126 @@
-<p>preference-selection-page works!</p>
+<div class="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+    <div class="mb-8 border-b border-gray-200 pb-4">
+      <h2 class="text-3xl font-extrabold text-gray-800">Select Your Track Preferences</h2>
+      <p class="text-gray-500 mt-2 text-sm">Please arrange your desired tracks and branches carefully.</p>
+    </div>
+  
+    <!-- Display global error from the store if any -->
+    @if (store.error()) {
+      <div class="mb-6 p-4 rounded-lg bg-red-50 border-l-4 border-red-500 text-red-700 flex items-center gap-3">
+        <i class="pi pi-times-circle text-xl"></i>
+        <span class="font-medium">{{ store.error() }}</span>
+      </div>
+    }
+  
+    <!-- Display warning if the deadline is expired -->
+    @if (store.isExpired()) {
+      <div class="mb-6 p-4 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 flex items-center gap-3">
+        <i class="pi pi-exclamation-circle text-xl"></i>
+        <span class="font-medium">The application deadline has passed. You can no longer edit your preferences.</span>
+      </div>
+    }
+  
+    <!-- Reactive Form connected to our component -->
+    <form [formGroup]="preferencesForm" (ngSubmit)="onNextStep()" class="flex flex-col gap-8">
+      
+      <!-- Primary Preference Section -->
+      <fieldset class="border border-blue-100 rounded-xl p-6 bg-blue-50/30">
+        <legend class="text-lg font-bold text-blue-800 px-3 bg-white border border-blue-100 rounded-full py-1 shadow-sm">
+          1. Primary Preference
+        </legend>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div class="flex flex-col gap-2">
+            <label for="primaryTrack" class="text-sm font-semibold text-gray-700">Track</label>
+            <select id="primaryTrack" formControlName="primaryTrack" 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-gray-700 outline-none transition-all">
+              <option value="" disabled selected>Select a track</option>
+              <option value="track-1">Full-Stack Web Development</option>
+              <option value="track-2">Data Science</option>
+            </select>
+          </div>
+  
+          <div class="flex flex-col gap-2">
+            <label for="primaryBranch" class="text-sm font-semibold text-gray-700">Branch</label>
+            <select id="primaryBranch" formControlName="primaryBranch" 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-gray-700 outline-none transition-all">
+              <option value="" disabled selected>Select a branch</option>
+              <option value="branch-1">Smart Village</option>
+              <option value="branch-2">Alexandria</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+  
+      <!-- Backup Preference Section -->
+      <fieldset class="border border-gray-200 rounded-xl p-6 bg-gray-50">
+        <legend class="text-lg font-bold text-gray-700 px-3 bg-white border border-gray-200 rounded-full py-1 shadow-sm">
+          2. Backup Preference
+        </legend>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div class="flex flex-col gap-2">
+            <label for="backupTrack" class="text-sm font-semibold text-gray-700">Track</label>
+            <select id="backupTrack" formControlName="backupTrack" 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 bg-white text-gray-700 outline-none transition-all">
+              <option value="" disabled selected>Select a track</option>
+              <option value="track-1">Full-Stack Web Development</option>
+              <option value="track-2">Data Science</option>
+            </select>
+          </div>
+  
+          <div class="flex flex-col gap-2">
+            <label for="backupBranch" class="text-sm font-semibold text-gray-700">Branch</label>
+            <select id="backupBranch" formControlName="backupBranch" 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 bg-white text-gray-700 outline-none transition-all">
+              <option value="" disabled selected>Select a branch</option>
+              <option value="branch-1">Smart Village</option>
+              <option value="branch-2">Alexandria</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+  
+      <!-- Duplicate Track Validation Error -->
+      @if (hasDuplicateError) {
+        <div class="p-3 rounded-lg bg-red-100 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2">
+          <i class="pi pi-info-circle"></i>
+          Primary and Backup tracks cannot be the same. Please choose different tracks.
+        </div>
+      }
+  
+      <!-- Action Buttons -->
+      <div class="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
+        
+        <!-- PrimeNG Secondary Button -->
+        <p-button 
+          type="button" 
+          (onClick)="onSaveDraft()" 
+          [disabled]="!store.canEdit() || store.isLoading()"
+          styleClass="p-button-outlined p-button-secondary px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+          
+          @if (store.isLoading()) {
+            <i class="pi pi-spin pi-spinner mr-2"></i>
+            <span>Saving...</span>
+          } @else {
+            <div class="flex items-center gap-2">
+              <i class="pi pi-save text-sm"></i>
+              <span>Save Draft</span>
+            </div>
+          }
+        </p-button>
+  
+        <!-- PrimeNG Primary Button -->
+        <p-button 
+          type="submit" 
+          [disabled]="preferencesForm.invalid || !store.canEdit() || store.isLoading()"
+          styleClass="p-button-primary px-8 py-2 rounded-lg font-bold shadow-md transition-transform hover:-translate-y-0.5">
+          
+          <div class="flex items-center gap-2">
+            <span>Next Step</span>
+            <i class="pi pi-arrow-right text-sm"></i>
+          </div>
+        </p-button>
+      </div>
+    </form>
+</div>

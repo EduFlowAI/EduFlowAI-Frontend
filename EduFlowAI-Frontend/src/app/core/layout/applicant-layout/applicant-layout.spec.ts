@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { ApplicantLayout } from './applicant-layout';
 
@@ -9,11 +10,12 @@ describe('ApplicantLayout', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ApplicantLayout],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ApplicantLayout);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

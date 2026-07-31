@@ -1,4 +1,1 @@
-import { Service } from '@angular/core';
-
-@Service()
-export class AuthToken {}
+export const AUTH_SESSION_STORAGE_KEY = 'eduflow.auth-session';

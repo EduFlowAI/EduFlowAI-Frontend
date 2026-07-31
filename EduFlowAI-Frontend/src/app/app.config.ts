@@ -2,15 +2,35 @@ import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import {
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
+import {
+  provideRouter,
+  withInMemoryScrolling,
+} from '@angular/router';
 
 import { routes } from './app.routes';
+import { apiErrorInterceptor } from './core/http/api-error-interceptor';
+import { authInterceptor } from './core/http/auth-interceptor';
+import { correlationIdInterceptor } from './core/http/correlation-id-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(),
-    provideRouter(routes),
+    provideHttpClient(
+      withInterceptors([
+        correlationIdInterceptor,
+        authInterceptor,
+        apiErrorInterceptor,
+      ]),
+    ),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled',
+      }),
+    ),
   ],
 };
