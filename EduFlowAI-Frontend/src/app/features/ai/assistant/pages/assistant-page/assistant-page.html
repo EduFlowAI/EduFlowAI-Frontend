@@ -1,1 +1,236 @@
-<p>assistant-page works!</p>
+@if (isOpen()) {
+  <section
+    class="chat-popup"
+    [class.chat-popup--maximized]="isMaximized()"
+    aria-label="Admission Assistant"
+  >
+    <header class="chat-header">
+      <div class="chat-header__identity">
+        <div
+          class="chat-header__avatar"
+          aria-hidden="true"
+        >
+          AI
+        </div>
+
+        <div>
+          <h2>Admission Assistant</h2>
+          <span>Available 24/7</span>
+        </div>
+      </div>
+
+      <div class="chat-header__actions">
+        <button
+          type="button"
+          class="chat-header__button"
+          (click)="toggleMaximize()"
+          [attr.aria-label]="
+            isMaximized()
+              ? 'Restore chat size'
+              : 'Maximize chat'
+          "
+        >
+          {{ isMaximized() ? '🗗' : '□' }}
+        </button>
+
+        <button
+          type="button"
+          class="chat-header__button"
+          (click)="closeChat()"
+          aria-label="Close chat"
+        >
+          ✕
+        </button>
+      </div>
+    </header>
+
+    <main class="chat-body">
+      <div class="chat-welcome">
+        <p>
+          Welcome to the EduFlowAI Admission Assistant.
+          How can I help you today?
+        </p>
+      </div>
+
+      @for (
+        chatMessage of messages();
+        track chatMessage.id
+      ) {
+        @if (chatMessage.role === 'user') {
+          <article class="user-message">
+            <p>{{ chatMessage.content }}</p>
+          </article>
+        } @else {
+          @if (
+            chatMessage.response.requiresClarification
+          ) {
+            <article class="assistant-message">
+              <header class="assistant-message__header">
+                <strong>Admission Assistant</strong>
+              </header>
+
+              <p class="assistant-message__content">
+                {{
+                  chatMessage.response
+                    .clarificationMessage ??
+                    'Please clarify your request.'
+                }}
+              </p>
+            </article>
+          }
+
+          @for (
+            result of chatMessage.response.results;
+            track $index
+          ) {
+            <article
+              class="assistant-message"
+              [attr.data-intent]="result.intent"
+            >
+              <header class="assistant-message__header">
+                <strong>Admission Assistant</strong>
+              </header>
+
+              <p class="assistant-message__content">
+                {{ result.content }}
+              </p>
+
+              @if (
+                result.intent === 'recommendation' &&
+                result.metadata.recommendations?.length
+              ) {
+                <section class="recommendation-cards">
+                  @for (
+                    track of
+                      result.metadata.recommendations;
+                    track track.trackId
+                  ) {
+                    <article class="recommendation-card">
+                      <div
+                        class="recommendation-card__rank"
+                      >
+                        {{ track.rank }}
+                      </div>
+
+                      <div
+                        class="recommendation-card__content"
+                      >
+                        <h3>{{ track.trackName }}</h3>
+                        <p>{{ track.reason }}</p>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="recommendation-card__action"
+                      >
+                        View details
+                      </button>
+                    </article>
+                  }
+                </section>
+              }
+
+              @if (result.sources.length > 0) {
+                <details class="assistant-message__sources">
+                  <summary>
+                    References ({{ result.sources.length }})
+                  </summary>
+
+                  <ul>
+                    @for (
+                      source of result.sources;
+                      track source
+                    ) {
+                      <li>{{ source }}</li>
+                    }
+                  </ul>
+                </details>
+              }
+
+              @if (
+                result.intent === 'recommendation' &&
+                result.metadata.state ===
+                  'collecting_answers'
+              ) {
+                <div class="recommendation-actions">
+                  @if (
+                    result.metadata.canRecommendNow
+                  ) {
+                    <button
+                      type="button"
+                      class="secondary-action"
+                      (click)="recommendNow()"
+                      [disabled]="isSending()"
+                    >
+                      Recommend now
+                    </button>
+                  }
+                </div>
+              }
+            </article>
+          }
+        }
+      }
+
+      @if (isSending()) {
+        <div
+          class="
+            assistant-message
+            assistant-message--loading
+          "
+          aria-label="Assistant is typing"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <p class="chat-error">
+          {{ errorMessage() }}
+        </p>
+      }
+    </main>
+
+    <footer class="chat-composer">
+      <form
+        class="chat-composer__form"
+        (ngSubmit)="sendMessage()"
+      >
+        <input
+          type="text"
+          name="message"
+          [(ngModel)]="message"
+          placeholder="Type your inquiry here..."
+          autocomplete="off"
+          [disabled]="isSending()"
+        />
+
+        <button
+          type="submit"
+          class="chat-composer__send"
+          [disabled]="
+            isSending() || !message.trim()
+          "
+          aria-label="Send message"
+        >
+          ➤
+        </button>
+      </form>
+    </footer>
+  </section>
+}
+
+<button
+  type="button"
+  class="chat-launcher"
+  (click)="toggleChat()"
+  [attr.aria-label]="
+    isOpen()
+      ? 'Close admission assistant'
+      : 'Open admission assistant'
+  "
+>
+  {{ isOpen() ? '✕' : '💬' }}
+</button>

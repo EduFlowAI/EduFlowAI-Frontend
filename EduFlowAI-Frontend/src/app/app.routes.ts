@@ -15,26 +15,26 @@ export const routes: Routes = [
     path: 'auth',
     loadComponent: () =>
       import('./core/layout/public-layout/public-layout').then(
-        (component) => component.PublicLayout,
+        component => component.PublicLayout,
       ),
     loadChildren: () =>
       import('./features/identity/auth/auth.routes').then(
-        (routes) => routes.AUTH_ROUTES,
+        routes => routes.AUTH_ROUTES,
       ),
   },
   {
     path: 'applicant',
     canMatch: [authGuard, roleGuard(APP_ROLES.applicant)],
     loadComponent: () =>
-      import('./core/layout/applicant-layout/applicant-layout').then(
-        (component) => component.ApplicantLayout,
-      ),
+      import(
+        './core/layout/applicant-layout/applicant-layout'
+      ).then(component => component.ApplicantLayout),
     children: [
       {
         path: 'profile',
         loadChildren: () =>
           import('./features/identity/profile/routes').then(
-            (routes) => routes.PROFILE_ROUTES,
+            routes => routes.PROFILE_ROUTES,
           ),
       },
       {
@@ -52,40 +52,49 @@ export const routes: Routes = [
       profileCompleteGuard,
     ],
     loadComponent: () =>
-      import('./core/layout/applicant-layout/applicant-layout').then(
-        (component) => component.ApplicantLayout,
-      ),
+      import(
+        './core/layout/applicant-layout/applicant-layout'
+      ).then(component => component.ApplicantLayout),
     loadChildren: () =>
       import('./features/admission/applications/routes'),
   },
   {
     path: 'operations',
-    canMatch: [authGuard, roleGuard(APP_ROLES.operationsManager)],
+    canMatch: [
+      authGuard,
+      roleGuard(APP_ROLES.operationsManager),
+    ],
     loadComponent: () =>
-      import('./core/layout/operations-layout/operations-layout').then(
-        (component) => component.OperationsLayout,
-      ),
+      import(
+        './core/layout/operations-layout/operations-layout'
+      ).then(component => component.OperationsLayout),
   },
   {
     path: 'admin',
-    canMatch: [authGuard, roleGuard(APP_ROLES.superAdmin)],
+    canMatch: [
+      authGuard,
+      roleGuard(APP_ROLES.superAdmin),
+    ],
     loadComponent: () =>
-      import('./core/layout/admin-layout/admin-layout').then(
-        (component) => component.AdminLayout,
-      ),
+      import(
+        './core/layout/admin-layout/admin-layout'
+      ).then(component => component.AdminLayout),
   },
   {
     path: 'error',
     loadComponent: () =>
-      import('./core/layout/public-layout/public-layout').then(
-        (component) => component.PublicLayout,
-      ),
+      import(
+        './core/layout/public-layout/public-layout'
+      ).then(component => component.PublicLayout),
     children: [
       {
         path: '',
         loadComponent: () =>
-          import('./core/errors/unexpected-error-page').then(
-            (component) => component.UnexpectedErrorPage,
+          import(
+            './core/errors/unexpected-error-page'
+          ).then(
+            component =>
+              component.UnexpectedErrorPage,
           ),
       },
     ],
@@ -93,16 +102,16 @@ export const routes: Routes = [
   {
     path: 'not-found',
     loadComponent: () =>
-      import('./core/layout/public-layout/public-layout').then(
-        (component) => component.PublicLayout,
-      ),
+      import(
+        './core/layout/public-layout/public-layout'
+      ).then(component => component.PublicLayout),
     children: [
       {
         path: '',
         loadComponent: () =>
-          import('./core/errors/not-found-page').then(
-            (component) => component.NotFoundPage,
-          ),
+          import(
+            './core/errors/not-found-page'
+          ).then(component => component.NotFoundPage),
       },
     ],
   },
