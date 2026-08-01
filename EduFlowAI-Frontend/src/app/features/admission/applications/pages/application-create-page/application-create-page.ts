@@ -1,68 +1,53 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ApplicationsStore } from '../../data-access/applications.store';
-import { ApplicationRequestDto } from '../../models/application.model';
+import { Component, effect, inject, signal } from '@angular/core';
+import { DatePipe, NgClass } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { ApplicationsStore } from './../../data-access/applications.store';
 
 @Component({
   selector: 'app-application-create-page',
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule],
+  imports: [DatePipe, NgClass, RouterLink],
   templateUrl: './application-create-page.html',
   styleUrl: './application-create-page.scss',
 })
-export class ApplicationCreatePage implements OnInit {
+export class ApplicationCreatePage {
   readonly store = inject(ApplicationsStore);
-  private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
-  createForm: FormGroup;
+  // Signal to hold the currently selected cycle/program ID
+  selectedCycleId = signal<string | null>(null);
 
   constructor() {
-    // Initialize the form with basic details required to start an application
-    this.createForm = this.fb.group({
-      // The user must select an active admission cycle
-      cycleId: ['', Validators.required] 
-    });
+    // 1. Fetch active programs (cycles) when the page loads
+    this.store.loadActiveCycles();
 
-    // Effect to navigate automatically once the application draft is successfully created
+    // 2. Listen for successful draft creation to navigate to the preferences page
     effect(() => {
       const details = this.store.applicationDetails();
-      const isLoading = this.store.isLoading();
-      const error = this.store.error();
-
-      // If we have application details (success), it's a draft, and no loading/errors are active
-      if (details && details.status === 'Draft' && !isLoading && !error) {
-        // Redirect to the preferences page we just built
-        this.router.navigate(['/applicant/preferences']);
+      
+      // If we have details and the status is newly set to 'Draft', navigate to the next step
+      if (details && details.status === 'Draft') {
+        this.router.navigate(['/my-applications', details.id, 'preferences']);
       }
     });
   }
 
-  ngOnInit(): void {
-    this.store.loadActiveCycles();     // Fetch cycles when the component initializes
+  /**
+   * Set the selected cycle ID when the user clicks a program card
+   */
+  selectCycle(cycleId: string) {
+    this.selectedCycleId.set(cycleId);
   }
 
   /**
-   * Submits the form to create a new application draft
+   * Trigger the API call to create the draft application
    */
-  onSubmit(): void {
-    if (this.createForm.invalid) {
-      this.createForm.markAllAsTouched();
-      return;
+  startApplication() {
+    const cycleId = this.selectedCycleId();
+    if (cycleId && !this.store.isLoading()) {
+      this.store.createDraft({
+        cycleId: cycleId,
+        preferences: [] // Preferences are handled in the next step (Milestone 3)
+      });
     }
-
-    const formValues = this.createForm.value;
-
-    // Prepare the payload for the API
-    const request: ApplicationRequestDto = {
-      cycleId: formValues.cycleId,
-      // Preferences are submitted empty here; they will be filled in the next step
-      preferences: [] 
-    };
-
-    // Dispatch the action to the store
-    this.store.createDraft(request);
   }
 }

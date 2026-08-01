@@ -1,4 +1,6 @@
-// Core Result Wrapper matching the C# Result<T> implementation
+/**
+ * Core Result Wrapper matching the C# Result<T> implementation
+ */
 export interface Result<T> {
     isSuccess: boolean;
     data: T;
@@ -6,7 +8,9 @@ export interface Result<T> {
     message: string;
 }
 
-// Application Status Enum matching C# ApplicationStatus
+/**
+ * Application Status Enum matching C# ApplicationStatus
+ */
 export enum ApplicationStatus {
     None = 0,
     Draft = 1,
@@ -23,28 +27,39 @@ export enum ApplicationStatus {
     Expired = 12
 }
 
-// DTO for Track/Branch Preference
+/**
+ * DTO for Track/Branch Preference
+ */
 export interface PreferenceDto {
-    trackBranchOfferingId: string; // Guid maps to string in TS
-    rank: number;                  // short maps to number
+    trackId: string;    // Guid maps to string in TS
+    branchId: string;
+    rank: number;       // short maps to number
 }
 
-// DTO for creating a new draft application
+/**
+ * DTO for creating a new draft application
+ */
 export interface ApplicationRequestDto {
     cycleId: string;
     preferences: PreferenceDto[];
 }
 
-// DTO for updating existing preferences
+/**
+ *  DTO for updating existing preferences
+ */ 
 export interface UpdateApplicationPreferencesDto {
     preferences: PreferenceDto[];
 }
 
-// DTO for application details returned from GET endpoint
+/**
+ * DTO for application details returned from GET endpoint
+ */
 export interface ApplicationDetailsDto {
     id: string;
     applicantUserId: string;
     cycleId: string;
+    cycleName: string;
+    cycleDeadlineUtc: string;
     status: string;     // Kept as string to match C# JSON serialization, can be mapped to Enum if needed
     createdAt: string;  // DateTimeOffset maps to ISO string
     updatedAt: string;
@@ -55,8 +70,11 @@ export interface ApplicationDetailsDto {
  * DTO for Active Admission Cycle based on backend response
  */
 export interface ActiveAdmissionCycleDto {
-    id: string;          // Maps to Guid
-    label: string;
-    startDate: string;   // Maps to DateOnly
-    deadlineUtc: string; // Maps to DateTimeOffset
+    cycleId: string;
+    programName: string;
+    programCode: string;
+    programDescription: string;
+    cycleLabel: string;
+    startDate: string;
+    deadlineUtc: string;
 }
