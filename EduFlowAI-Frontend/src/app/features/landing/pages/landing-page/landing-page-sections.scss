@@ -232,59 +232,22 @@
   text-transform: uppercase;
 }
 
-.track-footer {
-  padding: 14px 18px;
-  border-top: 1px solid var(--border);
-}
-
-.track-toggle {
+.tracks-note {
   display: flex;
-  width: 100%;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 4px;
-  border: 0;
-  background: transparent;
-  color: var(--heading);
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.track-toggle svg {
-  transition: transform 0.2s ease;
-}
-
-.track-card.open .track-toggle svg {
-  transform: rotate(180deg);
-}
-
-.track-details {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.28s ease;
-}
-
-.track-card.open .track-details {
-  max-height: 240px;
-}
-
-.track-details-inner {
-  margin-top: 12px;
-  padding: 14px 4px 2px;
-  border-top: 1px dashed var(--border);
+  gap: 9px;
+  margin: 20px 0 0;
   color: var(--text-soft);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
 }
 
-.track-details-inner ul {
-  margin: 8px 0 15px;
-  padding-inline-start: 18px;
+.tracks-note svg {
+  flex: 0 0 auto;
+  color: var(--navy-700);
 }
 
-.track-details-inner .btn {
-  width: 100%;
-  min-height: 40px;
+[data-theme='dark'] .tracks-note svg {
+  color: #c5ddf8;
 }
 
 .process-grid {
@@ -711,13 +674,8 @@
     height: 92px;
   }
 
-  .program-card-footer {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .program-card-footer .btn {
-    width: 100%;
+  .program-eligibility-list {
+    grid-template-columns: 1fr;
   }
 
   .explorer-toolbar {

@@ -26,7 +26,7 @@
       </a>
 
       <nav class="nav-center" [attr.aria-label]="locale.t('landing.a11y.primaryNavigation')">
-        <a class="nav-link active" routerLink="/" fragment="programs">
+        <a class="nav-link" routerLink="/" fragment="programs">
           {{ locale.t('landing.nav.programs') }}
         </a>
         <a class="nav-link" routerLink="/" fragment="tracks">
@@ -83,7 +83,7 @@
         <a class="btn btn-secondary desktop-auth" routerLink="/auth/login">
           {{ locale.t('landing.nav.login') }}
         </a>
-        <a class="btn btn-primary desktop-auth" routerLink="/" fragment="programs">
+        <a class="btn btn-primary apply-button desktop-auth" routerLink="/applicant">
           {{ locale.t('landing.nav.apply') }}
         </a>
         <button
@@ -145,7 +145,12 @@
       <a class="btn btn-secondary" routerLink="/auth/login" (click)="closeMobileMenu()">
         {{ locale.t('landing.nav.login') }}
       </a>
-      <a class="btn btn-primary" routerLink="/" fragment="programs" (click)="closeMobileMenu()">
+      <a
+        class="btn btn-primary apply-button"
+        routerLink="/"
+        fragment="programs"
+        (click)="closeMobileMenu()"
+      >
         {{ locale.t('landing.nav.apply') }}
       </a>
     </div>
@@ -156,19 +161,8 @@
       <div class="container hero-grid">
         <div class="hero-copy-column">
           <div class="hero-badge">
-            <span
-              class="hero-badge-dot"
-              [class.closed]="programsStatus() === 'loaded' && !hasActivePrograms()"
-            ></span>
-            <span>
-              {{
-                locale.t(
-                  programsStatus() === 'loaded' && !hasActivePrograms()
-                    ? 'landing.hero.closed'
-                    : 'landing.hero.open'
-                )
-              }}
-            </span>
+            <span class="hero-badge-dot"></span>
+            <span>{{ locale.t('landing.programs.eyebrow') }}</span>
           </div>
           <h1>
             {{ locale.t('landing.hero.titlePrefix') }}
@@ -176,7 +170,7 @@
           </h1>
           <p class="hero-copy">{{ locale.t('landing.hero.copy') }}</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" routerLink="/" fragment="programs">
+            <a class="btn btn-primary apply-button" routerLink="/applicant">
               <span>{{ locale.t('landing.nav.apply') }}</span>
               <svg
                 class="directional-icon"
@@ -218,7 +212,7 @@
           <article class="portal-card">
             <div class="portal-top">
               <div class="portal-user">
-                <div class="avatar" aria-hidden="true">AM</div>
+                <div class="avatar" aria-hidden="true">iti</div>
                 <div>
                   <strong>{{ locale.t('landing.hero.workspace') }}</strong>
                   <small>{{ locale.t('landing.hero.reference') }}</small>
@@ -322,21 +316,19 @@
     >
       <div class="stats-strip">
         <div class="stat">
-          <strong>
-            {{ programsStatus() === 'loaded' ? programs().length : '—' }}
-          </strong>
+          <strong> 700K+ </strong>
           <span>{{ locale.t('landing.stats.programs') }}</span>
         </div>
         <div class="stat">
-          <strong>5+</strong>
+          <strong>30+</strong>
           <span>{{ locale.t('landing.stats.tracks') }}</span>
         </div>
         <div class="stat">
-          <strong>3</strong>
+          <strong>20+</strong>
           <span>{{ locale.t('landing.stats.locations') }}</span>
         </div>
         <div class="stat">
-          <strong>1</strong>
+          <strong>85%</strong>
           <span>{{ locale.t('landing.stats.journey') }}</span>
         </div>
       </div>
@@ -356,161 +348,65 @@
           <p class="section-copy">{{ locale.t('landing.programs.copy') }}</p>
         </div>
 
-        <div
-          class="programs-grid"
-          aria-live="polite"
-          [attr.aria-busy]="programsStatus() === 'loading'"
-        >
-          @if (programsStatus() === 'loading') {
-            <div class="programs-state" role="status">
-              <strong>{{ locale.t('landing.programs.loadingTitle') }}</strong>
-              <span>{{ locale.t('landing.programs.loadingCopy') }}</span>
-            </div>
-          } @else if (programsStatus() === 'error') {
-            <div class="programs-state" role="alert">
-              <strong>{{ locale.t('landing.programs.errorTitle') }}</strong>
-              <span>{{ locale.t('landing.programs.errorCopy') }}</span>
-              <button class="btn btn-secondary" type="button" (click)="loadPrograms()">
-                {{ locale.t('landing.programs.retry') }}
-              </button>
-            </div>
-          } @else if (programs().length === 0) {
-            <div class="programs-state">
-              <strong>{{ locale.t('landing.programs.emptyTitle') }}</strong>
-              <span>{{ locale.t('landing.programs.emptyCopy') }}</span>
-            </div>
-          } @else {
-            @for (program of programs(); track program.id) {
-              <article class="program-card" [class.is-active]="program.isActive">
-                <div class="program-card-body">
-                  <div
-                    class="program-duration"
-                    [attr.aria-label]="program.durationValue + ' ' + programDurationUnit(program)"
-                  >
-                    <strong>{{ program.durationValue || '—' }}</strong>
-                    <span>{{ programDurationUnit(program) }}</span>
-                  </div>
-                  <div class="program-content">
-                    <div class="program-card-head">
-                      <span class="program-code">{{ program.code }}</span>
-                      <span
-                        class="program-status"
-                        [class.open]="program.isActive"
-                        [class.closed]="!program.isActive"
-                      >
-                        {{
-                          locale.t(
-                            program.isActive ? 'landing.programs.open' : 'landing.programs.closed'
-                          )
-                        }}
-                      </span>
-                    </div>
-                    <h3>{{ programName(program) }}</h3>
-                    <p class="program-description">
-                      {{ programDescription(program) }}
-                    </p>
-                    <div class="program-meta">
-                      <span>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          aria-hidden="true"
-                        >
-                          <circle cx="12" cy="12" r="9"></circle>
-                          <path d="M12 7v5l3 2"></path>
-                        </svg>
-                        {{ program.durationValue }} {{ programDurationUnit(program) }}
-                      </span>
-                      <span>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          aria-hidden="true"
-                        >
-                          <path d="M3 10l9-5 9 5-9 5z"></path>
-                          <path d="M7 13v4c3 2 7 2 10 0v-4"></path>
-                        </svg>
-                        {{ programTrackCount(program) }}
-                      </span>
-                      <span>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          aria-hidden="true"
-                        >
-                          <path d="M12 21s7-5.2 7-12a7 7 0 10-14 0c0 6.8 7 12 7 12z"></path>
-                          <circle cx="12" cy="9" r="2"></circle>
-                        </svg>
-                        {{ programLocations(program) }}
-                      </span>
-                    </div>
-                  </div>
+        <div class="programs-grid">
+          @for (program of programs; track program.id) {
+            <article class="program-card">
+              <div class="program-card-body">
+                <div
+                  class="program-duration"
+                  [attr.aria-label]="
+                    program.durationMonths + ' ' + locale.t('landing.programs.months')
+                  "
+                >
+                  <strong>{{ program.durationMonths }}</strong>
+                  <span>{{ locale.t('landing.programs.months') }}</span>
                 </div>
-                <div class="program-card-footer">
-                  <a class="btn btn-secondary" routerLink="/" fragment="tracks">
-                    {{ locale.t('landing.programs.details') }}
-                  </a>
-                  @if (program.isActive) {
-                    <a
-                      class="btn btn-primary"
-                      routerLink="/applications/create"
-                      [queryParams]="{ programId: program.id }"
-                    >
-                      <span>{{ locale.t('landing.programs.start') }}</span>
-                      <svg
-                        class="directional-icon"
-                        width="17"
-                        height="17"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M5 12h14M13 6l6 6-6 6"></path>
-                      </svg>
-                    </a>
-                  } @else {
-                    <button class="btn btn-secondary" type="button" disabled aria-disabled="true">
-                      {{ locale.t('landing.programs.closed') }}
-                    </button>
-                  }
+                <div class="program-content">
+                  <div class="program-card-head">
+                    <span class="program-code">{{ program.code }}</span>
+                  </div>
+                  <h3>{{ locale.t(program.nameKey) }}</h3>
+                  <p class="program-description">
+                    {{ locale.t(program.descriptionKey) }}
+                  </p>
                 </div>
-              </article>
-            }
-          }
-        </div>
+              </div>
 
-        <div class="programs-note">
-          <span class="programs-note-icon" aria-hidden="true">
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-            >
-              <ellipse cx="12" cy="5" rx="8" ry="3"></ellipse>
-              <path
-                d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"
-              ></path>
-            </svg>
-          </span>
-          <span>{{ locale.t('landing.programs.availabilityNote') }}</span>
+              <dl class="program-highlights">
+                @for (highlight of program.highlights; track highlight.labelKey) {
+                  <div class="program-highlight">
+                    <dt>{{ locale.t(highlight.labelKey) }}</dt>
+                    <dd>{{ locale.t(highlight.valueKey) }}</dd>
+                  </div>
+                }
+              </dl>
+
+              <details class="program-eligibility">
+                <summary>
+                  <span>{{ locale.t('landing.programs.whoCanApply') }}</span>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 9l6 6 6-6"></path>
+                  </svg>
+                </summary>
+                <dl class="program-eligibility-list">
+                  @for (criterion of program.eligibility; track criterion.labelKey) {
+                    <div>
+                      <dt>{{ locale.t(criterion.labelKey) }}</dt>
+                      <dd>{{ locale.t(criterion.valueKey) }}</dd>
+                    </div>
+                  }
+                </dl>
+              </details>
+            </article>
+          }
         </div>
       </div>
     </section>
@@ -659,11 +555,7 @@
         @if (filteredTracks().length > 0) {
           <div class="tracks-grid">
             @for (track of filteredTracks(); track track.id) {
-              <article
-                class="track-card"
-                [class.ai]="track.isAi"
-                [class.open]="isTrackExpanded(track.id)"
-              >
+              <article class="track-card" [class.ai]="track.isAi">
                 <div class="track-top-line"></div>
                 <div class="track-main">
                   <div class="track-head">
@@ -754,67 +646,16 @@
                   <h3>{{ locale.t(track.nameKey) }}</h3>
                   <p class="track-description">{{ locale.t(track.descriptionKey) }}</p>
                   <div class="track-meta">
-                    <span>▷ <b>9</b> {{ locale.t('landing.tracks.months') }}</span>
+                    <span
+                      >▷ <b>{{ track.durationMonths }}</b>
+                      {{ locale.t('landing.tracks.months') }}</span
+                    >
                     <span>⌖ {{ locale.t(track.locationKey) }}</span>
                   </div>
                   <div class="tag-row">
-                    @for (tagKey of track.tagKeys; track tagKey) {
-                      <span class="tag">{{ locale.t(tagKey) }}</span>
+                    @for (requirementKey of track.requirementKeys; track requirementKey) {
+                      <span class="tag">{{ locale.t(requirementKey) }}</span>
                     }
-                  </div>
-                </div>
-                <div class="track-footer">
-                  <button
-                    class="track-toggle"
-                    type="button"
-                    (click)="toggleTrack(track.id)"
-                    [attr.aria-expanded]="isTrackExpanded(track.id)"
-                    [attr.aria-controls]="'track-details-' + track.id"
-                  >
-                    <span>
-                      {{
-                        locale.t(
-                          isTrackExpanded(track.id)
-                            ? 'landing.tracks.hideRequirements'
-                            : 'landing.tracks.viewRequirements'
-                        )
-                      }}
-                    </span>
-                    <svg
-                      width="17"
-                      height="17"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      aria-hidden="true"
-                    >
-                      <path d="M6 9l6 6 6-6"></path>
-                    </svg>
-                  </button>
-                  <div
-                    class="track-details"
-                    [id]="'track-details-' + track.id"
-                    [attr.aria-hidden]="!isTrackExpanded(track.id)"
-                    [attr.inert]="isTrackExpanded(track.id) ? null : ''"
-                  >
-                    <div class="track-details-inner">
-                      <strong>{{ locale.t('landing.tracks.typicalPrerequisites') }}</strong>
-                      <ul>
-                        @for (requirementKey of track.requirementKeys; track requirementKey) {
-                          <li>{{ locale.t(requirementKey) }}</li>
-                        }
-                      </ul>
-                      <a
-                        class="btn"
-                        [class.btn-amber]="track.isAi"
-                        [class.btn-secondary]="!track.isAi"
-                        routerLink="/"
-                        fragment="tracks"
-                      >
-                        {{ locale.t('landing.tracks.viewDetails') }}
-                      </a>
-                    </div>
                   </div>
                 </div>
               </article>
@@ -825,6 +666,22 @@
             {{ locale.t('landing.tracks.noResults') }}
           </div>
         }
+
+        <p class="tracks-note">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 11v5M12 8h.01"></path>
+          </svg>
+          <span>{{ locale.t('landing.tracks.availabilityNote') }}</span>
+        </p>
       </div>
     </section>
 
@@ -979,13 +836,8 @@
       </div>
       <div class="footer-bottom">
         <span>{{ locale.t('landing.footer.copyright') }}</span>
-        <span
-          class="footer-status"
-          [class.closed]="programsStatus() === 'loaded' && !hasActivePrograms()"
-        >
-          {{
-            programsStatus() === 'loaded' ? footerProgramStatus() : locale.t('landing.hero.open')
-          }}
+        <span class="footer-status">
+          {{ locale.t('landing.programs.catalogFooter', { count: programs.length }) }}
         </span>
       </div>
     </div>

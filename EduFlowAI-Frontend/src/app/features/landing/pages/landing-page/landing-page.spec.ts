@@ -1,61 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { ReplaySubject } from 'rxjs';
 
 import { LocaleStore } from '../../../../core/i18n/locale.store';
-import { ProgramsApi } from '../../data-access/programs.api';
-import { Program } from '../../models/program.model';
 import { LandingPage } from './landing-page';
 
-const programs: readonly Program[] = [
-  {
-    id: 'program-1',
-    code: 'PTP-9M',
-    name: '9-Month Professional Training Program',
-    nameAr: 'برنامج التدريب الاحترافي لمدة 9 أشهر',
-    description: 'Intensive career-focused specialization.',
-    descriptionAr: 'تخصص مهني مكثف.',
-    durationValue: '9',
-    durationUnit: 'Months',
-    durationUnitAr: 'أشهر',
-    tracksCount: 6,
-    locations: 'Multiple branches',
-    locationsAr: 'فروع متعددة',
-    isActive: true,
-  },
-  {
-    id: 'program-2',
-    code: 'ICC-4M',
-    name: '4-Month Intensive Training Program',
-    nameAr: 'برنامج التدريب المكثف لمدة 4 أشهر',
-    description: 'Focused practical training.',
-    descriptionAr: 'تدريب عملي مركز.',
-    durationValue: '4',
-    durationUnit: 'Months',
-    durationUnitAr: 'أشهر',
-    tracksCount: 4,
-    locations: 'Selected branches',
-    locationsAr: 'فروع محددة',
-    isActive: false,
-  },
-];
-
 describe('LandingPage', () => {
-  let programsSubject: ReplaySubject<readonly Program[]>;
-
   beforeEach(async () => {
     localStorage.clear();
-    programsSubject = new ReplaySubject<readonly Program[]>(1);
 
     await TestBed.configureTestingModule({
       imports: [LandingPage],
-      providers: [
-        provideRouter([]),
-        {
-          provide: ProgramsApi,
-          useValue: { getPrograms: () => programsSubject.asObservable() },
-        },
-      ],
+      providers: [provideRouter([])],
     }).compileComponents();
   });
 
@@ -64,28 +19,27 @@ describe('LandingPage', () => {
     localStorage.clear();
   });
 
-  it('renders live program availability and disables closed applications', () => {
+  it('renders the static program catalog with highlights and eligibility', () => {
     const fixture = TestBed.createComponent(LandingPage);
     fixture.detectChanges();
 
-    expect(
-      (fixture.nativeElement as HTMLElement)
-        .querySelector('.programs-grid')
-        ?.getAttribute('aria-busy'),
-    ).toBe('true');
-
-    programsSubject.next(programs);
-    fixture.detectChanges();
-
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.querySelectorAll('.program-card')).toHaveLength(2);
-    expect(root.querySelectorAll('.program-card.is-active')).toHaveLength(1);
-    expect(root.querySelector<HTMLButtonElement>('.program-card button:disabled')).not.toBeNull();
+    const cards = root.querySelectorAll('.program-card');
+
+    expect(cards).toHaveLength(2);
+    expect(cards[0]?.querySelector('h3')?.textContent?.trim()).toBe(
+      'Professional Training Program (9 Months)',
+    );
+    expect(cards[0]?.querySelectorAll('.program-highlight')).toHaveLength(4);
+    expect(cards[0]?.querySelectorAll('.program-eligibility-list > div')).toHaveLength(6);
+    const eligibility = cards[0]?.querySelector<HTMLDetailsElement>('.program-eligibility');
+    expect(eligibility?.open).toBe(false);
+    expect(cards[0]?.querySelector('.program-card-footer')).toBeNull();
+    expect(root.querySelector('.programs-state')).toBeNull();
   });
 
   it('combines category filtering with the localized search state', () => {
     const fixture = TestBed.createComponent(LandingPage);
-    programsSubject.next(programs);
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
@@ -98,23 +52,30 @@ describe('LandingPage', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('.empty-state')).not.toBeNull();
   });
 
-  it('keeps track accordions independent', () => {
+  it('shows track prerequisites as tags without requirement accordions', () => {
     const fixture = TestBed.createComponent(LandingPage);
-    programsSubject.next(programs);
     fixture.detectChanges();
 
-    fixture.componentInstance.toggleTrack('fullstack');
-    fixture.componentInstance.toggleTrack('data-ai');
-    fixture.detectChanges();
+    const firstTrack = (fixture.nativeElement as HTMLElement).querySelector('.track-card');
+    const tags = Array.from(firstTrack?.querySelectorAll('.tag') ?? []).map((tag) =>
+      tag.textContent?.trim(),
+    );
 
+    expect(tags).toEqual(['Programming fundamentals', 'Logical problem solving']);
+    expect(firstTrack?.querySelector('.track-toggle')).toBeNull();
+    expect(firstTrack?.querySelector('.track-footer')).toBeNull();
+    const durations = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.track-meta span:first-child'),
+    ).map((duration) => duration.textContent?.replace(/\s+/g, ' ').trim());
+    expect(durations.some((duration) => duration?.includes('9 months'))).toBe(true);
+    expect(durations.some((duration) => duration?.includes('4 months'))).toBe(true);
     expect(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('.track-card.open'),
-    ).toHaveLength(2);
+      (fixture.nativeElement as HTMLElement).querySelector('.tracks-note')?.textContent?.trim(),
+    ).toBe('Available tracks vary by program and by the branches offering each program.');
   });
 
   it('reuses persisted locale state and scopes the persisted theme to the page', () => {
     const fixture = TestBed.createComponent(LandingPage);
-    programsSubject.next(programs);
     fixture.detectChanges();
 
     fixture.componentInstance.toggleLocale();
@@ -126,5 +87,8 @@ describe('LandingPage', () => {
     expect(localStorage.getItem('eduflow.locale')).toBe('ar');
     expect(localStorage.getItem('iti-theme')).toBe('dark');
     expect(root?.getAttribute('data-theme')).toBe('dark');
+    expect(root?.querySelector('.program-card h3')?.textContent?.trim()).toBe(
+      'برنامج التدريب الاحترافي (9 أشهر)',
+    );
   });
 });

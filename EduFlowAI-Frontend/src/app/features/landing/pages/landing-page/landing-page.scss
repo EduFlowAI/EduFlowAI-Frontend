@@ -6,16 +6,16 @@
   --navy-950: #01182f;
   --navy-900: #022448;
   --navy-800: #12345a;
-  --navy-700: #1e3a5f;
-  --navy-600: #31557e;
+  --navy-700: #285a9b;
+  --navy-600: #385c86;
   --blue-200: #d5e3ff;
   --blue-100: #eaf1ff;
-  --amber-700: #9a6115;
+  --amber-700: #d68a26;
   --amber-600: #b7791f;
   --amber-200: #ffddb8;
   --amber-100: #fff2df;
-  --green-700: #107452;
-  --green-100: #d8f6e9;
+  --green-700: #16a04b;
+  --green-100: #9af3be;
   --red-700: #b4232d;
   --red-100: #ffe2e3;
   --gray-500: #778292;
@@ -346,6 +346,10 @@
   box-shadow: 0 14px 30px rgb(2 36 72 / 26%);
 }
 
+.landing-page:not([data-theme='dark']) .apply-button {
+  color: #fff;
+}
+
 .btn-secondary {
   border-color: var(--border-strong);
   background: var(--surface);
@@ -426,11 +430,6 @@
   border-radius: 50%;
   background: var(--green-700);
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--green-100), transparent 38%);
-}
-
-.hero-badge-dot.closed {
-  background: var(--gray-500);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--gray-100), transparent 38%);
 }
 
 .hero h1 {

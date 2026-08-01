@@ -74,11 +74,6 @@ footer {
   content: '';
 }
 
-.footer-status.closed::before {
-  background: var(--gray-500);
-  box-shadow: 0 0 0 4px var(--gray-100);
-}
-
 .chat-fab {
   position: fixed;
   z-index: 40;
