@@ -31,6 +31,16 @@
         </span>
         {{ locale.t('layout.applicant.applications') }}
       </a>
+      <a
+        routerLink="/applicant/notifications"
+        routerLinkActive="sidebar__link--active"
+        (click)="closeMenu()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          notifications
+        </span>
+        {{ locale.t('layout.applicant.notifications') }}
+      </a>
     </nav>
 
     <div class="sidebar__account">

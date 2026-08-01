@@ -78,6 +78,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
     // ---------------- Layout -----------------------------------------------------------
     'layout.applicant.profile': 'Applicant profile',
     'layout.applicant.applications': 'Applications',
+    'layout.applicant.notifications': 'Notifications',
     'layout.applicant.portal': 'Applicant portal',
     'layout.applicant.navigation': 'Applicant navigation',
     'layout.applicant.role': 'Applicant',
@@ -402,6 +403,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
     // ---------------------- Layout -----------------------------------------------------------
     'layout.applicant.profile': 'ملف المتقدم',
     'layout.applicant.applications': 'الطلبات',
+    'layout.applicant.notifications': 'الإشعارات',
     'layout.applicant.portal': 'بوابة المتقدم',
     'layout.applicant.navigation': 'تنقل المتقدم',
     'layout.applicant.role': 'متقدم',
