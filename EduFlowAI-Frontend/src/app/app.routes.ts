@@ -9,7 +9,18 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'auth/login',
+    redirectTo: 'tracks',
+  },
+  {
+    path: 'tracks',
+    loadComponent: () =>
+      import('./core/layout/public-layout/public-layout').then(
+        (component) => component.PublicLayout,
+      ),
+    loadChildren: () =>
+      import('./features/admission/catalog/routes').then(
+        (catalogRoutes) => catalogRoutes.TRACK_CATALOG_ROUTES,
+      ),
   },
   {
     path: 'auth',
