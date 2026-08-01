@@ -1,0 +1,274 @@
+<section class="management-page" [attr.dir]="copy.isRtl() ? 'rtl' : 'ltr'">
+  <header class="management-header">
+    <div>
+      <h1>{{ copy.text('Programs & document requirements', 'البرامج والمستندات المطلوبة') }}</h1>
+      <p>
+        {{
+          copy.text(
+            'Manage institutions, programs, and the program-scoped documents resolved for each applicant gender.',
+            'أدر المؤسسات والبرامج والمستندات المطلوبة لكل برنامج حسب نوع المتقدم.'
+          )
+        }}
+      </p>
+    </div>
+    <button class="secondary-button" type="button" (click)="loadReferenceData()" [disabled]="loading() || busy()">
+      <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+      {{ copy.text('Refresh', 'تحديث') }}
+    </button>
+  </header>
+
+  <nav class="page-tabs" [attr.aria-label]="copy.text('Admission administration', 'إدارة القبول')">
+    <a routerLink="/admin/admission" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+      {{ copy.text('Overview', 'نظرة عامة') }}
+    </a>
+    <a routerLink="/admin/admission/programs" routerLinkActive="is-active">
+      {{ copy.text('Programs', 'البرامج') }}
+    </a>
+    <a routerLink="/admin/admission/catalog" routerLinkActive="is-active">
+      {{ copy.text('Tracks & branches', 'المسارات والفروع') }}
+    </a>
+    <a routerLink="/admin/admission/cycles" routerLinkActive="is-active">
+      {{ copy.text('Cycles', 'الدورات') }}
+    </a>
+  </nav>
+
+  @if (loading()) {
+    <div class="loading-line" role="status" [attr.aria-label]="copy.text('Loading', 'جارٍ التحميل')"></div>
+  }
+
+  @if (error()) {
+    <div class="message message--error" role="alert">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      {{ error() }}
+    </div>
+  }
+
+  @if (success()) {
+    <div class="message message--success" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+      {{ success() }}
+    </div>
+  }
+
+  <div class="management-grid management-grid--equal">
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>{{ copy.text('Institutions', 'المؤسسات') }}</h2>
+          <p>{{ copy.text('Create or rename the organization that owns programs.', 'أنشئ أو عدّل المؤسسة المالكة للبرامج.') }}</p>
+        </div>
+        <span class="count-badge">{{ institutions().length }}</span>
+      </div>
+
+      <form [formGroup]="institutionForm" (ngSubmit)="saveInstitution()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="institution-name">{{ copy.text('Institution name', 'اسم المؤسسة') }}</label>
+            <input id="institution-name" formControlName="name" maxlength="200" />
+          </div>
+          <div class="field">
+            <label for="institution-code">{{ copy.text('Code', 'الكود') }}</label>
+            <input id="institution-code" formControlName="code" maxlength="20" />
+          </div>
+        </div>
+        <div class="form-actions">
+          @if (editingInstitutionId()) {
+            <button class="secondary-button" type="button" (click)="resetInstitutionForm()">
+              {{ copy.text('Cancel edit', 'إلغاء التعديل') }}
+            </button>
+          }
+          <button class="primary-button" type="submit" [disabled]="busy()">
+            <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            {{ editingInstitutionId() ? copy.text('Update institution', 'تحديث المؤسسة') : copy.text('Add institution', 'إضافة مؤسسة') }}
+          </button>
+        </div>
+      </form>
+
+      <div class="entity-list">
+        @for (institution of institutions(); track institution.id) {
+          <article class="list-row" [class.list-row--selected]="editingInstitutionId() === institution.id">
+            <div class="list-row__main">
+              <strong>{{ institution.name }}</strong>
+              <small>{{ institution.code }} · {{ institution.programCount }} {{ copy.text('programs', 'برامج') }}</small>
+            </div>
+            <div class="list-row__meta">
+              <button class="text-button" type="button" (click)="editInstitution(institution)">
+                <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                {{ copy.text('Edit', 'تعديل') }}
+              </button>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty-state">
+            <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
+            <p>{{ copy.text('No institutions are configured.', 'لم تتم إضافة مؤسسات بعد.') }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>{{ copy.text('Programs', 'البرامج') }}</h2>
+          <p>{{ copy.text('Configure program identity and duration.', 'حدد بيانات البرنامج ومدته.') }}</p>
+        </div>
+        <span class="count-badge">{{ programs().length }}</span>
+      </div>
+
+      <form [formGroup]="programForm" (ngSubmit)="saveProgram()">
+        <div class="form-grid">
+          <div class="field span-2">
+            <label for="program-institution">{{ copy.text('Institution', 'المؤسسة') }}</label>
+            <select id="program-institution" formControlName="institutionId">
+              <option value="">{{ copy.text('Select institution', 'اختر المؤسسة') }}</option>
+              @for (institution of institutions(); track institution.id) {
+                <option [value]="institution.id">{{ institution.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="program-name">{{ copy.text('Program name', 'اسم البرنامج') }}</label>
+            <input id="program-name" formControlName="name" maxlength="200" />
+          </div>
+          <div class="field">
+            <label for="program-code">{{ copy.text('Code', 'الكود') }}</label>
+            <input id="program-code" formControlName="code" maxlength="30" />
+          </div>
+          <div class="field span-2">
+            <label for="program-duration">{{ copy.text('Duration in months', 'المدة بالشهور') }}</label>
+            <input id="program-duration" type="number" min="1" max="60" formControlName="durationMonths" />
+          </div>
+        </div>
+        <div class="form-actions">
+          @if (editingProgramId()) {
+            <button class="secondary-button" type="button" (click)="resetProgramForm()">
+              {{ copy.text('Cancel edit', 'إلغاء التعديل') }}
+            </button>
+          }
+          <button class="primary-button" type="submit" [disabled]="busy() || institutions().length === 0">
+            <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            {{ editingProgramId() ? copy.text('Update program', 'تحديث البرنامج') : copy.text('Add program', 'إضافة برنامج') }}
+          </button>
+        </div>
+      </form>
+
+      <div class="entity-list">
+        @for (program of programs(); track program.id) {
+          <article class="list-row" [class.list-row--selected]="editingProgramId() === program.id">
+            <div class="list-row__main">
+              <strong>{{ program.name }}</strong>
+              <small>
+                {{ program.institutionName }} · {{ program.code }} · {{ program.durationMonths }} {{ copy.text('months', 'شهرًا') }} ·
+                {{ program.trackCount }} {{ copy.text('tracks', 'مسارات') }}
+              </small>
+            </div>
+            <div class="list-row__meta">
+              <button class="text-button" type="button" (click)="editProgram(program)">
+                <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                {{ copy.text('Edit', 'تعديل') }}
+              </button>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty-state">
+            <span class="material-symbols-outlined" aria-hidden="true">school</span>
+            <p>{{ copy.text('No programs are configured.', 'لم تتم إضافة برامج بعد.') }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="panel panel--full">
+      <div class="panel-heading">
+        <div>
+          <h2>{{ copy.text('Program document requirements', 'المستندات المطلوبة للبرنامج') }}</h2>
+          <p>
+            {{
+              copy.text(
+                'The API resolves all-gender and gender-specific requirements for each applicant.',
+                'يجمع النظام المستندات العامة والمستندات الخاصة بنوع المتقدم.'
+              )
+            }}
+          </p>
+        </div>
+        <span class="count-badge">{{ requirements().length }}/12</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field span-2">
+          <label for="requirements-program">{{ copy.text('Program', 'البرنامج') }}</label>
+          <select id="requirements-program" [value]="requirementsProgramId()" (change)="onRequirementsProgramChange($event)">
+            <option value="">{{ copy.text('Select program', 'اختر البرنامج') }}</option>
+            @for (program of programs(); track program.id) {
+              <option [value]="program.id">{{ program.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (selectedRequirementsProgram()) {
+        <form [formGroup]="requirementForm" (ngSubmit)="addRequirement()">
+          <div class="form-grid">
+            <div class="field">
+              <label for="requirement-document">{{ copy.text('Document type', 'نوع المستند') }}</label>
+              <select id="requirement-document" formControlName="documentType">
+                @for (option of documentTypes; track option.value) {
+                  <option [ngValue]="option.value">{{ copy.text(option.en, option.ar) }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label for="requirement-gender">{{ copy.text('Required for', 'مطلوب من') }}</label>
+              <select id="requirement-gender" formControlName="requiredForGender">
+                @for (option of genders; track option.en) {
+                  <option [ngValue]="option.value">{{ copy.text(option.en, option.ar) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="secondary-button" type="submit" [disabled]="busy() || requirements().length >= 12">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span>
+              {{ copy.text('Add requirement', 'إضافة مستند') }}
+            </button>
+          </div>
+        </form>
+
+        <div class="requirement-list">
+          @for (requirement of requirements(); track $index) {
+            <article class="list-row">
+              <div class="list-row__main">
+                <strong>{{ documentTypeLabel(requirement.documentType) }}</strong>
+                <small>{{ genderLabel(requirement.requiredForGender) }}</small>
+              </div>
+              <div class="list-row__meta">
+                <button class="text-button" type="button" (click)="removeRequirement($index)">
+                  <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                  {{ copy.text('Remove', 'حذف') }}
+                </button>
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-state">
+              <span class="material-symbols-outlined" aria-hidden="true">folder_off</span>
+              <p>{{ copy.text('Add at least one document requirement.', 'أضف مستندًا مطلوبًا واحدًا على الأقل.') }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button class="primary-button" type="button" (click)="saveRequirements()" [disabled]="busy() || requirements().length === 0">
+            <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            {{ copy.text('Save requirements', 'حفظ المستندات المطلوبة') }}
+          </button>
+        </div>
+      } @else {
+        <div class="empty-state">
+          <span class="material-symbols-outlined" aria-hidden="true">touch_app</span>
+          <p>{{ copy.text('Select a program to edit its requirements.', 'اختر برنامجًا لتعديل مستنداته المطلوبة.') }}</p>
+        </div>
+      }
+    </section>
+  </div>
+</section>
