@@ -2,7 +2,7 @@
   <header class="public-shell__header">
     <a
       class="brand"
-      routerLink="/auth/login"
+      routerLink="/tracks"
       [attr.aria-label]="locale.t('layout.homeLabel')"
     >
       <span class="brand__mark" aria-hidden="true">EF</span>
@@ -12,15 +12,34 @@
       </span>
     </a>
 
-    <button
-      class="language-button"
-      type="button"
-      (click)="locale.toggle()"
-      [attr.aria-label]="locale.t('common.language')"
-    >
-      <span class="material-symbols-outlined" aria-hidden="true">language</span>
-      {{ locale.t('common.language') }}
-    </button>
+    <div class="public-shell__actions">
+      <nav [attr.aria-label]="text('Public navigation', 'التنقل العام')">
+        <a
+          routerLink="/tracks"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: false }"
+        >
+          {{ text('Explore tracks', 'استكشف المسارات') }}
+        </a>
+        <a
+          routerLink="/auth/login"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: false }"
+        >
+          {{ text('Sign in', 'تسجيل الدخول') }}
+        </a>
+      </nav>
+
+      <button
+        class="language-button"
+        type="button"
+        (click)="locale.toggle()"
+        [attr.aria-label]="locale.t('common.language')"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">language</span>
+        {{ locale.t('common.language') }}
+      </button>
+    </div>
   </header>
 
   <main class="public-shell__content">
