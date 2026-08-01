@@ -84,6 +84,20 @@ export const routes: Routes = [
       import('./core/layout/admin-layout/admin-layout').then(
         (component) => component.AdminLayout,
       ),
+    children: [
+      {
+        path: 'admission',
+        loadChildren: () =>
+          import('./features/admission/admin-configuration/routes').then(
+            (adminRoutes) => adminRoutes.ADMISSION_ADMIN_ROUTES,
+          ),
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'admission',
+      },
+    ],
   },
   {
     path: 'error',
