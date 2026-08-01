@@ -29,6 +29,7 @@
 
 .brand {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 0.75rem;
   color: #022448;
@@ -62,9 +63,52 @@
   font-size: 0.75rem;
 }
 
+.public-shell__actions,
+.public-shell__actions nav {
+  display: flex;
+  align-items: center;
+}
+
+.public-shell__actions {
+  gap: 0.85rem;
+}
+
+.public-shell__actions nav {
+  gap: 0.2rem;
+  border: 1px solid rgb(196 198 207 / 75%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 72%);
+  padding: 0.2rem;
+}
+
+.public-shell__actions nav a {
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  color: #53627a;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.public-shell__actions nav a:hover,
+.public-shell__actions nav a.is-active {
+  background: #eaf2fa;
+  color: #022448;
+}
+
+.public-shell__actions nav a:focus-visible,
+.language-button:focus-visible {
+  outline: 3px solid rgb(30 58 95 / 20%);
+  outline-offset: 2px;
+}
+
 .language-button {
   display: inline-flex;
   min-height: 2.5rem;
+  flex: 0 0 auto;
   align-items: center;
   gap: 0.4rem;
   border: 1px solid #c4c6cf;
@@ -76,11 +120,6 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-}
-
-.language-button:focus-visible {
-  outline: 3px solid rgb(30 58 95 / 20%);
-  outline-offset: 2px;
 }
 
 .language-button .material-symbols-outlined {
@@ -116,9 +155,36 @@
   text-decoration: underline;
 }
 
+@media (max-width: 48rem) {
+  .public-shell__header {
+    align-items: flex-start;
+  }
+
+  .public-shell__actions {
+    align-items: flex-end;
+    flex-direction: column-reverse;
+  }
+}
+
 @media (max-width: 40rem) {
-  .brand small {
+  .brand small,
+  .public-shell__actions nav a:first-child {
     display: none;
+  }
+
+  .public-shell__actions {
+    flex-direction: row;
+  }
+
+  .public-shell__actions nav {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .public-shell__actions nav a {
+    border: 1px solid #c4c6cf;
+    background: rgb(255 255 255 / 78%);
   }
 
   .language-button {
@@ -128,5 +194,11 @@
   .public-shell__footer {
     flex-direction: column;
     text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-shell__actions nav a {
+    transition: none;
   }
 }
