@@ -32,6 +32,16 @@
         {{ locale.t('layout.applicant.applications') }}
       </a>
       <a
+        routerLink="/replacement-requests"
+        routerLinkActive="sidebar__link--active"
+        (click)="closeMenu()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          folder_copy
+        </span>
+        {{ locale.t('layout.applicant.replacementRequests') }}
+      </a>
+      <a
         routerLink="/applicant/notifications"
         routerLinkActive="sidebar__link--active"
         (click)="closeMenu()"

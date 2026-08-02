@@ -180,7 +180,7 @@ export class NotificationCenterPage implements OnInit {
     if (type === 'DocumentReplacementRequested') {
       return {
         label: 'replacements',
-        route: '/applicant/replacement-requests',
+        route: '/replacement-requests',
       };
     }
 

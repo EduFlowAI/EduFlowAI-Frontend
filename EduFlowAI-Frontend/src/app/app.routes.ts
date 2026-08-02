@@ -73,6 +73,20 @@ export const routes: Routes = [
       import('./features/admission/applications/routes'),
   },
   {
+    path: 'replacement-requests',
+    canMatch: [
+      authGuard,
+      roleGuard(APP_ROLES.applicant),
+      profileCompleteGuard,
+    ],
+    loadComponent: () =>
+      import(
+        './core/layout/applicant-layout/applicant-layout'
+      ).then(component => component.ApplicantLayout),
+    loadChildren: () =>
+      import('./features/documents/replacement/routes'),
+  },
+  {
     path: 'operations',
     canMatch: [
       authGuard,
