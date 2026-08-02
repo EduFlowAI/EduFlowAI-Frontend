@@ -18,7 +18,7 @@ export default [
         },
         // Route for selecting preferences
         {
-          path: 'preferences',
+          path: ':id/preferences',
           loadComponent: () => 
             import('./pages/preference-selection-page/preference-selection-page')
             .then(c => c.PreferenceSelectionPage),
