@@ -1,0 +1,315 @@
+<section class="management-page" [attr.dir]="copy.isRtl() ? 'rtl' : 'ltr'">
+  <header class="management-header">
+    <div>
+      <h1>{{ copy.text('Admission cycles & offerings', 'دورات التقديم والمسارات المتاحة') }}</h1>
+      <p>
+        {{
+          copy.text(
+            'Create draft cycles, configure eligibility and capacity, then activate or close the intake.',
+            'أنشئ دورات مسودة وحدد الأهلية والسعات ثم فعّل دورة التقديم أو أغلقها.'
+          )
+        }}
+      </p>
+    </div>
+    <button class="secondary-button" type="button" (click)="load(selectedCycleId())" [disabled]="loading() || busy()">
+      <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+      {{ copy.text('Refresh', 'تحديث') }}
+    </button>
+  </header>
+
+  <nav class="page-tabs" [attr.aria-label]="copy.text('Admission administration', 'إدارة القبول')">
+    <a routerLink="/admin/admission" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+      {{ copy.text('Overview', 'نظرة عامة') }}
+    </a>
+    <a routerLink="/admin/admission/programs" routerLinkActive="is-active">
+      {{ copy.text('Programs', 'البرامج') }}
+    </a>
+    <a routerLink="/admin/admission/catalog" routerLinkActive="is-active">
+      {{ copy.text('Tracks & branches', 'المسارات والفروع') }}
+    </a>
+    <a routerLink="/admin/admission/cycles" routerLinkActive="is-active">
+      {{ copy.text('Cycles', 'الدورات') }}
+    </a>
+  </nav>
+
+  @if (loading()) {
+    <div class="loading-line" role="status"></div>
+  }
+  @if (error()) {
+    <div class="message message--error" role="alert">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      {{ error() }}
+    </div>
+  }
+  @if (success()) {
+    <div class="message message--success" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+      {{ success() }}
+    </div>
+  }
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>{{ copy.text('Create admission cycle', 'إنشاء دورة تقديم') }}</h2>
+        <p>{{ copy.text('New cycles always start as Draft.', 'تبدأ جميع الدورات الجديدة كمسودة.') }}</p>
+      </div>
+      <span class="count-badge">{{ cycles().length }}</span>
+    </div>
+
+    <form [formGroup]="cycleForm" (ngSubmit)="createCycle()">
+      <div class="form-grid">
+        <div class="field">
+          <label for="cycle-program">{{ copy.text('Program', 'البرنامج') }}</label>
+          <select id="cycle-program" formControlName="programId">
+            <option value="">{{ copy.text('Select program', 'اختر البرنامج') }}</option>
+            @for (program of programs(); track program.id) {
+              <option [value]="program.id">{{ program.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label for="cycle-label">{{ copy.text('Cycle label', 'اسم الدورة') }}</label>
+          <input id="cycle-label" formControlName="label" maxlength="200" [placeholder]="copy.text('Intake 46 - 2026', 'الدفعة 46 - 2026')" />
+        </div>
+        <div class="field">
+          <label for="cycle-start">{{ copy.text('Start date', 'تاريخ البداية') }}</label>
+          <input id="cycle-start" type="date" formControlName="startDate" />
+        </div>
+        <div class="field">
+          <label for="cycle-deadline">{{ copy.text('Application deadline', 'آخر موعد للتقديم') }}</label>
+          <input id="cycle-deadline" type="datetime-local" formControlName="deadlineLocal" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="primary-button" type="submit" [disabled]="busy() || programs().length === 0">
+          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+          {{ copy.text('Create draft cycle', 'إنشاء دورة مسودة') }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <div class="management-grid">
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>{{ copy.text('Cycles', 'الدورات') }}</h2>
+          <p>{{ copy.text('Select a cycle to manage its configuration.', 'اختر دورة لإدارة إعداداتها.') }}</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="selected-cycle">{{ copy.text('Selected cycle', 'الدورة المحددة') }}</label>
+        <select id="selected-cycle" [value]="selectedCycleId()" (change)="onCycleChange($event)">
+          <option value="">{{ copy.text('Select cycle', 'اختر الدورة') }}</option>
+          @for (cycle of cycles(); track cycle.id) {
+            <option [value]="cycle.id">{{ cycle.label }} — {{ cycle.programName }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="entity-list">
+        @for (cycle of cycles(); track cycle.id) {
+          <button
+            class="list-row"
+            [class.list-row--selected]="cycle.id === selectedCycleId()"
+            type="button"
+            (click)="selectCycle(cycle.id)"
+          >
+            <span class="list-row__main">
+              <strong>{{ cycle.label }}</strong>
+              <small>{{ cycle.programName }} · {{ formatDeadline(cycle.deadlineUtc) }}</small>
+            </span>
+            <span class="list-row__meta">
+              <span
+                class="status-badge"
+                [class.status-badge--active]="cycle.status === CycleStatus.Active"
+                [class.status-badge--closed]="cycle.status === CycleStatus.Closed"
+              >
+                {{ cycleStatusLabel(cycle.status) }}
+              </span>
+            </span>
+          </button>
+        } @empty {
+          <div class="empty-state">
+            <span class="material-symbols-outlined" aria-hidden="true">event_busy</span>
+            <p>{{ copy.text('No admission cycles are configured.', 'لم تتم إضافة دورات تقديم بعد.') }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      @if (selectedCycle(); as cycle) {
+        <div class="panel-heading">
+          <div>
+            <h2>{{ cycle.label }}</h2>
+            <p>{{ cycle.programName }} · {{ formatDeadline(cycle.deadlineUtc) }}</p>
+          </div>
+          <span
+            class="status-badge"
+            [class.status-badge--active]="cycle.status === CycleStatus.Active"
+            [class.status-badge--closed]="cycle.status === CycleStatus.Closed"
+          >
+            {{ cycleStatusLabel(cycle.status) }}
+          </span>
+        </div>
+
+        <div class="summary-strip">
+          <article>
+            <strong>{{ cycle.offerings.length }}</strong>
+            <small>{{ copy.text('Offerings', 'عروض المسارات') }}</small>
+          </article>
+          <article>
+            <strong>{{ cycle.offerings.length ? cycle.offerings[0].capacity : 0 }}</strong>
+            <small>{{ copy.text('First capacity', 'سعة أول عرض') }}</small>
+          </article>
+          <article>
+            <strong>{{ cycle.eligibilityRule ? copy.text('Ready', 'محددة') : copy.text('Missing', 'ناقصة') }}</strong>
+            <small>{{ copy.text('Eligibility', 'الأهلية') }}</small>
+          </article>
+          <article>
+            <strong>{{ cycle.startDate }}</strong>
+            <small>{{ copy.text('Start date', 'تاريخ البداية') }}</small>
+          </article>
+        </div>
+
+        <div class="form-actions">
+          @if (cycle.status === CycleStatus.Draft) {
+            <button class="success-button" type="button" (click)="activateCycle()" [disabled]="busy()">
+              <span class="material-symbols-outlined" aria-hidden="true">play_circle</span>
+              {{ copy.text('Activate cycle', 'تفعيل الدورة') }}
+            </button>
+          } @else if (cycle.status === CycleStatus.Active) {
+            <button class="danger-button" type="button" (click)="closeCycle()" [disabled]="busy()">
+              <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+              {{ copy.text('Close cycle', 'إغلاق الدورة') }}
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <span class="material-symbols-outlined" aria-hidden="true">touch_app</span>
+          <p>{{ copy.text('Select a cycle to continue.', 'اختر دورة للمتابعة.') }}</p>
+        </div>
+      }
+    </section>
+  </div>
+
+  @if (selectedCycle(); as cycle) {
+    <div class="management-grid management-grid--equal">
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>{{ copy.text('Eligibility rule', 'قاعدة الأهلية') }}</h2>
+            <p>{{ copy.text('These deterministic fields are evaluated before document processing.', 'تُفحص هذه الشروط المحددة قبل معالجة المستندات.') }}</p>
+          </div>
+        </div>
+
+        <form [formGroup]="eligibilityForm" (ngSubmit)="saveEligibility()">
+          <div class="form-grid">
+            <div class="field">
+              <label for="nationality">{{ copy.text('Nationality code', 'كود الجنسية') }}</label>
+              <input id="nationality" formControlName="requiredNationality" maxlength="5" />
+            </div>
+            <div class="field">
+              <label for="degree-level">{{ copy.text('Degree level', 'المؤهل الدراسي') }}</label>
+              <input id="degree-level" formControlName="requiredDegreeLevel" maxlength="30" />
+            </div>
+            <div class="field">
+              <label for="graduation-years">{{ copy.text('Maximum years since graduation', 'أقصى عدد سنوات منذ التخرج') }}</label>
+              <input id="graduation-years" type="number" min="0" max="100" formControlName="maxYearsSinceGraduation" />
+            </div>
+            <div class="field">
+              <label for="minimum-grade">{{ copy.text('Minimum grade', 'الحد الأدنى للتقدير') }}</label>
+              <select id="minimum-grade" formControlName="minGrade">
+                @for (grade of gradeOptions; track grade.value) {
+                  <option [ngValue]="grade.value">{{ copy.text(grade.en, grade.ar) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="primary-button" type="submit" [disabled]="busy() || cycle.status !== CycleStatus.Draft">
+              <span class="material-symbols-outlined" aria-hidden="true">rule</span>
+              {{ copy.text('Save eligibility rule', 'حفظ قاعدة الأهلية') }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>{{ copy.text('Track / branch offerings', 'عروض المسارات والفروع') }}</h2>
+            <p>{{ copy.text('Only these combinations appear in the public catalog.', 'هذه التركيبات فقط هي التي تظهر في الكتالوج العام.') }}</p>
+          </div>
+          <span class="count-badge">{{ offeringInputs().length }}</span>
+        </div>
+
+        <form [formGroup]="offeringForm" (ngSubmit)="addOffering()">
+          <div class="form-grid">
+            <div class="field">
+              <label for="offering-track">{{ copy.text('Track', 'المسار') }}</label>
+              <select id="offering-track" formControlName="trackId">
+                <option value="">{{ copy.text('Select track', 'اختر المسار') }}</option>
+                @for (track of selectedProgramTracks(); track track.id) {
+                  <option [value]="track.id" [disabled]="!track.isActive">{{ track.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label for="offering-branch">{{ copy.text('Branch', 'الفرع') }}</label>
+              <select id="offering-branch" formControlName="branchId">
+                <option value="">{{ copy.text('Select branch', 'اختر الفرع') }}</option>
+                @for (branch of branches(); track branch.id) {
+                  <option [value]="branch.id" [disabled]="!branch.isActive">{{ branch.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="field span-2">
+              <label for="offering-capacity">{{ copy.text('Capacity', 'السعة') }}</label>
+              <input id="offering-capacity" type="number" min="1" formControlName="capacity" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="secondary-button" type="submit" [disabled]="busy() || cycle.status !== CycleStatus.Draft">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span>
+              {{ copy.text('Add offering', 'إضافة عرض') }}
+            </button>
+          </div>
+        </form>
+
+        <div class="offering-list">
+          @for (offering of offeringInputs(); track $index) {
+            <article class="list-row">
+              <div class="list-row__main">
+                <strong>{{ trackName(offering.trackId) }}</strong>
+                <small>{{ branchName(offering.branchId) }} · {{ offering.capacity }} {{ copy.text('seats', 'مقعدًا') }}</small>
+              </div>
+              <div class="list-row__meta">
+                <button class="text-button" type="button" (click)="removeOffering($index)" [disabled]="cycle.status !== CycleStatus.Draft">
+                  <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                  {{ copy.text('Remove', 'حذف') }}
+                </button>
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-state">
+              <span class="material-symbols-outlined" aria-hidden="true">hub</span>
+              <p>{{ copy.text('Add at least one track and branch offering.', 'أضف عرضًا واحدًا على الأقل لمسار وفرع.') }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button class="primary-button" type="button" (click)="saveOfferings()" [disabled]="busy() || cycle.status !== CycleStatus.Draft || offeringInputs().length === 0">
+            <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            {{ copy.text('Save offerings', 'حفظ العروض') }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+</section>

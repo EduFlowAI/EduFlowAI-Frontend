@@ -1,1 +1,157 @@
-<p>admission-overview works!</p>
+<section class="admin-page" [attr.dir]="copy.isRtl() ? 'rtl' : 'ltr'">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">
+        <span class="material-symbols-outlined" aria-hidden="true">monitoring</span>
+        {{ copy.text('Admission operations', 'عمليات القبول') }}
+      </span>
+      <h1>{{ copy.text('Admission overview', 'نظرة عامة على القبول') }}</h1>
+      <p>
+        {{
+          copy.text(
+            'Monitor configuration readiness, the active cycle, and the catalog that applicants can see.',
+            'تابع جاهزية الإعدادات ودورة التقديم النشطة والمسارات الظاهرة للمتقدمين.'
+          )
+        }}
+      </p>
+    </div>
+    <button class="secondary-button" type="button" (click)="load()" [disabled]="loading()">
+      <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+      {{ copy.text('Refresh', 'تحديث') }}
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="state-panel" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      {{ copy.text('Loading dashboard…', 'جارٍ تحميل لوحة التحكم…') }}
+    </div>
+  } @else if (error()) {
+    <div class="state-panel state-panel--error" role="alert">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      <strong>{{ error() }}</strong>
+      <button type="button" (click)="load()">
+        {{ copy.text('Try again', 'إعادة المحاولة') }}
+      </button>
+    </div>
+  } @else if (dashboard(); as data) {
+    <div class="stat-grid">
+      <article>
+        <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
+        <strong>{{ data.institutionCount }}</strong>
+        <small>{{ copy.text('Institutions', 'المؤسسات') }}</small>
+      </article>
+      <article>
+        <span class="material-symbols-outlined" aria-hidden="true">school</span>
+        <strong>{{ data.programCount }}</strong>
+        <small>{{ copy.text('Programs', 'البرامج') }}</small>
+      </article>
+      <article>
+        <span class="material-symbols-outlined" aria-hidden="true">route</span>
+        <strong>{{ data.activeTrackCount }}</strong>
+        <small>{{ copy.text('Active tracks', 'المسارات النشطة') }}</small>
+      </article>
+      <article>
+        <span class="material-symbols-outlined" aria-hidden="true">apartment</span>
+        <strong>{{ data.activeBranchCount }}</strong>
+        <small>{{ copy.text('Active branches', 'الفروع النشطة') }}</small>
+      </article>
+      <article>
+        <span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+        <strong>{{ data.draftCycleCount }}</strong>
+        <small>{{ copy.text('Draft cycles', 'الدورات المسودة') }}</small>
+      </article>
+      <article>
+        <span class="material-symbols-outlined" aria-hidden="true">description</span>
+        <strong>{{ data.applicationCount }}</strong>
+        <small>{{ copy.text('Applications', 'طلبات التقديم') }}</small>
+      </article>
+    </div>
+
+    <div class="overview-grid">
+      <article class="panel active-cycle">
+        <div class="panel__heading">
+          <div>
+            <span class="panel__label">{{ copy.text('Current intake', 'دورة التقديم الحالية') }}</span>
+            <h2>{{ data.activeCycle?.label || copy.text('No active cycle', 'لا توجد دورة نشطة') }}</h2>
+          </div>
+          <span class="status" [class.status--empty]="!data.activeCycle">
+            {{ data.activeCycle ? copy.text('Active', 'نشطة') : copy.text('Not active', 'غير نشطة') }}
+          </span>
+        </div>
+
+        @if (data.activeCycle; as cycle) {
+          <dl>
+            <div>
+              <dt>{{ copy.text('Program', 'البرنامج') }}</dt>
+              <dd>{{ cycle.programName }}</dd>
+            </div>
+            <div>
+              <dt>{{ copy.text('Deadline', 'آخر موعد') }}</dt>
+              <dd>{{ formatDate(cycle.deadlineUtc) }}</dd>
+            </div>
+            <div>
+              <dt>{{ copy.text('Offerings', 'المسارات والفروع') }}</dt>
+              <dd>{{ data.activeCycleOfferingCount }}</dd>
+            </div>
+            <div>
+              <dt>{{ copy.text('Total capacity', 'إجمالي السعة') }}</dt>
+              <dd>{{ data.activeCycleCapacity }}</dd>
+            </div>
+          </dl>
+          <a class="primary-link" routerLink="/admin/admission/cycles">
+            {{ copy.text('Manage cycle', 'إدارة الدورة') }}
+            <span class="material-symbols-outlined" aria-hidden="true">
+              {{ copy.isRtl() ? 'arrow_back' : 'arrow_forward' }}
+            </span>
+          </a>
+        } @else {
+          <p class="empty-copy">
+            {{
+              copy.text(
+                'Create a cycle, configure eligibility and offerings, then activate it.',
+                'أنشئ دورة وحدد قواعد الأهلية والمسارات والفروع ثم فعّلها.'
+              )
+            }}
+          </p>
+          <a class="primary-link" routerLink="/admin/admission/cycles">
+            {{ copy.text('Configure cycles', 'إعداد الدورات') }}
+          </a>
+        }
+      </article>
+
+      <article class="panel quick-actions">
+        <div class="panel__heading">
+          <div>
+            <span class="panel__label">{{ copy.text('Configuration', 'الإعدادات') }}</span>
+            <h2>{{ copy.text('Continue setup', 'متابعة الإعداد') }}</h2>
+          </div>
+        </div>
+
+        <nav>
+          <a routerLink="/admin/admission/programs">
+            <span class="material-symbols-outlined" aria-hidden="true">corporate_fare</span>
+            <span>
+              <strong>{{ copy.text('Programs & requirements', 'البرامج والمستندات') }}</strong>
+              <small>{{ copy.text('Institutions, programs, required documents', 'المؤسسات والبرامج والمستندات المطلوبة') }}</small>
+            </span>
+          </a>
+          <a routerLink="/admin/admission/catalog">
+            <span class="material-symbols-outlined" aria-hidden="true">hub</span>
+            <span>
+              <strong>{{ copy.text('Tracks & branches', 'المسارات والفروع') }}</strong>
+              <small>{{ copy.text('Catalog metadata and availability', 'بيانات الكتالوج وحالة التفعيل') }}</small>
+            </span>
+          </a>
+          <a routerLink="/admin/admission/cycles">
+            <span class="material-symbols-outlined" aria-hidden="true">event_note</span>
+            <span>
+              <strong>{{ copy.text('Cycles & offerings', 'الدورات والسعات') }}</strong>
+              <small>{{ copy.text('Eligibility, capacity, activation and closing', 'الأهلية والسعات والتفعيل والإغلاق') }}</small>
+            </span>
+          </a>
+        </nav>
+      </article>
+    </div>
+  }
+</section>
