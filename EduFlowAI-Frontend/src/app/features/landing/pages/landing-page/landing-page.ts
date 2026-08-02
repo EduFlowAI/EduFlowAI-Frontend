@@ -1,29 +1,34 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 
 import { LocaleStore } from '../../../../core/i18n/locale.store';
-import { ProgramsApi } from '../../data-access/programs.api';
-import {
-  localizedProgramDescription,
-  localizedProgramLocations,
-  localizedProgramName,
-  Program,
-} from '../../models/program.model';
 
 type Theme = 'light' | 'dark';
-type ProgramsStatus = 'loading' | 'loaded' | 'error';
 type TrackCategory = 'software' | 'data' | 'design' | 'infrastructure';
 type TrackFilter = 'all' | TrackCategory;
+
+interface ProgramFact {
+  readonly labelKey: string;
+  readonly valueKey: string;
+}
+
+interface ProgramDefinition {
+  readonly id: string;
+  readonly code: string;
+  readonly nameKey: string;
+  readonly descriptionKey: string;
+  readonly durationMonths: number;
+  readonly highlights: readonly ProgramFact[];
+  readonly eligibility: readonly ProgramFact[];
+}
 
 interface TrackDefinition {
   readonly id: string;
@@ -32,12 +37,106 @@ interface TrackDefinition {
   readonly nameKey: string;
   readonly descriptionKey: string;
   readonly locationKey: string;
-  readonly tagKeys: readonly string[];
+  readonly durationMonths: 4 | 9;
   readonly requirementKeys: readonly string[];
   readonly isAi: boolean;
 }
 
 const THEME_STORAGE_KEY = 'iti-theme';
+
+const SHARED_ELIGIBILITY: readonly ProgramFact[] = [
+  {
+    labelKey: 'landing.programs.gender',
+    valueKey: 'landing.programs.malesAndFemales',
+  },
+  {
+    labelKey: 'landing.programs.nationalities',
+    valueKey: 'landing.programs.egyptian',
+  },
+  {
+    labelKey: 'landing.programs.militaryService',
+    valueKey: 'landing.programs.militaryStatus',
+  },
+  {
+    labelKey: 'landing.programs.educationDegree',
+    valueKey: 'landing.programs.bachelorDegree',
+  },
+];
+
+const PROGRAMS: readonly ProgramDefinition[] = [
+  {
+    id: 'professional-training-program',
+    code: 'PTP-9M',
+    nameKey: 'landing.programs.professional.name',
+    descriptionKey: 'landing.programs.professional.description',
+    durationMonths: 9,
+    highlights: [
+      {
+        labelKey: 'landing.programs.fees',
+        valueKey: 'landing.programs.fullyFunded',
+      },
+      {
+        labelKey: 'landing.programs.jobProfiles',
+        valueKey: 'landing.programs.professional.jobProfiles',
+      },
+      {
+        labelKey: 'landing.programs.graduates',
+        valueKey: 'landing.programs.professional.graduates',
+      },
+      {
+        labelKey: 'landing.programs.duration',
+        valueKey: 'landing.programs.professional.duration',
+      },
+    ],
+    eligibility: [
+      ...SHARED_ELIGIBILITY,
+      {
+        labelKey: 'landing.programs.graduationYear',
+        valueKey: 'landing.programs.professional.graduationYear',
+      },
+      {
+        labelKey: 'landing.programs.grade',
+        valueKey: 'landing.programs.fair',
+      },
+    ],
+  },
+  {
+    id: 'intensive-code-camps',
+    code: 'ICC-4M',
+    nameKey: 'landing.programs.icc.name',
+    descriptionKey: 'landing.programs.icc.description',
+    durationMonths: 4,
+    highlights: [
+      {
+        labelKey: 'landing.programs.fees',
+        valueKey: 'landing.programs.fullyFunded',
+      },
+      {
+        labelKey: 'landing.programs.jobProfiles',
+        valueKey: 'landing.programs.icc.jobProfiles',
+      },
+      {
+        labelKey: 'landing.programs.graduates',
+        valueKey: 'landing.programs.icc.graduates',
+      },
+      {
+        labelKey: 'landing.programs.duration',
+        valueKey: 'landing.programs.icc.duration',
+      },
+    ],
+    eligibility: [
+      ...SHARED_ELIGIBILITY,
+      {
+        labelKey: 'landing.programs.graduationYear',
+        valueKey: 'landing.programs.icc.graduationYear',
+      },
+      {
+        labelKey: 'landing.programs.grade',
+        valueKey: 'landing.programs.fair',
+      },
+    ],
+  },
+];
 
 const TRACKS: readonly TrackDefinition[] = [
   {
@@ -47,7 +146,7 @@ const TRACKS: readonly TrackDefinition[] = [
     nameKey: 'landing.tracks.fullstack',
     descriptionKey: 'landing.tracks.fullstackCopy',
     locationKey: 'landing.tracks.threeBranches',
-    tagKeys: ['landing.tracks.tags.computerScience', 'landing.tracks.tags.engineering'],
+    durationMonths: 9,
     requirementKeys: ['landing.tracks.req.programming', 'landing.tracks.req.problemSolving'],
     isAi: false,
   },
@@ -58,7 +157,7 @@ const TRACKS: readonly TrackDefinition[] = [
     nameKey: 'landing.tracks.data',
     descriptionKey: 'landing.tracks.dataCopy',
     locationKey: 'landing.tracks.cairoAlex',
-    tagKeys: ['landing.tracks.tags.mathematics', 'landing.tracks.tags.computerScience'],
+    durationMonths: 9,
     requirementKeys: ['landing.tracks.req.math', 'landing.tracks.req.python'],
     isAi: true,
   },
@@ -69,7 +168,7 @@ const TRACKS: readonly TrackDefinition[] = [
     nameKey: 'landing.tracks.cyber',
     descriptionKey: 'landing.tracks.cyberCopy',
     locationKey: 'landing.tracks.smartVillage',
-    tagKeys: ['landing.tracks.tags.networks', 'landing.tracks.tags.it'],
+    durationMonths: 9,
     requirementKeys: ['landing.tracks.req.networks', 'landing.tracks.req.systems'],
     isAi: false,
   },
@@ -80,7 +179,7 @@ const TRACKS: readonly TrackDefinition[] = [
     nameKey: 'landing.tracks.ux',
     descriptionKey: 'landing.tracks.uxCopy',
     locationKey: 'landing.tracks.allBranches',
-    tagKeys: ['landing.tracks.tags.design', 'landing.tracks.tags.arts'],
+    durationMonths: 4,
     requirementKeys: ['landing.tracks.req.portfolio', 'landing.tracks.req.communication'],
     isAi: false,
   },
@@ -91,7 +190,7 @@ const TRACKS: readonly TrackDefinition[] = [
     nameKey: 'landing.tracks.cloud',
     descriptionKey: 'landing.tracks.cloudCopy',
     locationKey: 'landing.tracks.cairo',
-    tagKeys: ['landing.tracks.tags.it', 'landing.tracks.tags.engineering'],
+    durationMonths: 4,
     requirementKeys: ['landing.tracks.req.linux', 'landing.tracks.req.networks'],
     isAi: false,
   },
@@ -102,7 +201,7 @@ const TRACKS: readonly TrackDefinition[] = [
     nameKey: 'landing.tracks.embedded',
     descriptionKey: 'landing.tracks.embeddedCopy',
     locationKey: 'landing.tracks.alex',
-    tagKeys: ['landing.tracks.tags.engineering', 'landing.tracks.tags.electronics'],
+    durationMonths: 4,
     requirementKeys: ['landing.tracks.req.electronics', 'landing.tracks.req.c'],
     isAi: false,
   },
@@ -138,6 +237,7 @@ function initialTheme(): Theme {
 })
 export class LandingPage {
   readonly locale = inject(LocaleStore);
+  readonly programs = PROGRAMS;
   readonly tracks = TRACKS;
   readonly trackFilters: readonly {
     value: TrackFilter;
@@ -153,21 +253,12 @@ export class LandingPage {
     },
   ];
 
-  private readonly programsApi = inject(ProgramsApi);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly title = inject(Title);
 
   readonly theme = signal<Theme>(initialTheme());
   readonly mobileMenuOpen = signal(false);
   readonly activeFilter = signal<TrackFilter>('all');
   readonly trackSearch = signal('');
-  readonly expandedTrackIds = signal<ReadonlySet<string>>(new Set());
-  readonly programs = signal<readonly Program[]>([]);
-  readonly programsStatus = signal<ProgramsStatus>('loading');
-  readonly activeProgramCount = computed(
-    () => this.programs().filter((program) => program.isActive).length,
-  );
-  readonly hasActivePrograms = computed(() => this.activeProgramCount() > 0);
   readonly filteredTracks = computed(() => {
     const filter = this.activeFilter();
     const query = this.trackSearch().trim().toLocaleLowerCase();
@@ -186,7 +277,6 @@ export class LandingPage {
         track.nameKey,
         track.descriptionKey,
         track.locationKey,
-        ...track.tagKeys,
         ...track.requirementKeys,
       ]
         .map((key) => this.locale.t(key))
@@ -199,24 +289,6 @@ export class LandingPage {
 
   constructor() {
     effect(() => this.title.setTitle(this.locale.t('landing.pageTitle')));
-    this.loadPrograms();
-  }
-
-  loadPrograms(): void {
-    this.programsStatus.set('loading');
-    this.programsApi
-      .getPrograms()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (programs) => {
-          this.programs.set(programs);
-          this.programsStatus.set('loaded');
-        },
-        error: () => {
-          this.programs.set([]);
-          this.programsStatus.set('error');
-        },
-      });
   }
 
   toggleTheme(): void {
@@ -248,71 +320,5 @@ export class LandingPage {
     if (event.target instanceof HTMLInputElement) {
       this.trackSearch.set(event.target.value);
     }
-  }
-
-  toggleTrack(trackId: string): void {
-    this.expandedTrackIds.update((current) => {
-      const next = new Set(current);
-      if (next.has(trackId)) {
-        next.delete(trackId);
-      } else {
-        next.add(trackId);
-      }
-      return next;
-    });
-  }
-
-  isTrackExpanded(trackId: string): boolean {
-    return this.expandedTrackIds().has(trackId);
-  }
-
-  programName(program: Program): string {
-    return localizedProgramName(program, this.locale.locale());
-  }
-
-  programDescription(program: Program): string {
-    return localizedProgramDescription(program, this.locale.locale());
-  }
-
-  programLocations(program: Program): string {
-    return localizedProgramLocations(program, this.locale.locale());
-  }
-
-  programDurationUnit(program: Program): string {
-    if (this.locale.locale() === 'ar' && program.durationUnitAr) {
-      return program.durationUnitAr;
-    }
-
-    if (/^months?$/i.test(program.durationUnit)) {
-      return this.locale.t('landing.programs.months');
-    }
-
-    if (program.durationUnit === 'Duration') {
-      return this.locale.t('landing.programs.duration');
-    }
-
-    return program.durationUnit;
-  }
-
-  programTrackCount(program: Program): string {
-    if (program.tracksCount === null) {
-      return this.locale.t('landing.programs.defaultTracks');
-    }
-
-    const key =
-      program.tracksCount === 1 ? 'landing.programs.oneTrack' : 'landing.programs.manyTracks';
-    return this.locale.t(key, { count: program.tracksCount });
-  }
-
-  footerProgramStatus(): string {
-    const count = this.activeProgramCount();
-    if (count === 0) {
-      return this.locale.t('landing.programs.closedFooter');
-    }
-
-    return this.locale.t(
-      count === 1 ? 'landing.programs.activeFooterOne' : 'landing.programs.activeFooterMany',
-      { count },
-    );
   }
 }

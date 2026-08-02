@@ -42,6 +42,16 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'notifications',
+        title: 'Notifications | EduFlow AI',
+        loadComponent: () =>
+          import(
+            './features/communication/notifications/pages/notification-center-page/notification-center-page'
+          ).then(
+            component => component.NotificationCenterPage,
+          ),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'profile',
