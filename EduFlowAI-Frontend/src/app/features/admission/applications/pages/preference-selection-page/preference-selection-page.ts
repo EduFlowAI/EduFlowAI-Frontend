@@ -48,15 +48,18 @@ export class PreferenceSelectionPage implements OnInit{
   applicationId = signal<string>('');
   availableTracks = signal<TrackDto[]>([]);
 
+  selectedTrackId1 = signal<string | null>(null);
+  selectedTrackId2 = signal<string | null>(null);
+
   // Computed signals for branches based on selected tracks
   availableBranches1 = computed(() => {
-    const trackId = this.preferencesForm.get('preference1.trackId')?.value;
+    const trackId = this.selectedTrackId1();
     const track = this.availableTracks().find(t => t.id === trackId);
     return track ? track.offerings : [];
   });
 
   availableBranches2 = computed(() => {
-    const trackId = this.preferencesForm.get('preference2.trackId')?.value;
+    const trackId = this.selectedTrackId2();
     const track = this.availableTracks().find(t => t.id === trackId);
     return track ? track.offerings : [];
   });
@@ -90,12 +93,16 @@ export class PreferenceSelectionPage implements OnInit{
               trackId: pref1.trackId,
               branchId: pref1.branchId
             });
+            // Update signal to trigger computed branches evaluation
+            this.selectedTrackId1.set(pref1.trackId);
           }
           if (pref2) {
             this.preferencesForm.get('preference2')?.patchValue({
               trackId: pref2.trackId,
               branchId: pref2.branchId
             });
+            // Update signal to trigger computed branches evaluation
+            this.selectedTrackId2.set(pref2.trackId);
           }
         }
 
@@ -130,12 +137,21 @@ export class PreferenceSelectionPage implements OnInit{
 
   // Handle track selection change to clear the corresponding branch
   onTrackChange(preferenceIndex: 1 | 2): void {
+    const trackControl = this.preferencesForm.get(`preference${preferenceIndex}.trackId`);
     const branchControl = this.preferencesForm.get(`preference${preferenceIndex}.branchId`);
+    
+    // Update the corresponding reactive signal with the newly selected track ID
+    if (preferenceIndex === 1) {
+      this.selectedTrackId1.set(trackControl?.value || null);
+    } else {
+      this.selectedTrackId2.set(trackControl?.value || null);
+    }
+    // Reset the selected branch since the track has changed
     branchControl?.setValue('');
     
     // If preference 2 track is selected, branch becomes required
     if (preferenceIndex === 2) {
-      const trackId2 = this.preferencesForm.get('preference2.trackId')?.value;
+      const trackId2 = trackControl?.value;
       if (trackId2) {
         branchControl?.setValidators(Validators.required);
       } else {
@@ -180,6 +196,9 @@ export class PreferenceSelectionPage implements OnInit{
       applicationId: this.applicationId(), 
       request: payload 
     });
+
+    // Mark form as pristine to prevent duplicate submissions on double clicks
+    this.preferencesForm.markAsPristine();
   }
 
   // Navigation handlers
@@ -189,7 +208,12 @@ export class PreferenceSelectionPage implements OnInit{
 
   goNext(): void {
     if (this.preferencesForm.valid && this.store.canEdit()) {
-      this.savePreferences();
+      // Only fire the save API if the user has actually made changes 
+      // or hasn't clicked "Save Draft" just now.
+      if (this.preferencesForm.dirty) {
+        this.savePreferences();
+      }
+      
       // Navigate to Documents step (Milestone 4 placeholder)
       this.router.navigate(['/applications', this.applicationId(), 'documents']);
     }
