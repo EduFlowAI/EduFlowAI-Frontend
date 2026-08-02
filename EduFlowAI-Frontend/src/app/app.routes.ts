@@ -9,6 +9,17 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    redirectTo: 'tracks',
+  },
+  {
+    path: 'tracks',
+    loadComponent: () =>
+      import('./core/layout/public-layout/public-layout').then(
+        (component) => component.PublicLayout,
+      ),
+    loadChildren: () =>
+      import('./features/admission/catalog/routes').then(
+        (catalogRoutes) => catalogRoutes.TRACK_CATALOG_ROUTES,
     title: 'ITI Admissions through EduFlowAI',
     loadComponent: () =>
       import('./features/landing/pages/landing-page/landing-page').then(
@@ -90,6 +101,23 @@ export const routes: Routes = [
       roleGuard(APP_ROLES.superAdmin),
     ],
     loadComponent: () =>
+      import('./core/layout/admin-layout/admin-layout').then(
+        (component) => component.AdminLayout,
+      ),
+    children: [
+      {
+        path: 'admission',
+        loadChildren: () =>
+          import('./features/admission/admin-configuration/routes').then(
+            (adminRoutes) => adminRoutes.ADMISSION_ADMIN_ROUTES,
+          ),
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'admission',
+      },
+    ],
       import(
         './core/layout/admin-layout/admin-layout'
       ).then(component => component.AdminLayout),
