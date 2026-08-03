@@ -1,14 +1,16 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApplicationsStore } from '../../data-access/applications.store';
+import { StatusTimeline } from '../../../../../shared/ui/status-timeline/status-timeline';
 
 @Component({
   selector: 'app-applicant-dashboard-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, StatusTimeline, RouterLink],
   templateUrl: './applicant-dashboard-page.html',
   styleUrl: './applicant-dashboard-page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush     // Enforce OnPush change detection strategy for better performance
 })
 export class ApplicantDashboardPage implements OnInit {
   readonly store = inject(ApplicationsStore);
@@ -17,7 +19,7 @@ export class ApplicantDashboardPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   // Store the real ID to use it for initial load and retries
-  private currentApplicationId: string | null = null;
+  currentApplicationId: string | null = null;
 
   ngOnInit(): void {
     // Extract the 'id' parameter from the active route
@@ -32,11 +34,58 @@ export class ApplicantDashboardPage implements OnInit {
     }
   }
 
-  // Helper method for the UI retry button
+  /**
+   * Helper method for the UI retry button.
+   */
   retryLoading(): void {
     if (this.currentApplicationId) {
       // Retry using the same real ID
       this.store.loadDashboardSummary(this.currentApplicationId);
     }
   }
+
+  /**
+   * Helper method to determine the Call to Action (CTA) details 
+   * based on the application's current status.
+   */
+  getActionConfig(status: string) {
+    if (!this.currentApplicationId) return null;
+    
+    // Base path for the status page
+    const statusPath = ['/applications', this.currentApplicationId, 'status'];
+
+    switch (status) {
+      case 'DocumentsRequired':
+      case 'UnderDocumentVerification':
+        return { 
+          label: 'Upload Documents', 
+          icon: 'upload_file', 
+          path: statusPath
+        };
+      case 'EligibilityPassed':
+      case 'EligibilityFailed':
+        return { 
+          label: 'View Result Details', 
+          icon: 'fact_check', 
+          path: statusPath 
+        };
+      case 'English/IQ Pending':
+      case 'Technical Pending':
+        return { 
+          label: 'Take Assessment', 
+          icon: 'quiz', 
+          path: statusPath 
+        };
+      case 'Interviews Pending':
+        return { 
+          label: 'View Interview Details', 
+          icon: 'groups', 
+          path: statusPath
+        };
+      // Return null if the status doesn't require a direct user action
+      default:
+        return null; 
+    }
+  }
+
 }
