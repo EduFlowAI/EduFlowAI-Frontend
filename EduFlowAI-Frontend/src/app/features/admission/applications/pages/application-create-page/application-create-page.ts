@@ -26,7 +26,7 @@ export class ApplicationCreatePage {
       
       // If we have details and the status is newly set to 'Draft', navigate to the next step
       if (details && details.status === 'Draft') {
-        this.router.navigate(['/my-applications', details.id, 'preferences']);
+        this.router.navigate(['/applications', details.id, 'preferences']);
       }
     });
   }
