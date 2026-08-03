@@ -109,7 +109,7 @@ export class PreferenceSelectionPage implements OnInit{
 
   ngOnInit(): void {
     // Extract application ID from the route parameters and load details
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.route.snapshot.paramMap.get('applicationId');
     if (id) {
       this.applicationId.set(id);
       this.store.loadApplicationDetails(id);

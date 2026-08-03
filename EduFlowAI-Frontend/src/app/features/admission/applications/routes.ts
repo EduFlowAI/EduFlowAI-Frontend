@@ -18,20 +18,27 @@ export default [
         },
         // Route for selecting preferences
         {
-          path: ':id/preferences',
+          path: ':applicationId/preferences',
           loadComponent: () => 
             import('./pages/preference-selection-page/preference-selection-page')
             .then(c => c.PreferenceSelectionPage),
           title: 'Select Preferences'
         },
-        // The dynamic ':id' route MUST be at the very bottom
+        // Route for uploading documents for a specific application
         {
-          path: ':id',  // Add ':' to make it a dynamic route parameter
-          // Lazy loading the standalone component
+          path: ':applicationId/documents',
+          loadChildren: () =>
+            import('../../../features/documents/applicant-documents/routes').then(
+              (m) => m.APPLICANT_DOCUMENTS_ROUTES,
+            ),
+          title: 'Upload Documents'
+        },
+        // The dynamic ':applicationId' route MUST be at the very bottom
+        {
+          path: ':applicationId',
           loadComponent: () => import('./pages/applicant-dashboard-page/applicant-dashboard-page')
             .then(c => c.ApplicantDashboardPage)
         }
-        // Other routes owned by Halim (like application-create-page) will go here
       ]
     }    
 ] as Routes;

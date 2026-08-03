@@ -1,0 +1,28 @@
+// shared/ui/file-dropzone/file-dropzone.component.scss
+//
+// Intentionally minimal — all visual states (idle, drag-over, error, disabled)
+// are handled via Tailwind utility classes in the .ts file's containerClasses().
+// Only rules that can't be cleanly expressed as Tailwind utilities live here.
+
+.dropzone {
+    position: relative;
+    display: flex;
+    min-height: 120px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    outline: none;
+    border-width: 2px;
+    border-style: dashed;
+    border-radius: 16px; // --radius-md, design.md
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease;
+
+    &__input {
+        display: none;
+    }
+}

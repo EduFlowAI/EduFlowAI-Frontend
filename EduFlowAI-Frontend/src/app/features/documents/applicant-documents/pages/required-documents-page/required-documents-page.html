@@ -1,1 +1,146 @@
-<p>required-documents-page works!</p>
+<div class="page">
+  <!-- Header -->
+  <div class="page__header">
+    <div>
+      <h2 class="text-[24px] font-semibold text-[var(--navy-900)]">Document Uploads</h2>
+      <p class="page__header-sub">
+        <lucide-angular [img]="InfoIcon" [size]="18" class="text-[#5B6472]" />
+        {{ uploadedCount() }} of {{ store.requiredTypes().length }} required documents uploaded
+      </p>
+    </div>
+
+    <div class="page__progress">
+      <div class="page__progress-labels">
+        <span>Progress</span>
+        <span>{{ progressPercent() }}%</span>
+      </div>
+      <div class="page__progress-track">
+        <div class="page__progress-fill" [style.width.%]="progressPercent()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  @if (store.loading()) {
+  <p class="text-[14px] text-[#5B6472]">Loading your documents…</p>
+  }
+
+  <!-- Error state -->
+  @if (store.error()) {
+  <div class="page__error">
+    <lucide-angular [img]="TriangleAlertIcon" [size]="18" class="text-[var(--red-700)]" />
+    <span class="text-[14px] text-[var(--red-700)]">{{ store.error() }}</span>
+  </div>
+  }
+
+  <!-- Document cards -->
+  @if (!store.loading()) {
+  <div class="page__grid">
+    @for (type of store.requiredTypes(); track type) {
+    <div class="card" [class.card--uploaded]="store.documentByType().get(type)?.status === DocumentStatus.Uploaded"
+      [class.card--rejected]="store.documentByType().get(type)?.status === DocumentStatus.Rejected">
+      <div class="card__header">
+        <h3 class="text-[18px] font-semibold text-[var(--navy-900)]">
+          {{ DOCUMENT_TYPE_LABELS[type] }}
+        </h3>
+
+        @if (store.uploadingType() !== type) {
+        @switch (store.documentByType().get(type)?.status) {
+        @case (DocumentStatus.Uploaded) {
+        <span class="badge badge--success">
+          <lucide-angular [img]="CircleCheckIcon" [size]="14" />
+          Uploaded
+        </span>
+        }
+        @case (DocumentStatus.Verifying) {
+        <span class="badge badge--neutral">Verifying</span>
+        }
+        @case (DocumentStatus.Approved) {
+        <span class="badge badge--success">
+          <lucide-angular [img]="CircleCheckIcon" [size]="14" />
+          Approved
+        </span>
+        }
+        @case (DocumentStatus.NeedsHumanReview) {
+        <span class="badge badge--amber">Needs Review</span>
+        }
+        @case (DocumentStatus.Rejected) {
+        <span class="badge badge--error">
+          <lucide-angular [img]="TriangleAlertIcon" [size]="14" />
+          Rejected
+        </span>
+        }
+        @default {
+        <span class="badge badge--neutral">Pending</span>
+        }
+        }
+        }
+      </div>
+
+      <!-- Currently uploading -->
+      @if (store.uploadingType() === type) {
+      <app-upload-progress label="Uploading…" />
+      }
+
+      <!-- Verifying: reuse the same indeterminate visual language -->
+      @else if (store.documentByType().get(type)?.status === DocumentStatus.Verifying) {
+      <app-upload-progress label="Verifying…" [fileName]="store.documentByType().get(type)?.originalFileName ?? null" />
+      }
+
+      <!-- Rejected: point to replacement flow, no direct re-upload here -->
+      @else if (store.documentByType().get(type)?.status === DocumentStatus.Rejected) {
+      <div class="card__rejected-box">
+        <lucide-angular [img]="TriangleAlertIcon" [size]="24" class="text-[var(--red-700)]" />
+        <p class="text-[14px] text-[var(--red-700)]">This document was rejected.</p>
+        <p class="text-[13px] text-[#5B6472]">A replacement request is required to resubmit this document.</p>
+      </div>
+      }
+
+      <!-- Uploaded or Approved, and not currently replacing: show file info -->
+      @else if (
+      store.documentByType().get(type) &&
+      !isReplacing(type) &&
+      (store.documentByType().get(type)?.status === DocumentStatus.Uploaded ||
+      store.documentByType().get(type)?.status === DocumentStatus.Approved)
+      ) {
+      <div class="card__file-info">
+        <span class="text-[14px] text-[var(--navy-900)] truncate">
+          {{ store.documentByType().get(type)?.originalFileName }}
+        </span>
+      </div>
+
+      @if (store.documentByType().get(type)?.status === DocumentStatus.Uploaded) {
+      <div class="card__actions">
+        <button type="button" class="link-button" (click)="toggleReplace(type)">
+          <lucide-angular [img]="RotateCcwIcon" [size]="16" />
+          Replace
+        </button>
+      </div>
+      }
+      }
+
+      <!-- No document yet, or Replace was clicked: show the dropzone -->
+      @else {
+      <app-file-dropzone (fileSelected)="onFileSelected(type, $event)" />
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="page__footer">
+    @if (store.missingTypes().length > 0) {
+    <p class="page__footer-warning">
+      <lucide-angular [img]="TriangleAlertIcon" [size]="18" class="text-[#5B6472]" />
+      Please upload all {{ store.requiredTypes().length }} required documents to proceed.
+    </p>
+    } @else {
+    <span></span>
+    }
+
+    <button type="button" class="submit-button" [disabled]="!store.canSubmit()" (click)="onSubmit()">
+      {{ store.submitting() ? 'Submitting…' : 'Submit Application' }}
+    </button>
+  </div>
+  }
+</div>
