@@ -92,7 +92,7 @@ export class PreferenceSelectionPage implements OnInit{
             this.preferencesForm.get('preference1')?.patchValue({
               trackId: pref1.trackId,
               branchId: pref1.branchId
-            });
+            }, { emitEvent: false});
             // Update signal to trigger computed branches evaluation
             this.selectedTrackId1.set(pref1.trackId);
           }
@@ -100,10 +100,15 @@ export class PreferenceSelectionPage implements OnInit{
             this.preferencesForm.get('preference2')?.patchValue({
               trackId: pref2.trackId,
               branchId: pref2.branchId
-            });
+            }, { emitEvent: false });
             // Update signal to trigger computed branches evaluation
             this.selectedTrackId2.set(pref2.trackId);
           }
+        }
+
+        // Automatic routing based on the status after successful submission
+        if (details.status === 'DocumentsRequired' || details.status === 'EligibilityFailed') {
+          this.router.navigate(['/applications', details.id]);
         }
 
         // Disable form if the application is not in an editable state (e.g., Expired/Closed)
@@ -201,103 +206,28 @@ export class PreferenceSelectionPage implements OnInit{
     this.preferencesForm.markAsPristine();
   }
 
+  // Trigger the final submission and automatic evaluation
+  submitApplication(): void {
+    if (this.preferencesForm.valid && this.store.canEdit() && !this.preferencesForm.dirty) {
+      this.store.submitApplication(this.applicationId());
+    }
+  }
+
   // Navigation handlers
   goBack(): void {
     this.router.navigate(['/applications', this.applicationId()]);
   }
 
-  goNext(): void {
-    if (this.preferencesForm.valid && this.store.canEdit()) {
-      // Only fire the save API if the user has actually made changes 
-      // or hasn't clicked "Save Draft" just now.
-      if (this.preferencesForm.dirty) {
-        this.savePreferences();
-      }
+  // goNext(): void {
+  //   if (this.preferencesForm.valid && this.store.canEdit()) {
+  //     // Only fire the save API if the user has actually made changes 
+  //     // or hasn't clicked "Save Draft" just now.
+  //     if (this.preferencesForm.dirty) {
+  //       this.savePreferences();
+  //     }
       
-      // Navigate to Documents step (Milestone 4 placeholder)
-      this.router.navigate(['/applications', this.applicationId(), 'documents']);
-    }
-  }
+  //     // Navigate to Documents step (Milestone 4 placeholder)
+  //     this.router.navigate(['/applications', this.applicationId(), 'documents']);
+  //   }
+  // }
 }
-
-//   /**
-//    * Initializes the FormGroup with necessary controls and cross-field validation
-//    */
-//   private initForm(): void {
-//     this.preferencesForm = this.fb.group({
-//       primaryTrack: ['', Validators.required],
-//       primaryBranch: ['', Validators.required],
-//       backupTrack: ['', Validators.required],
-//       backupBranch: ['', Validators.required]
-//     }, { validators: this.duplicateTrackValidator });
-//   }
-
-//   /**
-//    * Custom validator to ensure primary and backup tracks are not identical
-//    */
-//   private duplicateTrackValidator(group: AbstractControl): ValidationErrors | null {
-//     const primary = group.get('primaryTrack')?.value;
-//     const backup = group.get('backupTrack')?.value;
-    
-//     // Return error object if both tracks are selected and they match
-//     if (primary && backup && primary === backup) {
-//       return { duplicateTrack: true };
-//     }
-//     return null;
-//   }
-
-//   /**
-//    * Checks if the duplicate track error is present for UI rendering
-//    */
-//   get hasDuplicateError(): boolean {
-//     return this.preferencesForm.hasError('duplicateTrack') && 
-//            this.preferencesForm.get('backupTrack')?.touched === true;
-//   }
-
-//   /**
-//    * Handles the save draft action
-//    */
-//   onSaveDraft(): void {
-//     if (this.preferencesForm.valid) {
-//       this.submitPreferences();
-//     } else {
-//       this.preferencesForm.markAllAsTouched();
-//     }
-//   }
-
-//   /**
-//    * Handles the next step action
-//    */
-//   onNextStep(): void {
-//     if (this.preferencesForm.valid) {
-//       this.submitPreferences();
-//       // Navigate to the next step using Angular Router (e.g., Document Upload)
-//     } else {
-//       this.preferencesForm.markAllAsTouched();
-//     }
-//   }
-
-//   /**
-//    * Prepares the DTO and dispatches the update method to the SignalStore
-//    */
-//   private submitPreferences(): void {
-//     const details = this.store.applicationDetails();
-//     if (!details) return;
-
-//     const formValues = this.preferencesForm.value;
-    
-//     // Map form values to the expected DTO structure
-//     const requestDto: UpdateApplicationPreferencesDto = {
-//       preferences: [
-//         { trackBranchOfferingId: formValues.primaryTrack, rank: 1 },
-//         { trackBranchOfferingId: formValues.backupTrack, rank: 2 }
-//       ]
-//     };
-
-//     // Call the updatePreferences rxMethod from the store
-//     this.store.updatePreferences({ 
-//       applicationId: details.id, 
-//       request: requestDto 
-//     });
-//   }
-// }

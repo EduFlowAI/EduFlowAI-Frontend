@@ -1,9 +1,52 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, effect, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ApplicationsStore } from '../../data-access/applications.store';
+import { EligibilityResultComponent } from './../../ui/eligibility-result.component/eligibility-result.component';
+// We will import the micro-view components here once we create them
+// import { AssessmentProgressTrackingComponent } from './components/assessment-progress-tracking.component';
 
 @Component({
   selector: 'app-application-status-page',
-  imports: [],
+  standalone: true,
+  imports: [
+    CommonModule, RouterLink, EligibilityResultComponent
+    // Add micro-view components to imports later
+    // AssessmentProgressTrackingComponent
+  ],
   templateUrl: './application-status-page.html',
-  styleUrl: './application-status-page.scss',
+  styleUrls: ['./application-status-page.scss']
 })
-export class ApplicationStatusPage {}
+export class ApplicationStatusPage implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  readonly store = inject(ApplicationsStore);
+
+  applicationId: string = '';
+
+  constructor() {
+    // Reactively load specific details based on the current status
+    effect(() => {
+      const summary = this.store.summaryData();
+      
+      if (summary && this.applicationId) {
+        const status = summary.currentStatus;
+
+        // Load specific data based on the active phase
+        if (status === 'EligibilityFailed' || status === 'DocumentsRequired') {
+          this.store.loadEligibilityDetails(this.applicationId);
+        } else if (status === 'AssessmentInProgress' || status === 'AssessmentCompleted') {
+          this.store.loadStagesResults(this.applicationId);
+        }
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    this.applicationId = this.route.snapshot.paramMap.get('id') || '';
+    
+    if (this.applicationId) {
+      // Ensure we have the latest summary to determine the status
+      this.store.loadDashboardSummary(this.applicationId);
+    }
+  }
+}
