@@ -52,8 +52,8 @@ const DOCUMENT_STATUS_KEYS: Record<DocumentStatus, string> = {
   styleUrl: './required-documents-page.scss',
 })
 export class RequiredDocumentsPage implements OnInit {
-  /** Bound from the :applicationId route param — requires withComponentInputBinding() in app.config.ts */
-  @Input({ required: true }) applicationId!: string;
+  /** Bound from the :id route param (matches the applications feature's actual param name) — requires withComponentInputBinding() in app.config.ts */
+  @Input({ required: true }) id!: string;
 
   @ViewChild(SecureFileViewer) private viewer!: SecureFileViewer;
 
@@ -80,11 +80,11 @@ export class RequiredDocumentsPage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.store.load(this.applicationId);
+    this.store.load(this.id);
   }
 
   protected retry(): void {
-    this.store.load(this.applicationId);
+    this.store.load(this.id);
   }
 
   protected viewFile(doc: ApplicantDocumentDto): void {
@@ -106,11 +106,11 @@ export class RequiredDocumentsPage implements OnInit {
   }
 
   protected onFileSelected(documentType: DocumentType, file: File): void {
-    this.store.uploadDocument(this.applicationId, documentType, file);
+    this.store.uploadDocument(this.id, documentType, file);
   }
 
   protected onSubmit(): void {
-    this.store.submitPackage(this.applicationId);
+    this.store.submitPackage(this.id);
   }
 
   protected uploadedCount(): number {

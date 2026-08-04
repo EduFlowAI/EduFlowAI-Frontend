@@ -1,3 +1,20 @@
+@if (inlineMode()) {
+<!-- ── Inline / embedded mode (review-details-page) ── -->
+<div class="inline-viewer" [attr.aria-label]="labels?.documentPreview">
+    @if (sourceUrl && inlineFileKind() === 'pdf') {
+    <ngx-extended-pdf-viewer [src]="sourceUrl!" [showToolbar]="true" [showSidebarButton]="false"
+        [showOpenFileButton]="false" [showPrintButton]="false" [showDownloadButton]="false" height="100%" />
+    } @else if (sourceUrl && inlineFileKind() === 'image') {
+    <img [src]="sourceUrl" [alt]="labels?.documentPreview || ''" class="inline-viewer__image" />
+    } @else if (sourceUrl) {
+    <div class="inline-viewer__unsupported">
+        <lucide-angular [img]="TriangleAlertIcon" [size]="24" />
+        <p>{{ labels?.unsupported || locale.t('common.fileViewer.unsupported') }}</p>
+    </div>
+    }
+</div>
+} @else {
+<!-- ── Modal mode (required-documents-page) ── -->
 @if (isOpen()) {
 <div class="viewer-backdrop" (click)="close()">
     <div #dialogEl class="viewer-dialog" role="dialog" aria-modal="true" [attr.aria-label]="fileName()"
@@ -33,4 +50,5 @@
         </div>
     </div>
 </div>
+}
 }
