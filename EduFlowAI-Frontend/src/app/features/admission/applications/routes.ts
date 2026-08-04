@@ -46,7 +46,15 @@ export default [
           loadComponent: () => import('./pages/application-status-page/application-status-page')
             .then(c => c.ApplicationStatusPage),
           title: 'Application Status Details'
-        }
+        },
+        // Route for editing an existing draft application
+        {
+          path: ':id/edit',
+          loadComponent: () => 
+            import('./pages/application-edit-page/application-edit-page')
+            .then(c => c.ApplicationEditPage),
+          title: 'Edit Application'
+        },
         // Other routes owned by Halim (like application-create-page) will go here
       ]
     }    
