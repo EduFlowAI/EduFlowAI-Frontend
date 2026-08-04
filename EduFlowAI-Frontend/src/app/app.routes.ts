@@ -42,14 +42,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'applicant/applications/:applicationId/documents',
-    loadChildren: () =>
-      import('./features/documents/applicant-documents/routes').then(
-        (m) => m.APPLICANT_DOCUMENTS_ROUTES,
-      ),
-    canMatch: [authGuard, roleGuard(APP_ROLES.applicant)],
-  },
-  {
     path: 'applicant',
     canMatch: [authGuard, roleGuard(APP_ROLES.applicant)],
     loadComponent: () =>
