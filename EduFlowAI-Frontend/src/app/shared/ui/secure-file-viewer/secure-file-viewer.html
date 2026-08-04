@@ -1,1 +1,39 @@
-<p>secure-file-viewer works!</p>
+<section class="file-viewer" [attr.aria-label]="labels().documentPreview">
+  <div class="viewer-toolbar">
+    <button type="button" [attr.aria-label]="labels().zoomIn" (click)="zoomIn()">
+      <span class="material-symbols-outlined" aria-hidden="true">zoom_in</span>
+    </button>
+    <button type="button" [attr.aria-label]="labels().zoomOut" (click)="zoomOut()">
+      <span class="material-symbols-outlined" aria-hidden="true">zoom_out</span>
+    </button>
+    <button type="button" [attr.aria-label]="labels().rotate" (click)="rotate()">
+      <span class="material-symbols-outlined" aria-hidden="true">rotate_right</span>
+    </button>
+    <button type="button" [attr.aria-label]="labels().reset" (click)="reset()">
+      <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>
+    </button>
+    <a [href]="sourceUrl()" [download]="fileName()" [attr.aria-label]="labels().download">
+      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+    </a>
+  </div>
+
+  <div class="viewer-canvas">
+    @if (isImage()) {
+      <img [src]="sourceUrl()" [alt]="fileName()" [style.transform]="transform()" />
+    } @else if (isPdf()) {
+      <iframe
+        [src]="safeSource()"
+        [title]="labels().documentPreview"
+        [style.transform]="transform()"
+      ></iframe>
+    } @else {
+      <div class="unsupported-file">
+        <span class="material-symbols-outlined" aria-hidden="true">draft</span>
+        <p>{{ labels().unsupported }}</p>
+        <a class="download-button" [href]="sourceUrl()" [download]="fileName()">
+          {{ labels().download }}
+        </a>
+      </div>
+    }
+  </div>
+</section>

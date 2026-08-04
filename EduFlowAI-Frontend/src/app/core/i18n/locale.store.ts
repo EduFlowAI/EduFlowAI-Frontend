@@ -88,6 +88,9 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'layout.homeLabel': 'EduFlow AI home',
     'layout.legal': 'Legal',
     'layout.operations.title': 'Operations workspace',
+    'layout.operations.navigation': 'Operations navigation',
+    'layout.operations.reviewQueue': 'Document review queue',
+    'layout.operations.role': 'Operations manager',
     'layout.admin.title': 'Administration',
 
     // ---------------- Profile -------------------------------------------------------
@@ -190,8 +193,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.stats.locations': 'Training locations',
     'landing.stats.journey': 'Annual Employment Rate',
     'landing.programs.eyebrow': 'ITI Training Programs',
-    'landing.programs.title':
-      'Choose the program that fits your next step.',
+    'landing.programs.title': 'Choose the program that fits your next step.',
     'landing.programs.copy':
       'Review each program’s format, outcomes, duration, and eligibility requirements.',
     'landing.programs.months': 'Months',
@@ -414,6 +416,9 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'layout.homeLabel': 'الصفحة الرئيسية لإديوفلو الذكي',
     'layout.legal': 'روابط قانونية',
     'layout.operations.title': 'مساحة عمل العمليات',
+    'layout.operations.navigation': 'تنقل مساحة العمليات',
+    'layout.operations.reviewQueue': 'قائمة مراجعة المستندات',
+    'layout.operations.role': 'مدير العمليات',
     'layout.admin.title': 'الإدارة',
 
     // ---------------------- Profile -----------------------------------------------------------
