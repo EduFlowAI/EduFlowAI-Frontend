@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EligibilityResultPage } from './eligibility-result-page';
+import { MyApplicationsPage } from './my-applications-page';
 
-describe('EligibilityResultPage', () => {
-  let component: EligibilityResultPage;
-  let fixture: ComponentFixture<EligibilityResultPage>;
+describe('MyApplicationsPage', () => {
+  let component: MyApplicationsPage;
+  let fixture: ComponentFixture<MyApplicationsPage>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EligibilityResultPage],
+      imports: [MyApplicationsPage],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(EligibilityResultPage);
+    fixture = TestBed.createComponent(MyApplicationsPage);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -7,6 +7,7 @@ import { debounceTime, distinctUntilChanged, finalize, Subscription } from 'rxjs
 
 import { LocaleStore } from '../../../../../core/i18n/locale.store';
 import { NotificationApi } from '../../data-access/notification.api';
+import { NotificationRealtimeService } from '../../data-access/notification-realtime.service';
 import {
   NotificationItem,
   NOTIFICATION_TYPES,
@@ -71,6 +72,7 @@ export class NotificationCenterPage implements OnInit {
   );
 
   private readonly api = inject(NotificationApi);
+  private readonly realtime = inject(NotificationRealtimeService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly markingReadIds = signal<ReadonlySet<string>>(new Set());
   private requestSubscription?: Subscription;
@@ -94,6 +96,10 @@ export class NotificationCenterPage implements OnInit {
     this.sortControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((order) => this.sortOrder.set(order));
+
+    this.realtime.notificationCreated$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((notification) => this.addRealtimeNotification(notification));
 
     this.loadNotifications();
   }
@@ -180,7 +186,7 @@ export class NotificationCenterPage implements OnInit {
     if (type === 'DocumentReplacementRequested') {
       return {
         label: 'replacements',
-        route: '/applicant/replacement-requests',
+        route: '/replacement-requests',
       };
     }
 
@@ -227,6 +233,34 @@ export class NotificationCenterPage implements OnInit {
   private filtersChanged(): void {
     this.page.set(1);
     this.loadNotifications();
+  }
+
+  private addRealtimeNotification(notification: NotificationItem): void {
+    if (
+      this.notifications().some((item) => item.id === notification.id) ||
+      !this.matchesCurrentFilters(notification)
+    ) {
+      return;
+    }
+
+    this.totalCount.update((count) => count + 1);
+    this.totalPages.set(Math.ceil(this.totalCount() / this.pageSize));
+
+    if (this.page() === 1) {
+      this.notifications.update((notifications) =>
+        [notification, ...notifications].slice(0, this.pageSize),
+      );
+    }
+  }
+
+  private matchesCurrentFilters(notification: NotificationItem): boolean {
+    const selectedType = this.typeControl.value;
+    if (selectedType && notification.type !== selectedType) {
+      return false;
+    }
+
+    const search = this.searchControl.value.trim().toLocaleLowerCase();
+    return !search || (notification.message ?? '').toLocaleLowerCase().includes(search);
   }
 
   private loadNotifications(): void {

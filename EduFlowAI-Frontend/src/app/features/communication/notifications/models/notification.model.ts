@@ -35,3 +35,11 @@ export interface NotificationQuery {
 export interface MarkAllReadResponse {
   updatedCount: number;
 }
+
+export interface NotificationCreatedMessage {
+  notificationId: string;
+  applicationId: string | null;
+  notificationType: NotificationType | number | string;
+  message: string | null;
+  createdAtUtc: string;
+}

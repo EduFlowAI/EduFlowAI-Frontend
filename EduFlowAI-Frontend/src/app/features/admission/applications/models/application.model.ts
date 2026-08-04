@@ -78,3 +78,110 @@ export interface ActiveAdmissionCycleDto {
     startDate: string;
     deadlineUtc: string;
 }
+
+/**
+ * DTO representing the result of an application status change (e.g., Withdrawal).
+ * Maps directly to the backend ApplicationStatusDto record.
+ */
+export interface ApplicationStatusDto {
+    applicationId: string;
+    currentStatus: string;
+    lastUpdatedAt: string;     // Maps from DateTimeOffset to ISO string in TS
+    statusMessage?: string | null;
+}
+
+/*
+ * Defines the shape of the lightweight application data used in the dashboard list view.
+ * This directly maps to the ApplicationListDto in the backend.
+ */
+export interface ApplicationListDto {
+    id: string;
+    programName: string;
+    intakeName: string;
+    status: string;
+    submittedAt?: string | null;
+}
+
+/**
+ * Pagination query parameters matching C# QueryParameters
+ */
+export interface QueryParameters {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    status?: string;
+    type?: string;
+}
+
+/**
+ * Paginated result wrapper matching C# PaginatedResult<T>
+ */
+export interface PaginatedResult<T> {
+    data: T[];
+    filters?: any;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    totalCount: number;
+}
+
+/**
+ * DTO for returning eligibility results
+ */
+export interface EligibilityDetailsDto {
+    passed: boolean;
+    evaluatedAt: string; // Maps to DateTimeOffset
+    failureReasons: string[]; // Parsed list of rejection reasons
+}
+
+/**
+ * DTO to securely receive the evaluation request from the front-end
+ */
+export interface EvaluateEligibilityRequestDto {
+    applicantId: string;
+    cycleId: string;
+    applicationId: string;
+}
+
+/**
+ * Result returned after evaluating applicant eligibility
+ */
+export interface EligibilityResult {
+    id: string;
+    passed: boolean;
+    failureReasonsJson: string; // JSON array string
+    evaluatedAt: string;
+    applicationId: string;
+    // application entity omitted to prevent circular reference bloat
+}
+
+/**
+ * DTO for Assessment Simulated Stages
+ */
+export interface SimulatedStageDto {
+    stageId: string;
+    stageType: string;
+    score?: number | null;
+    maxScore: number;
+    result: string;
+    updatedAt: string; // Maps to DateTimeOffset
+}
+
+/**
+ * Enum for Reviewer Type mapping to C# Enum
+ */
+export enum ReviewerType {
+    Human = 0,
+    AI = 1
+}
+
+/**
+ * DTO for Document Review Result
+ */
+export interface DocumentReviewResultDto {
+    isAccepted: boolean;
+    rejectionReason?: string | null;
+    reviewerType: ReviewerType;
+    isAgentUncertain: boolean;
+    reviewedByUserId?: string | null;
+}

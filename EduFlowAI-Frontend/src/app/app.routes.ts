@@ -22,13 +22,13 @@ export const routes: Routes = [
   {
     path: 'tracks',
     loadComponent: () =>
-      import('./core/layout/public-layout/public-layout').then(
-        (component) => component.PublicLayout,
+      import('./features/landing/pages/landing-page/landing-page').then(
+        (component) => component.LandingPage,
       ),
     loadChildren: () =>
       import('./features/admission/catalog/routes').then(
-        (catalogRoutes) => catalogRoutes.TRACK_CATALOG_ROUTES,
-      ),
+        (catalogRoutes) => catalogRoutes.TRACK_CATALOG_ROUTES),
+    title: 'ITI Admissions through EduFlowAI',
   },
   {
     path: 'auth',
@@ -93,12 +93,52 @@ export const routes: Routes = [
     loadChildren: () => import('./features/admission/applications/routes'),
   },
   {
+    path: 'replacement-requests',
+    canMatch: [
+      authGuard,
+      roleGuard(APP_ROLES.applicant),
+      profileCompleteGuard,
+    ],
+    loadComponent: () =>
+      import(
+        './core/layout/applicant-layout/applicant-layout'
+      ).then(component => component.ApplicantLayout),
+    loadChildren: () =>
+      import('./features/admission/applications/routes'),
+  },
+  {
+    path: 'replacement-requests',
+    canMatch: [
+      authGuard,
+      roleGuard(APP_ROLES.applicant),
+      profileCompleteGuard,
+    ],
+    loadComponent: () =>
+      import(
+        './core/layout/applicant-layout/applicant-layout'
+      ).then(component => component.ApplicantLayout),
+    loadChildren: () =>
+      import('./features/documents/replacement/routes'),
+  },
+  {
     path: 'operations',
     canMatch: [authGuard, roleGuard(APP_ROLES.operationsManager)],
     loadComponent: () =>
-      import('./core/layout/operations-layout/operations-layout').then(
-        (component) => component.OperationsLayout,
-      ),
+      import(
+        './core/layout/operations-layout/operations-layout'
+      ).then(component => component.OperationsLayout),
+    children: [
+      {
+        path: 'document-reviews',
+        loadChildren: () =>
+          import('./features/documents/human-review/routes'),
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'document-reviews',
+      },
+    ],
   },
   {
     path: 'admin',

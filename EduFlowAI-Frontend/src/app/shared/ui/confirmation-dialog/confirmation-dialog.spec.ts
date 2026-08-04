@@ -12,6 +12,13 @@ describe('ConfirmationDialog', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConfirmationDialog);
+    fixture.componentRef.setInput('config', {
+      title: 'Approve?',
+      message: 'Confirm this action.',
+      cancelLabel: 'Cancel',
+      confirmLabel: 'Confirm',
+      submittingLabel: 'Submitting',
+    });
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
