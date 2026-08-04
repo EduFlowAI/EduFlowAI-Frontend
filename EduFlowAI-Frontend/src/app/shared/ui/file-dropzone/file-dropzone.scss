@@ -14,13 +14,20 @@
     gap: 0.5rem;
     padding: 1.5rem;
     text-align: center;
-    outline: none;
     border-width: 2px;
     border-style: dashed;
     border-radius: 16px; // --radius-md, design.md
     transition:
         border-color 0.2s ease,
         background-color 0.2s ease;
+
+    // Only show a focus ring for keyboard navigation, not mouse clicks —
+    // avoids the "ring flashes on every click" complaint while still being
+    // fully visible for Tab/keyboard users.
+    &:focus-visible {
+        outline: 2px solid var(--navy-900, #022448);
+        outline-offset: 2px;
+    }
 
     &__input {
         display: none;

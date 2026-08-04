@@ -4,14 +4,20 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   HostListener,
   Input,
   OnDestroy,
+  ViewChild,
+  inject,
   signal,
 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { LucideAngularModule, X, TriangleAlert } from 'lucide-angular';
+
+// TODO: fix this path to match your actual repo location for LocaleStore
+import { LocaleStore } from '../../../core/i18n/locale.store';
 
 type FileKind = 'pdf' | 'image' | 'unsupported';
 
@@ -42,12 +48,34 @@ export class SecureFileViewer implements OnDestroy {
   protected readonly XIcon = X;
   protected readonly TriangleAlertIcon = TriangleAlert;
 
+  protected readonly locale = inject(LocaleStore);
+
   protected readonly isOpen = signal(false);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly objectUrl = signal<string | null>(null);
   protected readonly fileKind = signal<FileKind>('unsupported');
   protected readonly fileName = signal('');
+
+  @ViewChild('dialogEl') private dialogEl?: ElementRef<HTMLElement>;
+
+  /**
+   * Fires whenever the close button enters/leaves the DOM (i.e. exactly when the
+   * modal opens/closes, since it's inside the @if block). Used to move focus into
+   * the dialog on open and restore it to whatever triggered the modal on close —
+   * standard modal accessibility behavior, not optional polish.
+   */
+  private previouslyFocusedElement: HTMLElement | null = null;
+
+  @ViewChild('closeButton') private set closeButtonRef(ref: ElementRef<HTMLButtonElement> | undefined) {
+    if (ref) {
+      this.previouslyFocusedElement = document.activeElement as HTMLElement;
+      ref.nativeElement.focus();
+    } else if (this.previouslyFocusedElement) {
+      this.previouslyFocusedElement.focus();
+      this.previouslyFocusedElement = null;
+    }
+  }
 
   /** Call from a parent component to open the viewer for a given document. */
   open(documentId: string, fileName: string): void {
@@ -56,6 +84,7 @@ export class SecureFileViewer implements OnDestroy {
     this.fileKind.set(this.detectFileKind(fileName));
     this.loading.set(true);
     this.error.set(null);
+    document.body.style.overflow = 'hidden'; // lock background scroll while modal is open
 
     this.fileFetcher(documentId).subscribe({
       next: (blob) => {
@@ -63,7 +92,7 @@ export class SecureFileViewer implements OnDestroy {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Could not load this document. Please try again.');
+        this.error.set(this.locale.t('common.fileViewer.error'));
         this.loading.set(false);
       },
     });
@@ -73,6 +102,7 @@ export class SecureFileViewer implements OnDestroy {
     this.revokeCurrentUrl();
     this.isOpen.set(false);
     this.error.set(null);
+    document.body.style.overflow = '';
   }
 
   @HostListener('document:keydown.escape')
@@ -80,8 +110,41 @@ export class SecureFileViewer implements OnDestroy {
     if (this.isOpen()) this.close();
   }
 
+  /** Keeps Tab/Shift+Tab cycling within the dialog instead of leaking into the page behind it. */
+  @HostListener('document:keydown.tab', ['$event'])
+  protected onTab(event: KeyboardEvent): void {
+    this.trapFocus(event, false);
+  }
+
+  @HostListener('document:keydown.shift.tab', ['$event'])
+  protected onShiftTab(event: KeyboardEvent): void {
+    this.trapFocus(event, true);
+  }
+
+  private trapFocus(event: KeyboardEvent, reverse: boolean): void {
+    if (!this.isOpen() || !this.dialogEl) return;
+
+    const focusable = this.dialogEl.nativeElement.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+
+    if (reverse && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!reverse && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   ngOnDestroy(): void {
     this.revokeCurrentUrl();
+    document.body.style.overflow = '';
   }
 
   private revokeCurrentUrl(): void {

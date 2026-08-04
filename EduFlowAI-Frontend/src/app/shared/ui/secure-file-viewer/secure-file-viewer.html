@@ -1,19 +1,20 @@
 @if (isOpen()) {
 <div class="viewer-backdrop" (click)="close()">
-    <div class="viewer-dialog" role="dialog" aria-modal="true" [attr.aria-label]="fileName()"
+    <div #dialogEl class="viewer-dialog" role="dialog" aria-modal="true" [attr.aria-label]="fileName()"
         (click)="$event.stopPropagation()">
         <div class="viewer-dialog__header">
             <span class="text-[14px] font-medium text-[var(--navy-900)] truncate">
                 {{ fileName() }}
             </span>
-            <button type="button" class="viewer-dialog__close" (click)="close()" aria-label="Close">
+            <button #closeButton type="button" class="viewer-dialog__close" (click)="close()"
+                [attr.aria-label]="locale.t('common.fileViewer.close')">
                 <lucide-angular [img]="XIcon" [size]="20" />
             </button>
         </div>
 
-        <div class="viewer-dialog__body">
+        <div class="viewer-dialog__body" aria-live="polite">
             @if (loading()) {
-            <p class="text-[14px] text-[#5B6472]">Loading document…</p>
+            <p class="text-[14px] text-[#5B6472]">{{ locale.t('common.fileViewer.loading') }}</p>
             } @else if (error()) {
             <div class="viewer-dialog__error">
                 <lucide-angular [img]="TriangleAlertIcon" [size]="24" class="text-[var(--red-700)]" />
@@ -26,7 +27,7 @@
             <img [src]="objectUrl()" [alt]="fileName()" class="viewer-dialog__image" />
             } @else if (objectUrl()) {
             <p class="text-[14px] text-[#5B6472]">
-                This file type can't be previewed.
+                {{ locale.t('common.fileViewer.unsupported') }}
             </p>
             }
         </div>

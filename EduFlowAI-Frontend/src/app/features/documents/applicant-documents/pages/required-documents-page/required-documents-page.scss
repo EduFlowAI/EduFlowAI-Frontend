@@ -61,7 +61,7 @@
     }
 
     &__error-retry {
-        margin-left: auto;
+        margin-inline-start: auto;
     }
 
     &__empty {
@@ -266,4 +266,18 @@
     .skeleton-line {
         animation: none;
     }
+}
+
+// Visually hides content while keeping it available to screen readers.
+// Remove this if your repo already has a global .sr-only utility.
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }

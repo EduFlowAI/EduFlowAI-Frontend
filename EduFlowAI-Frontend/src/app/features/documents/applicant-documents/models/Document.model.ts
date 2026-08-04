@@ -45,15 +45,6 @@ export interface RequiredDocumentsResponse {
     documentTypes: DocumentType[];
 }
 
-/** Display labels for each document type. Presentation-only — not sourced from the backend. */
-export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
-    [DocumentType.None]: 'Unknown Document',
-    [DocumentType.NationalId]: 'National ID',
-    [DocumentType.BirthCertificate]: 'Birth Certificate',
-    [DocumentType.GraduationCertificate]: 'Graduation Certificate',
-    [DocumentType.MilitaryCertificate]: 'Military Certificate',
-};
-
 /** Shape of a failed response body across all five endpoints */
 export interface ApiErrorResponse {
     error: string;

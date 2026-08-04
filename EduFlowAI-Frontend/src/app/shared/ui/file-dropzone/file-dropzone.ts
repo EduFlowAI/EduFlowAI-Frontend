@@ -10,9 +10,13 @@ import {
   Output,
   ViewChild,
   computed,
+  inject,
   signal,
 } from '@angular/core';
 import { LucideAngularModule, UploadCloud, AlertCircle } from 'lucide-angular';
+
+// TODO: fix this path to match your actual repo location for LocaleStore
+import { LocaleStore } from '../../../core/i18n/locale.store';
 
 @Component({
   selector: 'app-file-dropzone',
@@ -37,11 +41,16 @@ export class FileDropzone {
   protected readonly UploadCloudIcon = UploadCloud;
   protected readonly AlertCircleIcon = AlertCircle;
 
+  protected readonly locale = inject(LocaleStore);
+
   protected readonly isDragOver = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
-  protected readonly hintText = computed(
-    () => `${this.acceptedTypes.map((t) => t.toUpperCase()).join(', ')}, max ${this.maxSizeMb}MB`,
+  protected readonly hintText = computed(() =>
+    this.locale.t('common.fileDropzone.hint', {
+      types: this.acceptedTypes.map((t) => t.toUpperCase()).join(', '),
+      size: this.maxSizeMb,
+    }),
   );
 
   protected readonly acceptAttr = computed(() =>
@@ -100,11 +109,15 @@ export class FileDropzone {
     const isWithinSize = file.size <= this.maxSizeMb * 1024 * 1024;
 
     if (!isAcceptedType) {
-      this.errorMessage.set(`Unsupported file type. Allowed: ${this.hintText()}`);
+      this.errorMessage.set(
+        this.locale.t('common.fileDropzone.errorType', { allowed: this.hintText() }),
+      );
       return;
     }
     if (!isWithinSize) {
-      this.errorMessage.set(`File too large. Max ${this.maxSizeMb}MB.`);
+      this.errorMessage.set(
+        this.locale.t('common.fileDropzone.errorSize', { size: this.maxSizeMb }),
+      );
       return;
     }
 

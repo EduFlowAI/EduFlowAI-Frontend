@@ -337,6 +337,50 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.footer.terms': 'Terms of service',
     'landing.footer.accessibility': 'Accessibility',
     'landing.footer.copyright': '© 2026 EduFlowAI. ITI Admissions experience.',
+
+    // Shared UI — shared/ui/file-dropzone
+    'common.fileDropzone.cta': 'Click to upload or drag and drop',
+    'common.fileDropzone.hint': '{{types}}, max {{size}}MB',
+    'common.fileDropzone.errorType': 'Unsupported file type. Allowed: {{allowed}}',
+    'common.fileDropzone.errorSize': 'File too large. Max {{size}}MB.',
+
+    // Shared UI — shared/ui/secure-file-viewer
+    'common.fileViewer.loading': 'Loading document…',
+    'common.fileViewer.error': 'Could not load this document. Please try again.',
+    'common.fileViewer.unsupported': "This file type can't be previewed.",
+    'common.fileViewer.close': 'Close',
+
+    // Documents feature — required-documents-page
+    'documents.page.title': 'Document Uploads',
+    'documents.page.loadingSr': 'Loading your documents…',
+    'documents.page.progressLabel': 'Progress',
+    'documents.page.summary': '{{uploaded}} of {{total}} required documents uploaded',
+    'documents.page.retry': 'Retry',
+    'documents.page.empty': 'No documents are required for this application.',
+    'documents.page.missingWarning': 'Please upload all {{total}} required documents to proceed.',
+    'documents.page.submit': 'Submit Application',
+    'documents.page.submitting': 'Submitting…',
+    'documents.page.uploading': 'Uploading…',
+    'documents.page.verifying': 'Verifying…',
+    'documents.page.view': 'View',
+    'documents.page.replace': 'Replace',
+    'documents.page.rejectedTitle': 'This document was rejected.',
+    'documents.page.rejectedBody': 'A replacement request is required to resubmit this document.',
+
+    // Document status badges
+    'documents.status.uploaded': 'Uploaded',
+    'documents.status.verifying': 'Verifying',
+    'documents.status.approved': 'Approved',
+    'documents.status.needsReview': 'Needs Review',
+    'documents.status.rejected': 'Rejected',
+    'documents.status.pending': 'Pending',
+
+    // Document type labels (replaces the hardcoded DOCUMENT_TYPE_LABELS map)
+    'documents.type.nationalId': 'National ID',
+    'documents.type.birthCertificate': 'Birth Certificate',
+    'documents.type.graduationCertificate': 'Graduation Certificate',
+    'documents.type.militaryCertificate': 'Military Certificate',
+    'documents.type.unknown': 'Unknown Document',
   },
   ar: {
     // Common
@@ -655,6 +699,46 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.footer.terms': 'شروط الاستخدام',
     'landing.footer.accessibility': 'إمكانية الوصول',
     //'landing.footer.copyright': '© 2026 EduFlowAI. تجربة قبول ITI.',
+
+
+    'common.fileDropzone.cta': 'انقر للتحميل أو اسحب وأفلت الملف هنا',
+    'common.fileDropzone.hint': '{{types}}، بحد أقصى {{size}} ميجابايت',
+    'common.fileDropzone.errorType': 'نوع الملف غير مدعوم. الأنواع المسموحة: {{allowed}}',
+    'common.fileDropzone.errorSize': 'حجم الملف كبير جدًا. الحد الأقصى {{size}} ميجابايت.',
+
+    'common.fileViewer.loading': 'جارٍ تحميل المستند…',
+    'common.fileViewer.error': 'تعذر تحميل هذا المستند. يرجى المحاولة مرة أخرى.',
+    'common.fileViewer.unsupported': 'لا يمكن معاينة هذا النوع من الملفات.',
+    'common.fileViewer.close': 'إغلاق',
+
+    'documents.page.title': 'رفع المستندات',
+    'documents.page.loadingSr': 'جارٍ تحميل مستنداتك…',
+    'documents.page.progressLabel': 'التقدم',
+    'documents.page.summary': 'تم رفع {{uploaded}} من {{total}} مستندات مطلوبة',
+    'documents.page.retry': 'إعادة المحاولة',
+    'documents.page.empty': 'لا توجد مستندات مطلوبة لهذا الطلب.',
+    'documents.page.missingWarning': 'يرجى رفع جميع المستندات المطلوبة ({{total}}) للمتابعة.',
+    'documents.page.submit': 'تقديم الطلب',
+    'documents.page.submitting': 'جارٍ التقديم…',
+    'documents.page.uploading': 'جارٍ الرفع…',
+    'documents.page.verifying': 'جارٍ التحقق…',
+    'documents.page.view': 'عرض',
+    'documents.page.replace': 'استبدال',
+    'documents.page.rejectedTitle': 'تم رفض هذا المستند.',
+    'documents.page.rejectedBody': 'يلزم تقديم طلب استبدال لإعادة رفع هذا المستند.',
+
+    'documents.status.uploaded': 'تم الرفع',
+    'documents.status.verifying': 'قيد التحقق',
+    'documents.status.approved': 'مقبول',
+    'documents.status.needsReview': 'يحتاج مراجعة',
+    'documents.status.rejected': 'مرفوض',
+    'documents.status.pending': 'قيد الانتظار',
+
+    'documents.type.nationalId': 'الرقم القومي',
+    'documents.type.birthCertificate': 'شهادة الميلاد',
+    'documents.type.graduationCertificate': 'شهادة التخرج',
+    'documents.type.militaryCertificate': 'الشهادة العسكرية',
+    'documents.type.unknown': 'مستند غير معروف',
   },
 };
 
