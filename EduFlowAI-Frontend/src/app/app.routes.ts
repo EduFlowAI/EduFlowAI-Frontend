@@ -103,6 +103,18 @@ export const routes: Routes = [
       import(
         './core/layout/operations-layout/operations-layout'
       ).then(component => component.OperationsLayout),
+    children: [
+      {
+        path: 'document-reviews',
+        loadChildren: () =>
+          import('./features/documents/human-review/routes'),
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'document-reviews',
+      },
+    ],
   },
   {
     path: 'admin',

@@ -1,0 +1,150 @@
+:host,
+.file-viewer {
+  display: block;
+  height: 100%;
+}
+
+.file-viewer {
+  position: relative;
+  min-height: 620px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.viewer-toolbar {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 18px;
+  inset-inline-start: 18px;
+  display: flex;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  padding: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.viewer-toolbar button,
+.viewer-toolbar a {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--heading);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.viewer-toolbar button:hover,
+.viewer-toolbar a:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.viewer-canvas {
+  display: grid;
+  height: 100%;
+  min-height: 620px;
+  place-items: center;
+  overflow: auto;
+  padding: 76px 24px 24px;
+}
+
+img,
+iframe {
+  max-width: 100%;
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+img {
+  max-height: 540px;
+  border-radius: 10px;
+  object-fit: contain;
+  box-shadow: var(--shadow-md);
+}
+
+iframe {
+  width: 100%;
+  height: 520px;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+.unsupported-file {
+  display: grid;
+  max-width: 360px;
+  justify-items: center;
+  gap: 14px;
+  color: var(--text-soft);
+  text-align: center;
+}
+
+.unsupported-file > .material-symbols-outlined {
+  display: grid;
+  width: 60px;
+  height: 60px;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--blue-100);
+  color: var(--navy-700);
+  font-size: 1.8rem;
+}
+
+.unsupported-file p {
+  margin: 0;
+}
+
+.download-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  border-radius: 11px;
+  background: var(--navy-900);
+  padding-inline: 18px;
+  color: #fff;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+@media (max-width: 55rem) {
+  .file-viewer,
+  .viewer-canvas {
+    min-height: 520px;
+  }
+}
+
+@media (max-width: 40.625rem) {
+  .file-viewer,
+  .viewer-canvas {
+    min-height: 430px;
+  }
+
+  .viewer-toolbar {
+    inset-block-start: 14px;
+    inset-inline: 14px;
+    justify-content: center;
+  }
+
+  .viewer-canvas {
+    padding: 72px 14px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
