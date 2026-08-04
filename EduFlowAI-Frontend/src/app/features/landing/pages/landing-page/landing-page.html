@@ -736,7 +736,11 @@
             >
             <h2>{{ locale.t('landing.assistant.title') }}</h2>
             <p>{{ locale.t('landing.assistant.copy') }}</p>
-            <a class="btn btn-amber" routerLink="/" fragment="assistant">
+            <button
+              class="btn btn-amber"
+              type="button"
+              (click)="openAssistant()"
+            >
               <span>{{ locale.t('landing.assistant.ask') }}</span>
               <svg
                 class="directional-icon"
@@ -750,7 +754,7 @@
               >
                 <path d="M5 12h14M13 6l6 6-6 6"></path>
               </svg>
-            </a>
+            </button>
           </div>
           <div class="assistant-demo">
             <div class="chat-head">
@@ -843,23 +847,4 @@
     </div>
   </footer>
 
-  <a
-    class="chat-fab"
-    routerLink="/"
-    fragment="assistant"
-    [attr.aria-label]="locale.t('landing.a11y.openAssistant')"
-  >
-    <svg
-      width="23"
-      height="23"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      aria-hidden="true"
-    >
-      <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"></path>
-      <path d="M8 9h8M8 13h5"></path>
-    </svg>
-  </a>
-</div>
+ </div>
