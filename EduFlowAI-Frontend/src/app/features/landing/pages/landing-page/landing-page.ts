@@ -10,6 +10,7 @@ import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 
 import { LocaleStore } from '../../../../core/i18n/locale.store';
+import { AssistantLauncherService } from '../../../ai/assistant/services/assistant-launcher.service';
 
 type Theme = 'light' | 'dark';
 type TrackCategory = 'software' | 'data' | 'design' | 'infrastructure';
@@ -254,6 +255,8 @@ export class LandingPage {
   ];
 
   private readonly title = inject(Title);
+  private readonly assistantLauncher =
+    inject(AssistantLauncherService);
 
   readonly theme = signal<Theme>(initialTheme());
   readonly mobileMenuOpen = signal(false);
@@ -320,5 +323,9 @@ export class LandingPage {
     if (event.target instanceof HTMLInputElement) {
       this.trackSearch.set(event.target.value);
     }
+  }
+
+  openAssistant(): void {
+    this.assistantLauncher.open();
   }
 }
