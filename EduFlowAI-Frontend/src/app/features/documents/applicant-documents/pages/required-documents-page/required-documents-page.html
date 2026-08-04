@@ -20,9 +20,16 @@
     </div>
   </div>
 
-  <!-- Loading state -->
+  <!-- Loading skeleton -->
   @if (store.loading()) {
-  <p class="text-[14px] text-[#5B6472]">Loading your documents…</p>
+  <div class="page__grid" aria-hidden="true">
+    @for (i of [1, 2, 3]; track i) {
+    <div class="card card--skeleton">
+      <div class="skeleton-line skeleton-line--title"></div>
+      <div class="skeleton-line skeleton-line--body"></div>
+    </div>
+    }
+  </div>
   }
 
   <!-- Error state -->
@@ -30,11 +37,24 @@
   <div class="page__error">
     <lucide-angular [img]="TriangleAlertIcon" [size]="18" class="text-[var(--red-700)]" />
     <span class="text-[14px] text-[var(--red-700)]">{{ store.error() }}</span>
+    <button type="button" class="link-button page__error-retry" (click)="retry()">
+      Retry
+    </button>
+  </div>
+  }
+
+  <!-- Empty state: no documents required for this application -->
+  @if (!store.loading() && !store.error() && store.requiredTypes().length === 0) {
+  <div class="page__empty">
+    <lucide-angular [img]="InfoIcon" [size]="28" class="text-[#5B6472]" />
+    <p class="text-[14px] text-[#5B6472]">
+      No documents are required for this application.
+    </p>
   </div>
   }
 
   <!-- Document cards -->
-  @if (!store.loading()) {
+  @if (!store.loading() && store.requiredTypes().length > 0) {
   <div class="page__grid">
     @for (type of store.requiredTypes(); track type) {
     <div class="card" [class.card--uploaded]="store.documentByType().get(type)?.status === DocumentStatus.Uploaded"
@@ -109,14 +129,19 @@
         </span>
       </div>
 
-      @if (store.documentByType().get(type)?.status === DocumentStatus.Uploaded) {
       <div class="card__actions">
+        <button type="button" class="link-button" (click)="viewFile(store.documentByType().get(type)!)">
+          <lucide-angular [img]="EyeIcon" [size]="16" />
+          View
+        </button>
+
+        @if (store.documentByType().get(type)?.status === DocumentStatus.Uploaded) {
         <button type="button" class="link-button" (click)="toggleReplace(type)">
           <lucide-angular [img]="RotateCcwIcon" [size]="16" />
           Replace
         </button>
+        }
       </div>
-      }
       }
 
       <!-- No document yet, or Replace was clicked: show the dropzone -->
@@ -143,4 +168,6 @@
     </button>
   </div>
   }
+
+  <app-secure-file-viewer [fileFetcher]="fetchFile" />
 </div>

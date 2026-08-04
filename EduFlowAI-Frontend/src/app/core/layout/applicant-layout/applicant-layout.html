@@ -1,9 +1,5 @@
 <div class="workspace-shell">
-  <aside
-    class="sidebar"
-    [class.sidebar--open]="menuOpen()"
-    [attr.aria-label]="locale.t('layout.applicant.navigation')"
-  >
+  <aside class="sidebar" [class.sidebar--open]="menuOpen()" [attr.aria-label]="locale.t('layout.applicant.navigation')">
     <a class="brand" routerLink="/applicant/profile" (click)="closeMenu()">
       <span class="brand__mark" aria-hidden="true">EF</span>
       <span>
@@ -13,34 +9,28 @@
     </a>
 
     <nav class="sidebar__nav">
-      <a
-        routerLink="/applicant/profile"
-        routerLinkActive="sidebar__link--active"
-        (click)="closeMenu()"
-      >
+      <a routerLink="/applicant/profile" routerLinkActive="sidebar__link--active" (click)="closeMenu()">
         <span class="material-symbols-outlined" aria-hidden="true">person</span>
         {{ locale.t('layout.applicant.profile') }}
       </a>
-      <a
-        routerLink="/applications"
-        routerLinkActive="sidebar__link--active"
-        (click)="closeMenu()"
-      >
+      <a routerLink="/applications" routerLinkActive="sidebar__link--active" (click)="closeMenu()">
         <span class="material-symbols-outlined" aria-hidden="true">
           description
         </span>
         {{ locale.t('layout.applicant.applications') }}
       </a>
-      <a
-        routerLink="/applicant/notifications"
-        routerLinkActive="sidebar__link--active"
-        (click)="closeMenu()"
-      >
+      <a routerLink="/applicant/notifications" routerLinkActive="sidebar__link--active" (click)="closeMenu()">
         <span class="material-symbols-outlined" aria-hidden="true">
           notifications
         </span>
         {{ locale.t('layout.applicant.notifications') }}
       </a>
+      <!-- <a routerLink="/applicant/documents" routerLinkActive="sidebar__link--active" (click)="closeMenu()">
+        <span class="material-symbols-outlined" aria-hidden="true">
+          folder
+        </span>
+        {{ locale.t('layout.applicant.documents') }}
+      </a> -->
     </nav>
 
     <div class="sidebar__account">
@@ -59,31 +49,18 @@
   </aside>
 
   @if (menuOpen()) {
-    <button
-      class="sidebar-backdrop"
-      type="button"
-      [attr.aria-label]="locale.t('layout.closeNavigation')"
-      (click)="closeMenu()"
-    ></button>
+  <button class="sidebar-backdrop" type="button" [attr.aria-label]="locale.t('layout.closeNavigation')"
+    (click)="closeMenu()"></button>
   }
 
   <section class="workspace">
     <header class="topbar">
-      <button
-        class="menu-button"
-        type="button"
-        [attr.aria-expanded]="menuOpen()"
-        [attr.aria-label]="locale.t('layout.openNavigation')"
-        (click)="menuOpen.set(!menuOpen())"
-      >
+      <button class="menu-button" type="button" [attr.aria-expanded]="menuOpen()"
+        [attr.aria-label]="locale.t('layout.openNavigation')" (click)="menuOpen.set(!menuOpen())">
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
       <span class="topbar__title">{{ locale.t('app.name') }}</span>
-      <button
-        class="topbar__language"
-        type="button"
-        (click)="locale.toggle()"
-      >
+      <button class="topbar__language" type="button" (click)="locale.toggle()">
         <span class="material-symbols-outlined" aria-hidden="true">language</span>
         {{ locale.t('common.language') }}
       </button>

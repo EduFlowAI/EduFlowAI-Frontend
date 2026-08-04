@@ -9,20 +9,23 @@ import {
   SubmitPackageResponse,
   UploadDocumentResponse,
 } from '../models/Document.model';
+import { environment } from '../../../../../environments/environment.development';
+
 
 @Injectable()
 export class DocumentsApi {
   private readonly http = inject(HttpClient);
+  private readonly baseUrl = environment.apiUrl;
 
   getRequiredDocumentTypes(applicationId: string): Observable<RequiredDocumentsResponse> {
     return this.http.get<RequiredDocumentsResponse>(
-      `/api/applications/${applicationId}/documents/required`
+      `${this.baseUrl}/applications/${applicationId}/documents/required`
     );
   }
 
   getDocuments(applicationId: string): Observable<{ documents: ApplicantDocumentDto[] }> {
     return this.http.get<{ documents: ApplicantDocumentDto[] }>(
-      `/api/applications/${applicationId}/documents`
+      `${this.baseUrl}/applications/${applicationId}/documents`
     );
   }
 
@@ -32,19 +35,25 @@ export class DocumentsApi {
     file: File
   ): Observable<UploadDocumentResponse> {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('documentType', documentType.toString());
+    formData.append('File', file);
+    formData.append('DocumentType', documentType.toString());
 
     return this.http.post<UploadDocumentResponse>(
-      `/api/applications/${applicationId}/documents`,
+      `${this.baseUrl}/applications/${applicationId}/documents`,
       formData
     );
   }
 
   submitPackage(applicationId: string): Observable<SubmitPackageResponse> {
     return this.http.post<SubmitPackageResponse>(
-      `/api/applications/${applicationId}/documents/submit`,
+      `${this.baseUrl}/applications/${applicationId}/documents/submit`,
       null
     );
+  }
+
+  downloadFile(documentId: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/documents/${documentId}/file`, {
+      responseType: 'blob',
+    });
   }
 }

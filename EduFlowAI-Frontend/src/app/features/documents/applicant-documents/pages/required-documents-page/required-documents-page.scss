@@ -60,6 +60,19 @@
         background: var(--red-100, #ffe2e3);
     }
 
+    &__error-retry {
+        margin-left: auto;
+    }
+
+    &__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 3rem 1rem;
+        text-align: center;
+    }
+
     &__grid {
         display: grid;
         grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -112,6 +125,10 @@
         border-color: var(--red-700, #b4232d);
     }
 
+    &--skeleton {
+        gap: 0.75rem;
+    }
+
     &__header {
         display: flex;
         align-items: flex-start;
@@ -142,6 +159,7 @@
     &__actions {
         display: flex;
         justify-content: flex-end;
+        gap: 1rem;
     }
 }
 
@@ -211,5 +229,41 @@
         background: var(--border, #d9e0e8);
         color: #8f97a3;
         cursor: not-allowed;
+    }
+}
+
+.skeleton-line {
+    border-radius: 6px;
+    background: linear-gradient(90deg,
+            var(--border, #d9e0e8) 25%,
+            color-mix(in srgb, var(--border, #d9e0e8) 50%, white) 50%,
+            var(--border, #d9e0e8) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+
+    &--title {
+        height: 20px;
+        width: 60%;
+    }
+
+    &--body {
+        height: 80px;
+        width: 100%;
+    }
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-line {
+        animation: none;
     }
 }

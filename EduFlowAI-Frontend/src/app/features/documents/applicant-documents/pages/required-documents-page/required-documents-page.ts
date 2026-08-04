@@ -6,25 +6,28 @@ import {
   Component,
   Input,
   OnInit,
+  ViewChild,
   inject,
   signal,
 } from '@angular/core';
-import { LucideAngularModule, CircleCheck, RotateCcw, TriangleAlert, Info } from 'lucide-angular';
+import { LucideAngularModule, CircleCheck, RotateCcw, TriangleAlert, Info, Eye } from 'lucide-angular';
 
 import { ApplicantDocumentsStore } from '../../data-access/applicant-documents.store';
 import { DocumentsApi } from '../../data-access/documents.api';
 import {
+  ApplicantDocumentDto,
   DOCUMENT_TYPE_LABELS,
   DocumentStatus,
   DocumentType,
 } from '../../models/Document.model';
 import { FileDropzone } from '../../../../../shared/ui/file-dropzone/file-dropzone';
 import { UploadProgress } from '../../../../../shared/ui/upload-progress/upload-progress';
+import { SecureFileViewer } from '../../../../../shared/ui/secure-file-viewer/secure-file-viewer';
 
 @Component({
   selector: 'app-required-documents-page',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, FileDropzone, UploadProgress],
+  imports: [CommonModule, LucideAngularModule, FileDropzone, UploadProgress, SecureFileViewer],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Route-scoped: fresh store per navigation into this feature, not a singleton.
   providers: [DocumentsApi, ApplicantDocumentsStore],
@@ -35,6 +38,8 @@ export class RequiredDocumentsPage implements OnInit {
   /** Bound from the :applicationId route param — requires withComponentInputBinding() in app.config.ts */
   @Input({ required: true }) applicationId!: string;
 
+  @ViewChild(SecureFileViewer) private viewer!: SecureFileViewer;
+
   protected readonly store = inject(ApplicantDocumentsStore);
 
   protected readonly DocumentStatus = DocumentStatus;
@@ -44,9 +49,21 @@ export class RequiredDocumentsPage implements OnInit {
   protected readonly RotateCcwIcon = RotateCcw;
   protected readonly TriangleAlertIcon = TriangleAlert;
   protected readonly InfoIcon = Info;
+  protected readonly EyeIcon = Eye;
+
+  /** Bound to SecureFileViewer's fileFetcher input. */
+  protected readonly fetchFile = (documentId: string) => this.store.downloadFile(documentId);
 
   ngOnInit(): void {
     this.store.load(this.applicationId);
+  }
+
+  protected retry(): void {
+    this.store.load(this.applicationId);
+  }
+
+  protected viewFile(doc: ApplicantDocumentDto): void {
+    this.viewer.open(doc.id, doc.originalFileName);
   }
 
   /** Document types whose card currently shows the dropzone in place of the file info (Replace clicked). */

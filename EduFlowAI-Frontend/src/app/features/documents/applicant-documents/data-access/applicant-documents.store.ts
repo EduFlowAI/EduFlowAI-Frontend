@@ -121,4 +121,9 @@ export class ApplicantDocumentsStore {
         const httpError = err as { error?: { error?: string } };
         return httpError?.error?.error ?? 'Something went wrong. Please try again.';
     }
+
+    /** Passthrough for SecureFileViewer's fileFetcher input — keeps the API service private to this store. */
+    downloadFile(documentId: string) {
+        return this.api.downloadFile(documentId);
+    }
 }
