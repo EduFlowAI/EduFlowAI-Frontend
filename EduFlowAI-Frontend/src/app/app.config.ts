@@ -8,6 +8,7 @@ import {
 } from '@angular/common/http';
 import {
   provideRouter,
+  withComponentInputBinding,
   withInMemoryScrolling,
 } from '@angular/router';
 
@@ -28,6 +29,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideRouter(
       routes,
+      withComponentInputBinding(),
       withInMemoryScrolling({
         anchorScrolling: 'enabled',
         scrollPositionRestoration: 'enabled',

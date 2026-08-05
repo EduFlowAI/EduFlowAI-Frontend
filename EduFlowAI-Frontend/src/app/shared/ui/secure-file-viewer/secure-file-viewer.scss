@@ -1,150 +1,109 @@
-:host,
-.file-viewer {
-  display: block;
-  height: 100%;
-}
+// shared/ui/secure-file-viewer/secure-file-viewer.scss
 
-.file-viewer {
-  position: relative;
-  min-height: 620px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--surface-soft);
-  box-shadow: var(--shadow-sm);
-}
-
-.viewer-toolbar {
-  position: absolute;
-  z-index: 2;
-  inset-block-start: 18px;
-  inset-inline-start: 18px;
-  display: flex;
-  gap: 6px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface-raised);
-  padding: 6px;
-  box-shadow: var(--shadow-sm);
-}
-
-.viewer-toolbar button,
-.viewer-toolbar a {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  border: 1px solid transparent;
-  border-radius: 11px;
-  background: transparent;
-  color: var(--heading);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.viewer-toolbar button:hover,
-.viewer-toolbar a:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-
-.viewer-canvas {
-  display: grid;
-  height: 100%;
-  min-height: 620px;
-  place-items: center;
-  overflow: auto;
-  padding: 76px 24px 24px;
-}
-
-img,
-iframe {
-  max-width: 100%;
-  transform-origin: center;
-  transition: transform 0.2s ease;
-}
-
-img {
-  max-height: 540px;
-  border-radius: 10px;
-  object-fit: contain;
-  box-shadow: var(--shadow-md);
-}
-
-iframe {
-  width: 100%;
-  height: 520px;
-  border: 0;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: var(--shadow-md);
-}
-
-.unsupported-file {
-  display: grid;
-  max-width: 360px;
-  justify-items: center;
-  gap: 14px;
-  color: var(--text-soft);
-  text-align: center;
-}
-
-.unsupported-file > .material-symbols-outlined {
-  display: grid;
-  width: 60px;
-  height: 60px;
-  place-items: center;
-  border-radius: 18px;
-  background: var(--blue-100);
-  color: var(--navy-700);
-  font-size: 1.8rem;
-}
-
-.unsupported-file p {
-  margin: 0;
-}
-
-.download-button {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  border-radius: 11px;
-  background: var(--navy-900);
-  padding-inline: 18px;
-  color: #fff;
-  font-weight: 650;
-  text-decoration: none;
-}
-
-@media (max-width: 55rem) {
-  .file-viewer,
-  .viewer-canvas {
-    min-height: 520px;
-  }
-}
-
-@media (max-width: 40.625rem) {
-  .file-viewer,
-  .viewer-canvas {
-    min-height: 430px;
-  }
-
-  .viewer-toolbar {
-    inset-block-start: 14px;
-    inset-inline: 14px;
+.viewer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
     justify-content: center;
-  }
-
-  .viewer-canvas {
-    padding: 72px 14px 14px;
-  }
+    padding: 1.5rem;
+    background: rgba(1, 24, 47, 0.55); // navy-950 tint, design.md
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
-  }
+.viewer-dialog {
+    display: flex;
+    flex-direction: column;
+    width: min(900px, 100%);
+    max-height: 90vh;
+    border-radius: 16px; // --radius-md
+    background: var(--surface-raised, #fff);
+    box-shadow: 0 20px 40px rgba(2, 36, 72, 0.25);
+    overflow: hidden;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        border-bottom: 1px solid var(--border, #d9e0e8);
+    }
+
+    &__close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.375rem;
+        border: none;
+        border-radius: 999px;
+        background: none;
+        color: var(--navy-900, #022448);
+        cursor: pointer;
+
+        &:hover {
+            background: var(--border, #d9e0e8);
+        }
+    }
+
+    &__body {
+        flex: 1;
+        overflow: auto;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    &__image {
+        max-width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+        border-radius: 10px;
+    }
+}
+
+// ── Inline / embedded mode ──
+
+.inline-viewer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 620px;
+    border: 1px solid var(--border, #d9e0e8);
+    border-radius: 16px;
+    background: var(--surface, #fff);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06));
+    overflow: hidden;
+
+    // Let the pdf viewer fill the entire pane
+    ngx-extended-pdf-viewer {
+        width: 100%;
+        height: 100%;
+    }
+
+    &__image {
+        max-width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+        border-radius: 10px;
+    }
+
+    &__unsupported {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 2rem;
+        color: var(--text-soft, #5B6472);
+        text-align: center;
+    }
 }
