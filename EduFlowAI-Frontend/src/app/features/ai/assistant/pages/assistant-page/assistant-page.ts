@@ -8,6 +8,7 @@ import {
   RecommendationQuestionnaireProgress,
 } from '../../models/assistant.models';
 import { AssistantApiService } from '../../services/assistant-api.service';
+import { AssistantLauncherService } from '../../services/assistant-launcher.service';
 
 @Component({
   selector: 'app-assistant-page',
@@ -17,11 +18,13 @@ import { AssistantApiService } from '../../services/assistant-api.service';
 })
 export class AssistantPage {
   private readonly assistantApi = inject(AssistantApiService);
+  private readonly assistantLauncher =
+    inject(AssistantLauncherService);
 
   readonly messages = signal<ChatMessage[]>([]);
   readonly isSending = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly isOpen = signal(false);
+  readonly isOpen = this.assistantLauncher.isOpen;
   readonly isMaximized = signal(false);
   readonly activeRecommendationQuestionKey =
     signal<RecommendationQuestionKey | null>(null);
@@ -81,7 +84,7 @@ export class AssistantPage {
   }
 
   toggleChat(): void {
-    this.isOpen.update(value => !value);
+    this.assistantLauncher.toggle();
   }
 
   toggleMaximize(): void {
@@ -89,7 +92,7 @@ export class AssistantPage {
   }
 
   closeChat(): void {
-    this.isOpen.set(false);
+    this.assistantLauncher.close();
     this.isMaximized.set(false);
   }
 

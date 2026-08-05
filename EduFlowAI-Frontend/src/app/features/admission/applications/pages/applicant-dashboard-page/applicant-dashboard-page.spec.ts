@@ -25,7 +25,7 @@ describe('ApplicantDashboardPage', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              paramMap: convertToParamMap({ id: 'application-1' }),
+              paramMap: convertToParamMap({ applicationId: 'application-1' }),
             },
           },
         },

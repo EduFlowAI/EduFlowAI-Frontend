@@ -8,10 +8,10 @@ import {
   AdmissionCycleDto,
   ApiResult,
   BranchDto,
-  ConfigureOfferingsRequest,
   CreateAdmissionCycleRequest,
   CreateBranchRequest,
   CreateInstitutionRequest,
+  CreateOfferingRequest,
   CreateProgramRequest,
   CreateTrackRequest,
   CycleEligibilityRuleDto,
@@ -22,6 +22,7 @@ import {
   UpdateBranchRequest,
   UpdateCycleEligibilityRuleRequest,
   UpdateInstitutionRequest,
+  UpdateOfferingRequest,
   UpdateProgramDocumentRequirementsRequest,
   UpdateProgramRequest,
   UpdateTrackRequest,
@@ -138,13 +139,30 @@ export class AdmissionAdminApiService {
     );
   }
 
-  configureOfferings(
+  createOffering(
     cycleId: string,
-    request: ConfigureOfferingsRequest,
-  ): Observable<readonly OfferingDto[]> {
-    return this.post<OfferingDto[]>(
+    request: CreateOfferingRequest,
+  ): Observable<OfferingDto> {
+    return this.post<OfferingDto>(
       `/api/admin/cycles/${cycleId}/offerings`,
       request,
+    );
+  }
+
+  updateOffering(
+    cycleId: string,
+    offeringId: string,
+    request: UpdateOfferingRequest,
+  ): Observable<OfferingDto> {
+    return this.put<OfferingDto>(
+      `/api/admin/cycles/${cycleId}/offerings/${offeringId}`,
+      request,
+    );
+  }
+
+  deleteOffering(cycleId: string, offeringId: string): Observable<boolean> {
+    return this.delete<boolean>(
+      `/api/admin/cycles/${cycleId}/offerings/${offeringId}`,
     );
   }
 
@@ -177,6 +195,12 @@ export class AdmissionAdminApiService {
   private put<T>(url: string, body: unknown): Observable<T> {
     return this.http
       .put<ApiResult<T>>(url, body)
+      .pipe(map((response) => this.unwrap(response)));
+  }
+
+  private delete<T>(url: string): Observable<T> {
+    return this.http
+      .delete<ApiResult<T>>(url)
       .pipe(map((response) => this.unwrap(response)));
   }
 

@@ -2,35 +2,43 @@ import { Routes } from '@angular/router';
 import { ApplicationsStore } from './data-access/applications.store';
 
 export default [
-    {
-      path: '',
-      // Here we provide the Store. It will be available to all children routes,
-      // but destroyed when the user leaves the applications feature!
-      providers: [ApplicationsStore], 
-      children: [
-        // Route for starting a new application
-        {
-          path: 'create',
-          loadComponent: () => 
-            import('./pages/application-create-page/application-create-page')
+  {
+    path: '',
+    // Here we provide the Store. It will be available to all children routes,
+    // but destroyed when the user leaves the applications feature!
+    providers: [ApplicationsStore],
+    children: [
+      // Route for starting a new application
+      {
+        path: 'create',
+        loadComponent: () =>
+          import('./pages/application-create-page/application-create-page')
             .then(c => c.ApplicationCreatePage),
-          title: 'Start Application'
-        },
-        // Route for viewing my applications
-        {
-          path: '',
-          loadComponent: () =>
-            import('./pages/my-applications-page/my-applications-page')
+        title: 'Start Application'
+      },
+      // Route for viewing my applications
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/my-applications-page/my-applications-page')
             .then(c => c.MyApplicationsPage),
-          title: 'My Applications'
-        },
-        // Route for selecting preferences
-        {
-          path: ':id/preferences',
-          loadComponent: () => 
-            import('./pages/preference-selection-page/preference-selection-page')
+        title: 'My Applications'
+      },
+      // Route for selecting preferences
+      {
+        path: ':id/preferences',
+        loadComponent: () =>
+          import('./pages/preference-selection-page/preference-selection-page')
             .then(c => c.PreferenceSelectionPage),
           title: 'Select Preferences'
+        },
+        // Route for the applicant-documents feature (owned by Mansy — features/documents/applicant-documents/)
+        {
+          path: ':id/documents',
+          loadChildren: () =>
+            import('../../documents/applicant-documents/routes')
+              .then(r => r.APPLICANT_DOCUMENTS_ROUTES),
+          title: 'Document Uploads'
         },
         // The dynamic ':id' route MUST be at the very bottom
         {
@@ -67,4 +75,3 @@ export default [
       ]
     }    
 ] as Routes;
-

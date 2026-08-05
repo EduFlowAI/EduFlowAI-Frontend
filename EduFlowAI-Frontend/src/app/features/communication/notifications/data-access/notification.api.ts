@@ -63,7 +63,9 @@ export class NotificationApi {
   }
 }
 
-function normalizeNotificationType(value: NotificationType | number | string): NotificationType {
+export function normalizeNotificationType(
+  value: NotificationType | number | string,
+): NotificationType {
   if (typeof value === 'number') {
     return TYPES_BY_VALUE[value] ?? 'None';
   }
