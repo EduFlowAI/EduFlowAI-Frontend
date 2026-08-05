@@ -55,28 +55,53 @@ describe('AdmissionAdminApiService', () => {
     request.flush({ isSuccess: true, data: [], statusCode: 200, message: '' });
   });
 
-  it('posts the complete offerings collection for a cycle', () => {
+  it('creates one offering without resending existing offerings', () => {
     const cycleId = '22222222-2222-2222-2222-222222222222';
     const body = {
-      offerings: [
-        {
-          trackId: '33333333-3333-3333-3333-333333333333',
-          branchId: '44444444-4444-4444-4444-444444444444',
-          capacity: 40,
-        },
-      ],
+      trackId: '33333333-3333-3333-3333-333333333333',
+      branchId: '44444444-4444-4444-4444-444444444444',
+      capacity: 40,
     };
 
-    service.configureOfferings(cycleId, body).subscribe();
+    service.createOffering(cycleId, body).subscribe();
 
     const request = http.expectOne(`/api/admin/cycles/${cycleId}/offerings`);
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(body);
-    request.flush({ isSuccess: true, data: [], statusCode: 200, message: '' });
+    request.flush({ isSuccess: true, data: {}, statusCode: 201, message: '' });
+  });
+
+  it('updates only the selected offering capacity', () => {
+    const cycleId = '22222222-2222-2222-2222-222222222222';
+    const offeringId = '55555555-5555-5555-5555-555555555555';
+    const body = { capacity: 75 };
+
+    service.updateOffering(cycleId, offeringId, body).subscribe();
+
+    const request = http.expectOne(
+      `/api/admin/cycles/${cycleId}/offerings/${offeringId}`,
+    );
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual(body);
+    request.flush({ isSuccess: true, data: {}, statusCode: 200, message: '' });
+  });
+
+  it('deletes only the selected offering', () => {
+    const cycleId = '22222222-2222-2222-2222-222222222222';
+    const offeringId = '55555555-5555-5555-5555-555555555555';
+
+    service.deleteOffering(cycleId, offeringId).subscribe();
+
+    const request = http.expectOne(
+      `/api/admin/cycles/${cycleId}/offerings/${offeringId}`,
+    );
+    expect(request.request.method).toBe('DELETE');
+    expect(request.request.body).toBeNull();
+    request.flush({ isSuccess: true, data: true, statusCode: 200, message: '' });
   });
 
   it('activates a cycle with the expected endpoint', () => {
-    const cycleId = '55555555-5555-5555-5555-555555555555';
+    const cycleId = '66666666-6666-6666-6666-666666666666';
 
     service.activateCycle(cycleId).subscribe();
 

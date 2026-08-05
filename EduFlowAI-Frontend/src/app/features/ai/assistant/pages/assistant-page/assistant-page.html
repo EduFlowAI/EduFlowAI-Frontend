@@ -30,7 +30,7 @@
               : 'Maximize chat'
           "
         >
-          {{ isMaximized() ? '🗗' : '□' }}
+          {{ isMaximized() ? '🗗' : '⛶' }}
         </button>
 
         <button
@@ -224,7 +224,7 @@
 
 <button
   type="button"
-  class="chat-launcher"
+  class="chat-fab"
   (click)="toggleChat()"
   [attr.aria-label]="
     isOpen()
@@ -232,5 +232,16 @@
       : 'Open admission assistant'
   "
 >
-  {{ isOpen() ? '✕' : '💬' }}
+  <svg
+    width="23"
+    height="23"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    aria-hidden="true"
+  >
+    <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"></path>
+    <path d="M8 9h8M8 13h5"></path>
+  </svg>
 </button>

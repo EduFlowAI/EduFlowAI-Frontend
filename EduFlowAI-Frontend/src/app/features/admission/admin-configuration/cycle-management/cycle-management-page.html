@@ -162,8 +162,8 @@
             <small>{{ copy.text('Offerings', 'عروض المسارات') }}</small>
           </article>
           <article>
-            <strong>{{ cycle.offerings.length ? cycle.offerings[0].capacity : 0 }}</strong>
-            <small>{{ copy.text('First capacity', 'سعة أول عرض') }}</small>
+            <strong>{{ cycleCapacity(cycle) }}</strong>
+            <small>{{ copy.text('Total capacity', 'إجمالي السعة') }}</small>
           </article>
           <article>
             <strong>{{ cycle.eligibilityRule ? copy.text('Ready', 'محددة') : copy.text('Missing', 'ناقصة') }}</strong>
@@ -243,9 +243,9 @@
         <div class="panel-heading">
           <div>
             <h2>{{ copy.text('Track / branch offerings', 'عروض المسارات والفروع') }}</h2>
-            <p>{{ copy.text('Only these combinations appear in the public catalog.', 'هذه التركيبات فقط هي التي تظهر في الكتالوج العام.') }}</p>
+            <p>{{ copy.text('Each add, capacity update, or removal is saved separately.', 'كل إضافة أو تعديل للسعة أو حذف يتم حفظه بشكل منفصل.') }}</p>
           </div>
-          <span class="count-badge">{{ offeringInputs().length }}</span>
+          <span class="count-badge">{{ cycle.offerings.length }}</span>
         </div>
 
         <form [formGroup]="offeringForm" (ngSubmit)="addOffering()">
@@ -276,20 +276,42 @@
           <div class="form-actions">
             <button class="secondary-button" type="submit" [disabled]="busy() || cycle.status !== CycleStatus.Draft">
               <span class="material-symbols-outlined" aria-hidden="true">add</span>
-              {{ copy.text('Add offering', 'إضافة عرض') }}
+              {{ copy.text('Add and save offering', 'إضافة العرض وحفظه') }}
             </button>
           </div>
         </form>
 
         <div class="offering-list">
-          @for (offering of offeringInputs(); track $index) {
+          @for (offering of cycle.offerings; track offering.id) {
             <article class="list-row">
               <div class="list-row__main">
-                <strong>{{ trackName(offering.trackId) }}</strong>
-                <small>{{ branchName(offering.branchId) }} · {{ offering.capacity }} {{ copy.text('seats', 'مقعدًا') }}</small>
+                <strong>{{ offering.trackName }}</strong>
+                <small>{{ offering.branchName }}</small>
               </div>
               <div class="list-row__meta">
-                <button class="text-button" type="button" (click)="removeOffering($index)" [disabled]="cycle.status !== CycleStatus.Draft">
+                <input
+                  #capacityInput
+                  type="number"
+                  min="1"
+                  [value]="offering.capacity"
+                  [disabled]="busy() || cycle.status !== CycleStatus.Draft"
+                  [attr.aria-label]="copy.text('Offering capacity', 'سعة العرض')"
+                />
+                <button
+                  class="text-button"
+                  type="button"
+                  (click)="updateOfferingCapacity(offering, capacityInput.value)"
+                  [disabled]="busy() || cycle.status !== CycleStatus.Draft"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">save</span>
+                  {{ copy.text('Update capacity', 'تحديث السعة') }}
+                </button>
+                <button
+                  class="text-button"
+                  type="button"
+                  (click)="removeOffering(offering)"
+                  [disabled]="busy() || cycle.status !== CycleStatus.Draft"
+                >
                   <span class="material-symbols-outlined" aria-hidden="true">delete</span>
                   {{ copy.text('Remove', 'حذف') }}
                 </button>
@@ -301,13 +323,6 @@
               <p>{{ copy.text('Add at least one track and branch offering.', 'أضف عرضًا واحدًا على الأقل لمسار وفرع.') }}</p>
             </div>
           }
-        </div>
-
-        <div class="form-actions">
-          <button class="primary-button" type="button" (click)="saveOfferings()" [disabled]="busy() || cycle.status !== CycleStatus.Draft || offeringInputs().length === 0">
-            <span class="material-symbols-outlined" aria-hidden="true">save</span>
-            {{ copy.text('Save offerings', 'حفظ العروض') }}
-          </button>
         </div>
       </section>
     </div>
