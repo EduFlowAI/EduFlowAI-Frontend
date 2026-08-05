@@ -19,7 +19,7 @@ import {
   BranchDto,
   CumulativeGrade,
   CycleStatus,
-  OfferingInput,
+  OfferingDto,
   ProgramDto,
 } from '../models/admission-admin.model';
 import { admissionAdminErrorMessage } from '../utils/admission-admin-error.util';
@@ -43,7 +43,6 @@ export class CycleManagementPage implements OnInit {
   protected readonly branches = signal<readonly BranchDto[]>([]);
   protected readonly cycles = signal<readonly AdmissionCycleDto[]>([]);
   protected readonly selectedCycleId = signal('');
-  protected readonly offeringInputs = signal<OfferingInput[]>([]);
   protected readonly loading = signal(true);
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -202,7 +201,6 @@ export class CycleManagementPage implements OnInit {
     const cycle = this.cycles().find((item) => item.id === cycleId);
 
     if (!cycle) {
-      this.offeringInputs.set([]);
       return;
     }
 
@@ -213,13 +211,6 @@ export class CycleManagementPage implements OnInit {
       maxYearsSinceGraduation: rule?.maxYearsSinceGraduation ?? 5,
       minGrade: rule?.minGrade ?? CumulativeGrade.Good,
     });
-    this.offeringInputs.set(
-      cycle.offerings.map((offering) => ({
-        trackId: offering.trackId,
-        branchId: offering.branchId,
-        capacity: offering.capacity,
-      })),
-    );
 
     const tracks = this.tracks().filter(
       (track) => track.programId === cycle.programId && track.isActive,
@@ -275,14 +266,19 @@ export class CycleManagementPage implements OnInit {
 
   protected addOffering(): void {
     this.clearMessages();
+    const cycle = this.selectedCycle();
 
-    if (this.offeringForm.invalid) {
+    if (
+      !cycle ||
+      cycle.status !== CycleStatus.Draft ||
+      this.offeringForm.invalid
+    ) {
       this.offeringForm.markAllAsTouched();
       return;
     }
 
     const value = this.offeringForm.getRawValue();
-    const duplicate = this.offeringInputs().some(
+    const duplicate = cycle.offerings.some(
       (offering) =>
         offering.trackId === value.trackId &&
         offering.branchId === value.branchId,
@@ -298,36 +294,9 @@ export class CycleManagementPage implements OnInit {
       return;
     }
 
-    this.offeringInputs.update((offerings) => [...offerings, value]);
-  }
-
-  protected removeOffering(index: number): void {
-    this.offeringInputs.update((offerings) =>
-      offerings.filter((_, currentIndex) => currentIndex !== index),
-    );
-  }
-
-  protected saveOfferings(): void {
-    this.clearMessages();
-    const cycle = this.selectedCycle();
-
-    if (
-      !cycle ||
-      cycle.status !== CycleStatus.Draft ||
-      this.offeringInputs().length === 0
-    ) {
-      this.error.set(
-        this.copy.text(
-          'Select a draft cycle and add at least one offering.',
-          'اختر دورة مسودة وأضف مسارًا وفرعًا واحدًا على الأقل.',
-        ),
-      );
-      return;
-    }
-
     this.busy.set(true);
     this.api
-      .configureOfferings(cycle.id, { offerings: this.offeringInputs() })
+      .createOffering(cycle.id, value)
       .pipe(
         finalize(() => this.busy.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -336,14 +305,103 @@ export class CycleManagementPage implements OnInit {
         next: () => {
           this.success.set(
             this.copy.text(
-              'Cycle offerings saved.',
-              'تم حفظ مسارات وفروع الدورة.',
+              'Offering added successfully.',
+              'تمت إضافة العرض بنجاح.',
             ),
           );
           this.load(cycle.id);
         },
         error: (error: unknown) =>
-          this.showError(error, 'Unable to save cycle offerings.'),
+          this.showError(error, 'Unable to add the offering.'),
+      });
+  }
+
+  protected updateOfferingCapacity(
+    offering: OfferingDto,
+    rawCapacity: string,
+  ): void {
+    this.clearMessages();
+    const cycle = this.selectedCycle();
+    const capacity = Number(rawCapacity);
+
+    if (
+      !cycle ||
+      cycle.status !== CycleStatus.Draft ||
+      !Number.isInteger(capacity) ||
+      capacity <= 0
+    ) {
+      this.error.set(
+        this.copy.text(
+          'Enter a positive whole-number capacity.',
+          'أدخل سعة صحيحة أكبر من صفر.',
+        ),
+      );
+      return;
+    }
+
+    if (capacity === offering.capacity) {
+      return;
+    }
+
+    this.busy.set(true);
+    this.api
+      .updateOffering(cycle.id, offering.id, { capacity })
+      .pipe(
+        finalize(() => this.busy.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.success.set(
+            this.copy.text(
+              'Offering capacity updated.',
+              'تم تحديث سعة العرض.',
+            ),
+          );
+          this.load(cycle.id);
+        },
+        error: (error: unknown) =>
+          this.showError(error, 'Unable to update the offering.'),
+      });
+  }
+
+  protected removeOffering(offering: OfferingDto): void {
+    this.clearMessages();
+    const cycle = this.selectedCycle();
+
+    if (!cycle || cycle.status !== CycleStatus.Draft) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      this.copy.text(
+        `Remove ${offering.trackName} from ${offering.branchName}?`,
+        `هل تريد حذف ${offering.trackName} من ${offering.branchName}؟`,
+      ),
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    this.busy.set(true);
+    this.api
+      .deleteOffering(cycle.id, offering.id)
+      .pipe(
+        finalize(() => this.busy.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.success.set(
+            this.copy.text(
+              'Offering removed successfully.',
+              'تم حذف العرض بنجاح.',
+            ),
+          );
+          this.load(cycle.id);
+        },
+        error: (error: unknown) =>
+          this.showError(error, 'Unable to remove the offering.'),
       });
   }
 
@@ -396,16 +454,6 @@ export class CycleManagementPage implements OnInit {
         'Cycle closed successfully.',
         'تم إغلاق الدورة بنجاح.',
       ),
-    );
-  }
-
-  protected trackName(trackId: string): string {
-    return this.tracks().find((track) => track.id === trackId)?.name ?? trackId;
-  }
-
-  protected branchName(branchId: string): string {
-    return (
-      this.branches().find((branch) => branch.id === branchId)?.name ?? branchId
     );
   }
 
