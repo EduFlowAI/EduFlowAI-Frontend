@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApplicationsStore } from '../../data-access/applications.store';
 import { StatusTimeline } from '../../../../../shared/ui/status-timeline/status-timeline';
+import { FinalResultCardComponent } from '../../ui/final-result-card.component/final-result-card.component';
 
 @Component({
   selector: 'app-applicant-dashboard-page',
   standalone: true,
-  imports: [CommonModule, StatusTimeline, RouterLink],
+  imports: [CommonModule, StatusTimeline, RouterLink, FinalResultCardComponent],
   templateUrl: './applicant-dashboard-page.html',
   styleUrl: './applicant-dashboard-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush     // Enforce OnPush change detection strategy for better performance
