@@ -179,14 +179,14 @@ export interface UpdateCycleEligibilityRuleRequest {
   minGrade: CumulativeGrade;
 }
 
-export interface OfferingInput {
+export interface CreateOfferingRequest {
   trackId: string;
   branchId: string;
   capacity: number;
 }
 
-export interface ConfigureOfferingsRequest {
-  offerings: OfferingInput[];
+export interface UpdateOfferingRequest {
+  capacity: number;
 }
 
 export interface AdminAdmissionDashboardDto {
