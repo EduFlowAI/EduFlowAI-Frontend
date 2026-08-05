@@ -55,6 +55,14 @@ export default [
             .then(c => c.ApplicationEditPage),
           title: 'Edit Application'
         },
+        // Route for the enrollment cheklist page of an admitted application
+        {
+          path: ':id/enrollment',
+          loadComponent: () => 
+            import('./../assessment/pages/enrollment-checklist-page/enrollment-checklist-page')
+            .then(c => c.EnrollmentChecklistPage),
+          title: 'Enrollment Checklist'
+        },
         // Other routes owned by Halim (like application-create-page) will go here
       ]
     }    
