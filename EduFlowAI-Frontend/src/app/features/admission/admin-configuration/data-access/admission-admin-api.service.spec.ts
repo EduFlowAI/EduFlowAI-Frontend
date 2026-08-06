@@ -26,10 +26,14 @@ describe('AdmissionAdminApiService', () => {
 
   afterEach(() => http.verify());
 
-  it('loads the Super Admin dashboard', () => {
-    service.getDashboard().subscribe();
+  it('loads the Super Admin dashboard for the selected program', () => {
+    const programId = '11111111-1111-1111-1111-111111111111';
 
-    const request = http.expectOne('/api/admin/dashboard');
+    service.getDashboard(programId).subscribe();
+
+    const request = http.expectOne(
+      `/api/admin/dashboard?programId=${programId}`,
+    );
     expect(request.request.method).toBe('GET');
     request.flush({ isSuccess: true, data: {}, statusCode: 200, message: '' });
   });
