@@ -30,32 +30,48 @@ export default [
         loadComponent: () =>
           import('./pages/preference-selection-page/preference-selection-page')
             .then(c => c.PreferenceSelectionPage),
-        title: 'Select Preferences'
-      },
-      // Route for the applicant-documents feature (owned by Mansy — features/documents/applicant-documents/)
-      {
-        path: ':id/documents',
-        loadChildren: () =>
-          import('../../documents/applicant-documents/routes')
-            .then(r => r.APPLICANT_DOCUMENTS_ROUTES),
-        title: 'Document Uploads'
-      },
-      // The dynamic ':id' route MUST be at the very bottom
-      {
-        path: ':id',  // Add ':' to make it a dynamic route parameter
-        // Lazy loading the standalone component
-        loadComponent: () => import('./pages/applicant-dashboard-page/applicant-dashboard-page')
-          .then(c => c.ApplicantDashboardPage),
-        title: 'Application Dashboard'
-      },
-      // Detailed status and document review page route
-      {
-        path: ':id/status',
-        loadComponent: () => import('./pages/application-status-page/application-status-page')
-          .then(c => c.ApplicationStatusPage),
-        title: 'Application Status Details'
-      }
-      // Other routes owned by Halim (like application-create-page) will go here
-    ]
-  }
+          title: 'Select Preferences'
+        },
+        // Route for the applicant-documents feature (owned by Mansy — features/documents/applicant-documents/)
+        {
+          path: ':id/documents',
+          loadChildren: () =>
+            import('../../documents/applicant-documents/routes')
+              .then(r => r.APPLICANT_DOCUMENTS_ROUTES),
+          title: 'Document Uploads'
+        },
+        // The dynamic ':id' route MUST be at the very bottom
+        {
+          path: ':id',  // Add ':' to make it a dynamic route parameter
+          // Lazy loading the standalone component
+          loadComponent: () => import('./pages/applicant-dashboard-page/applicant-dashboard-page')
+            .then(c => c.ApplicantDashboardPage),
+          title: 'Application Dashboard'
+        },
+        // Detailed status and document review page route
+        {
+          path: ':id/status',
+          loadComponent: () => import('./pages/application-status-page/application-status-page')
+            .then(c => c.ApplicationStatusPage),
+          title: 'Application Status Details'
+        },
+        // Route for editing an existing draft application
+        {
+          path: ':id/edit',
+          loadComponent: () => 
+            import('./pages/application-edit-page/application-edit-page')
+            .then(c => c.ApplicationEditPage),
+          title: 'Edit Application'
+        },
+        // Route for the enrollment cheklist page of an admitted application
+        {
+          path: ':id/enrollment',
+          loadComponent: () => 
+            import('./../assessment/pages/enrollment-checklist-page/enrollment-checklist-page')
+            .then(c => c.EnrollmentChecklistPage),
+          title: 'Enrollment Checklist'
+        },
+        // Other routes owned by Halim (like application-create-page) will go here
+      ]
+    }    
 ] as Routes;

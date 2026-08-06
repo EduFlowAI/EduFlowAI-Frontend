@@ -42,10 +42,6 @@
         </span>
       </div>
     </div>
-    <button class="bg-primary text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-DEFAULT hover:opacity-90 transition-opacity flex items-center gap-2">
-      <span class="material-symbols-outlined text-[18px]">contact_support</span>
-      Contact Support
-    </button>
   </div>
 
   <!-- Horizontal Stepper (Timeline) -->
@@ -54,6 +50,15 @@
     <!-- Compose the dumb component and pass the current status from the store -->
     <app-status-timeline [summary]="summary"></app-status-timeline>
   </div>
+
+  <!-- FINAL RESULT CARD INTEGRATION -->
+  @if (summary.currentStatus === 'Admitted' || summary.currentStatus === 'Waitlisted' || summary.currentStatus === 'NotSelected') {
+    <!-- Pass the currentApplicationId to the card component -->
+    <app-final-result-card 
+        [status]="summary.currentStatus"
+        [applicationId]="currentApplicationId">
+    </app-final-result-card>
+  }
 
   <!-- Summary Cards Row -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
