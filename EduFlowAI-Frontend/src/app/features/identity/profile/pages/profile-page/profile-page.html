@@ -427,15 +427,30 @@
                   <label for="university">
                     {{ copy().university }} <span aria-hidden="true">*</span>
                   </label>
-                  <input
+                  <select
                     id="university"
-                    type="text"
                     formControlName="university"
-                    autocomplete="organization"
                     [attr.aria-invalid]="
                       fieldMessages('university').length > 0
                     "
-                  />
+                  >
+                    <option value="" disabled>{{ copy().selectOption }}</option>
+                    @if (
+                      hasUnlistedAcademicOption(
+                        universities,
+                        form.controls.university.value
+                      )
+                    ) {
+                      <option [value]="form.controls.university.value">
+                        {{ form.controls.university.value }}
+                      </option>
+                    }
+                    @for (option of universities; track option.value) {
+                      <option [value]="option.value">
+                        {{ academicOptionLabel(option) }}
+                      </option>
+                    }
+                  </select>
                   @for (
                     message of fieldMessages('university');
                     track message
@@ -448,14 +463,30 @@
                   <label for="faculty">
                     {{ copy().faculty }} <span aria-hidden="true">*</span>
                   </label>
-                  <input
+                  <select
                     id="faculty"
-                    type="text"
                     formControlName="faculty"
                     [attr.aria-invalid]="
                       fieldMessages('faculty').length > 0
                     "
-                  />
+                  >
+                    <option value="" disabled>{{ copy().selectOption }}</option>
+                    @if (
+                      hasUnlistedAcademicOption(
+                        faculties,
+                        form.controls.faculty.value
+                      )
+                    ) {
+                      <option [value]="form.controls.faculty.value">
+                        {{ form.controls.faculty.value }}
+                      </option>
+                    }
+                    @for (option of faculties; track option.value) {
+                      <option [value]="option.value">
+                        {{ academicOptionLabel(option) }}
+                      </option>
+                    }
+                  </select>
                   @for (
                     message of fieldMessages('faculty');
                     track message
@@ -468,15 +499,30 @@
                   <label for="degree-level">
                     {{ copy().degreeLevel }} <span aria-hidden="true">*</span>
                   </label>
-                  <input
+                  <select
                     id="degree-level"
-                    type="text"
                     formControlName="degreeLevel"
-                    placeholder="Bachelor's degree"
                     [attr.aria-invalid]="
                       fieldMessages('degreeLevel').length > 0
                     "
-                  />
+                  >
+                    <option value="" disabled>{{ copy().selectOption }}</option>
+                    @if (
+                      hasUnlistedAcademicOption(
+                        degreeLevels,
+                        form.controls.degreeLevel.value
+                      )
+                    ) {
+                      <option [value]="form.controls.degreeLevel.value">
+                        {{ form.controls.degreeLevel.value }}
+                      </option>
+                    }
+                    @for (option of degreeLevels; track option.value) {
+                      <option [value]="option.value">
+                        {{ academicOptionLabel(option) }}
+                      </option>
+                    }
+                  </select>
                   @for (
                     message of fieldMessages('degreeLevel');
                     track message
@@ -489,14 +535,30 @@
                   <label for="major">
                     {{ copy().major }} <span aria-hidden="true">*</span>
                   </label>
-                  <input
+                  <select
                     id="major"
-                    type="text"
                     formControlName="major"
                     [attr.aria-invalid]="
                       fieldMessages('major').length > 0
                     "
-                  />
+                  >
+                    <option value="" disabled>{{ copy().selectOption }}</option>
+                    @if (
+                      hasUnlistedAcademicOption(
+                        majors,
+                        form.controls.major.value
+                      )
+                    ) {
+                      <option [value]="form.controls.major.value">
+                        {{ form.controls.major.value }}
+                      </option>
+                    }
+                    @for (option of majors; track option.value) {
+                      <option [value]="option.value">
+                        {{ academicOptionLabel(option) }}
+                      </option>
+                    }
+                  </select>
                   @for (
                     message of fieldMessages('major');
                     track message

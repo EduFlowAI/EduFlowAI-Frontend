@@ -8,11 +8,14 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import {
   ApplicantProfile,
   UpdateApplicantProfileRequest,
 } from '../models/profile.model';
 import { ProfileApi } from './profile.api';
+
+const apiBaseUrl = 'https://identity.example.test/api';
 
 const profile: ApplicantProfile = {
   userId: 'user-1',
@@ -49,6 +52,7 @@ describe('ProfileApi', () => {
     TestBed.configureTestingModule({
       providers: [
         ProfileApi,
+        { provide: RuntimeConfig, useValue: { apiBaseUrl } },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
       ],
@@ -60,12 +64,12 @@ describe('ProfileApi', () => {
 
   afterEach(() => http.verify());
 
-  it('loads the applicant profile through the relative API route', () => {
+  it('loads the applicant profile through the configured API route', () => {
     let result: ApplicantProfile | undefined;
 
     api.getProfile().subscribe((value) => (result = value));
 
-    const request = http.expectOne('/api/profile');
+    const request = http.expectOne(`${apiBaseUrl}/profile`);
     expect(request.request.method).toBe('GET');
     request.flush(profile);
     expect(result).toEqual(profile);
@@ -95,7 +99,7 @@ describe('ProfileApi', () => {
 
     api.updateProfile(body).subscribe();
 
-    const request = http.expectOne('/api/profile');
+    const request = http.expectOne(`${apiBaseUrl}/profile`);
     expect(request.request.method).toBe('PUT');
     expect(request.request.body).toEqual(body);
     request.flush({ ...profile, ...body, isComplete: true });

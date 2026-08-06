@@ -1,5 +1,6 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 
 import { LocaleStore } from '../../../../../core/i18n/locale.store';
 import { ProfileStore } from '../../data-access/profile.store';
@@ -41,13 +42,22 @@ describe('ProfilePage', () => {
   let fixture: ComponentFixture<ProfilePage>;
   let component: ProfilePage;
   let save: ReturnType<typeof vi.fn>;
+  let clearSaveFeedback: ReturnType<typeof vi.fn>;
+  let navigateByUrl: ReturnType<typeof vi.fn>;
+  let profile: WritableSignal<ApplicantProfile | null>;
+  let isLocked: WritableSignal<boolean>;
+  let savedAt: WritableSignal<number | null>;
 
   beforeEach(async () => {
     save = vi.fn();
     const validationErrors = signal<
       Partial<Record<ProfileFieldName, string[]>>
     >({});
-    const profile = signal<ApplicantProfile | null>(lockedProfile);
+    profile = signal<ApplicantProfile | null>(lockedProfile);
+    isLocked = signal(true);
+    savedAt = signal<number | null>(null);
+    clearSaveFeedback = vi.fn();
+    navigateByUrl = vi.fn(() => Promise.resolve(true));
     const store = {
       profile,
       isLoading: signal(false),
@@ -56,13 +66,13 @@ describe('ProfilePage', () => {
       loadError: signal<string | null>(null),
       saveError: signal<string | null>(null),
       validationErrors,
-      savedAt: signal<number | null>(null),
+      savedAt,
       isComplete: signal(true),
-      isLocked: signal(true),
+      isLocked,
       load: vi.fn(),
       save,
       clearFieldError: vi.fn(),
-      clearSaveFeedback: vi.fn(),
+      clearSaveFeedback,
     };
     const locale = {
       locale: signal<'en' | 'ar'>('en'),
@@ -76,6 +86,7 @@ describe('ProfilePage', () => {
       providers: [
         { provide: ProfileStore, useValue: store },
         { provide: LocaleStore, useValue: locale },
+        { provide: Router, useValue: { navigateByUrl } },
       ],
     }).compileComponents();
 
@@ -126,5 +137,71 @@ describe('ProfilePage', () => {
         'aria-invalid',
       ),
     ).toBe('true');
+  });
+
+  it('renders academic fields as dropdowns and preserves legacy values', () => {
+    isLocked.set(false);
+    profile.set({
+      ...lockedProfile,
+      isProfileLocked: false,
+      university: 'Alexandria',
+      degreeLevel: "Bachelor's",
+      major: 'Communication',
+    });
+    component.currentStep.set(3);
+    fixture.detectChanges();
+
+    const university = fixture.nativeElement.querySelector(
+      '#university',
+    ) as HTMLSelectElement;
+    const faculty = fixture.nativeElement.querySelector(
+      '#faculty',
+    ) as HTMLSelectElement;
+    const degree = fixture.nativeElement.querySelector(
+      '#degree-level',
+    ) as HTMLSelectElement;
+    const major = fixture.nativeElement.querySelector(
+      '#major',
+    ) as HTMLSelectElement;
+
+    expect(university.tagName).toBe('SELECT');
+    expect(faculty.tagName).toBe('SELECT');
+    expect(degree.tagName).toBe('SELECT');
+    expect(major.tagName).toBe('SELECT');
+    expect(university.value).toBe('Alexandria');
+    expect(degree.value).toBe("Bachelor's");
+    expect(major.value).toBe('Communication');
+  });
+
+  it('navigates to applications only after an unlocked profile save succeeds', () => {
+    isLocked.set(false);
+    profile.set({ ...lockedProfile, isProfileLocked: false });
+    fixture.detectChanges();
+
+    component.submit();
+    savedAt.set(Date.now());
+    fixture.detectChanges();
+
+    expect(navigateByUrl).toHaveBeenCalledOnce();
+    expect(navigateByUrl).toHaveBeenCalledWith('/applications');
+    expect(clearSaveFeedback).toHaveBeenCalledOnce();
+  });
+
+  it('ignores save feedback retained from an earlier profile visit', () => {
+    isLocked.set(false);
+    profile.set({ ...lockedProfile, isProfileLocked: false });
+    savedAt.set(Date.now());
+    fixture.detectChanges();
+
+    expect(navigateByUrl).not.toHaveBeenCalled();
+    expect(clearSaveFeedback).not.toHaveBeenCalled();
+  });
+
+  it('stays on the profile when saving editable fields after profile lock', () => {
+    component.submit();
+    savedAt.set(Date.now());
+    fixture.detectChanges();
+
+    expect(navigateByUrl).not.toHaveBeenCalled();
   });
 });

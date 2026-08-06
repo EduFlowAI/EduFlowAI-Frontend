@@ -5,7 +5,10 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import { AuthApiService } from './auth-api.service';
+
+const apiBaseUrl = 'https://identity.example.test/api';
 
 describe('AuthApiService', () => {
   let api: AuthApiService;
@@ -15,6 +18,7 @@ describe('AuthApiService', () => {
     TestBed.configureTestingModule({
       providers: [
         AuthApiService,
+        { provide: RuntimeConfig, useValue: { apiBaseUrl } },
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
@@ -38,7 +42,7 @@ describe('AuthApiService', () => {
       .login({ email: 'user@example.com', password: 'Password1' })
       .subscribe((result) => expect(result).toEqual(response));
 
-    const request = http.expectOne('/api/auth/login');
+    const request = http.expectOne(`${apiBaseUrl}/auth/login`);
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({
       email: 'user@example.com',
@@ -63,7 +67,7 @@ describe('AuthApiService', () => {
       })
       .subscribe((result) => expect(result).toEqual(response));
 
-    const request = http.expectOne('/api/auth/register');
+    const request = http.expectOne(`${apiBaseUrl}/auth/register`);
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({
       email: 'user@example.com',
@@ -77,7 +81,7 @@ describe('AuthApiService', () => {
     api
       .confirmEmail({ email: 'user@example.com', token: 'confirm' })
       .subscribe();
-    const confirmation = http.expectOne('/api/auth/confirm-email');
+    const confirmation = http.expectOne(`${apiBaseUrl}/auth/confirm-email`);
     expect(confirmation.request.body).toEqual({
       email: 'user@example.com',
       token: 'confirm',
@@ -85,7 +89,7 @@ describe('AuthApiService', () => {
     confirmation.flush(null, { status: 204, statusText: 'No Content' });
 
     api.forgotPassword({ email: 'user@example.com' }).subscribe();
-    const recovery = http.expectOne('/api/auth/forgot-password');
+    const recovery = http.expectOne(`${apiBaseUrl}/auth/forgot-password`);
     expect(recovery.request.body).toEqual({ email: 'user@example.com' });
     recovery.flush({ message: 'If an account exists, an email was sent.' });
 
@@ -96,7 +100,7 @@ describe('AuthApiService', () => {
         newPassword: 'NewPassword1',
       })
       .subscribe();
-    const reset = http.expectOne('/api/auth/reset-password');
+    const reset = http.expectOne(`${apiBaseUrl}/auth/reset-password`);
     expect(reset.request.body).toEqual({
       email: 'user@example.com',
       token: 'reset',

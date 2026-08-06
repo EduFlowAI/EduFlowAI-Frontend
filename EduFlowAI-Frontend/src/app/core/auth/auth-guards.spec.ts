@@ -13,12 +13,15 @@ import {
 } from '@angular/router';
 import { Observable, firstValueFrom } from 'rxjs';
 
+import { RuntimeConfig } from '../config/runtime-config';
 import { authGuard } from './auth-guard';
 import { APP_ROLES } from './auth-session.model';
 import { AuthSessionStore } from './auth-session.store';
 import { guestGuard } from './guest-guard';
 import { profileCompleteGuard } from './profile-complete-guard';
 import { roleGuard } from './role-guard';
+
+const apiBaseUrl = 'https://identity.example.test/api';
 
 function startApplicantSession(store: InstanceType<typeof AuthSessionStore>): void {
   store.startSession(
@@ -38,6 +41,7 @@ describe('authentication guards', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
+        { provide: RuntimeConfig, useValue: { apiBaseUrl } },
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
@@ -93,7 +97,9 @@ describe('authentication guards', () => {
     ) as Observable<boolean | UrlTree>;
     const resolvedResult = firstValueFrom(result);
 
-    http.expectOne('/api/profile').flush({ isComplete: false });
+    http
+      .expectOne(`${apiBaseUrl}/profile`)
+      .flush({ isComplete: false });
 
     expect(router.serializeUrl((await resolvedResult) as UrlTree)).toBe(
       '/applicant/profile',

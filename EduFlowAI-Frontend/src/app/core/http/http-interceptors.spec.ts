@@ -12,6 +12,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { AuthSessionStore } from '../auth/auth-session.store';
+import { RuntimeConfig } from '../config/runtime-config';
 import { ApiError } from '../errors/api-problem';
 import { apiErrorInterceptor } from './api-error-interceptor';
 import { authInterceptor } from './auth-interceptor';
@@ -24,6 +25,7 @@ describe('HTTP interceptors', () => {
   let client: HttpClient;
   let http: HttpTestingController;
   let session: InstanceType<typeof AuthSessionStore>;
+  let runtimeConfig: RuntimeConfig;
 
   beforeEach(() => {
     sessionStorage.clear();
@@ -49,6 +51,7 @@ describe('HTTP interceptors', () => {
     client = TestBed.inject(HttpClient);
     http = TestBed.inject(HttpTestingController);
     session = TestBed.inject(AuthSessionStore);
+    runtimeConfig = TestBed.inject(RuntimeConfig);
     session.startSession(
       {
         accessToken: 'trusted-token',
@@ -66,9 +69,10 @@ describe('HTTP interceptors', () => {
   });
 
   it('adds authorization and correlation headers to trusted API calls', () => {
-    client.get('/api/profile').subscribe();
+    const url = `${runtimeConfig.apiBaseUrl}/profile`;
+    client.get(url).subscribe();
 
-    const request = http.expectOne('/api/profile');
+    const request = http.expectOne(url);
     expect(request.request.headers.get('Authorization')).toBe(
       'Bearer trusted-token',
     );
@@ -85,8 +89,10 @@ describe('HTTP interceptors', () => {
     request.flush({});
   });
 
-  it('does not expose credentials over plaintext to the production host', () => {
-    const url = 'http://api.eduflowai.com/api/profile';
+  it('does not expose credentials over plaintext to the configured host', () => {
+    const configuredUrl = new URL(runtimeConfig.apiBaseUrl);
+    configuredUrl.protocol = 'http:';
+    const url = `${configuredUrl.toString().replace(/\/$/, '')}/profile`;
     client.get(url).subscribe();
 
     const request = http.expectOne(url);
