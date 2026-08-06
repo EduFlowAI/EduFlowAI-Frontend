@@ -164,9 +164,13 @@
               </small>
             </div>
             <div class="list-row__meta">
-              <button class="text-button" type="button" (click)="editProgram(program)">
+              <button class="text-button" type="button" (click)="editProgram(program)" [disabled]="busy()">
                 <span class="material-symbols-outlined" aria-hidden="true">edit</span>
                 {{ copy.text('Edit', 'تعديل') }}
+              </button>
+              <button class="danger-button" type="button" (click)="deleteProgram(program)" [disabled]="busy()">
+                <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                {{ copy.text('Delete', 'حذف') }}
               </button>
             </div>
           </article>

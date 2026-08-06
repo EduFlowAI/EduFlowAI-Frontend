@@ -118,7 +118,7 @@ export class ProgramManagementPage implements OnInit {
           }
 
           if (!this.requirementsProgramId() && programs[0]) {
-            this.selectRequirementsProgram(programs[0].id);
+            this.selectRequirementsProgram(programs[0].id, false);
           }
         },
         error: (error: unknown) => this.showError(error, 'Unable to load programs.'),
@@ -227,6 +227,49 @@ export class ProgramManagementPage implements OnInit {
     });
   }
 
+  protected deleteProgram(program: ProgramDto): void {
+    this.clearMessages();
+
+    const confirmed = window.confirm(
+      this.copy.text(
+        `Delete ${program.name}? This also deletes its tracks, cycles, offerings, eligibility rules, and document requirements. This cannot be undone.`,
+        `هل تريد حذف برنامج ${program.name}؟ سيتم أيضًا حذف المسارات والدورات والعروض وقواعد الأهلية ومتطلبات المستندات التابعة له. لا يمكن التراجع عن هذا الإجراء.`,
+      ),
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    this.busy.set(true);
+    this.api
+      .deleteProgram(program.id)
+      .pipe(
+        finalize(() => this.busy.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          if (this.editingProgramId() === program.id) {
+            this.resetProgramForm();
+          }
+
+          if (this.requirementsProgramId() === program.id) {
+            this.requirementsProgramId.set('');
+            this.requirements.set([]);
+          }
+
+          this.success.set(
+            this.copy.text(
+              'Program and its configuration data were deleted successfully.',
+              'تم حذف البرنامج وكل بيانات الإعداد التابعة له بنجاح.',
+            ),
+          );
+          this.loadReferenceData();
+        },
+        error: (error: unknown) => this.showError(error, 'Unable to delete program.'),
+      });
+  }
+
   protected resetProgramForm(): void {
     this.editingProgramId.set(null);
     this.programForm.reset({
@@ -241,8 +284,14 @@ export class ProgramManagementPage implements OnInit {
     this.selectRequirementsProgram((event.target as HTMLSelectElement).value);
   }
 
-  protected selectRequirementsProgram(programId: string): void {
-    this.clearMessages();
+  protected selectRequirementsProgram(
+    programId: string,
+    clearMessages = true,
+  ): void {
+    if (clearMessages) {
+      this.clearMessages();
+    }
+
     this.requirementsProgramId.set(programId);
     this.requirements.set([]);
 
