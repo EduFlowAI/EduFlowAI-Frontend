@@ -30,11 +30,34 @@ describe('AdmissionOverview', () => {
 
   afterEach(() => http.verify());
 
-  it('creates and loads dashboard counts', () => {
+  it('loads dashboard counts for the first available program', () => {
+    const programId = '11111111-1111-1111-1111-111111111111';
+
     fixture.detectChanges();
 
-    const request = http.expectOne('/api/admin/dashboard');
-    request.flush({
+    const programsRequest = http.expectOne('/api/admin/programs');
+    programsRequest.flush({
+      isSuccess: true,
+      data: [
+        {
+          id: programId,
+          institutionId: '22222222-2222-2222-2222-222222222222',
+          institutionName: 'ITI',
+          name: '9-Month Program',
+          code: '9M',
+          durationMonths: 9,
+          trackCount: 10,
+          cycleCount: 1,
+        },
+      ],
+      statusCode: 200,
+      message: '',
+    });
+
+    const dashboardRequest = http.expectOne(
+      `/api/admin/dashboard?programId=${programId}`,
+    );
+    dashboardRequest.flush({
       isSuccess: true,
       data: {
         institutionCount: 1,
@@ -55,5 +78,8 @@ describe('AdmissionOverview', () => {
 
     expect(component).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain('Admission overview');
+    expect(
+      (fixture.nativeElement.querySelector('select') as HTMLSelectElement).value,
+    ).toBe(programId);
   });
 });
