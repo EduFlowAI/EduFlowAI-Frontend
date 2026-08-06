@@ -32,8 +32,14 @@ import {
 export class AdmissionAdminApiService {
   private readonly http = inject(HttpClient);
 
-  getDashboard(): Observable<AdminAdmissionDashboardDto> {
-    return this.get<AdminAdmissionDashboardDto>('/api/admin/dashboard');
+  getDashboard(programId?: string): Observable<AdminAdmissionDashboardDto> {
+    const query = programId
+      ? `?programId=${encodeURIComponent(programId)}`
+      : '';
+
+    return this.get<AdminAdmissionDashboardDto>(
+      `/api/admin/dashboard${query}`,
+    );
   }
 
   getInstitutions(): Observable<readonly InstitutionDto[]> {
