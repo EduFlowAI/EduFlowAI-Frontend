@@ -62,6 +62,10 @@ export const PROFILE_COPY = {
     saveEditable: 'Save editable changes',
     saving: 'Saving…',
     required: 'This field is required.',
+    englishNameOnly:
+      'Use English letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
+    arabicNameOnly:
+      'Use Arabic letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
     nationalIdFormat: 'Enter exactly 14 digits.',
     pastDate: 'Date of birth must be in the past.',
     graduationYearRange: 'Enter a year between 1900 and',
@@ -130,6 +134,10 @@ export const PROFILE_COPY = {
     saveEditable: 'حفظ التغييرات المتاحة',
     saving: 'جارٍ الحفظ…',
     required: 'هذا الحقل مطلوب.',
+    englishNameOnly:
+      'استخدم الحروف الإنجليزية فقط. يُسمح بالمسافات والفواصل العليا والنقاط والشرطات.',
+    arabicNameOnly:
+      'استخدم الحروف العربية فقط. يُسمح بالمسافات والفواصل العليا والنقاط والشرطات.',
     nationalIdFormat: 'أدخل 14 رقمًا بالضبط.',
     pastDate: 'يجب أن يكون تاريخ الميلاد في الماضي.',
     graduationYearRange: 'أدخل سنة بين 1900 و',

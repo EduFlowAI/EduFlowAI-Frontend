@@ -15,9 +15,17 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { LocaleStore } from '../../../../../core/i18n/locale.store';
 import { ProfileStore } from '../../data-access/profile.store';
+import {
+  DEGREE_LEVELS,
+  EGYPTIAN_UNIVERSITIES,
+  FACULTIES,
+  LocalizedAcademicOption,
+  MAJORS,
+} from '../../models/profile-academic-options';
 import {
   ApplicantProfile,
   ApplicantProfileFormValue,
@@ -35,6 +43,8 @@ import {
   profileToFormValue,
 } from '../../utils/profile.mapper';
 import {
+  arabicNameValidator,
+  englishNameValidator,
   graduationYearValidator,
   notBlankValidator,
   pastDateValidator,
@@ -105,13 +115,19 @@ export class ProfilePage implements OnInit {
   readonly locale = inject(LocaleStore);
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   private hydratedProfile: ApplicantProfile | null = null;
+  private awaitingSaveCompletion = false;
 
   readonly currentStep = signal<WizardStep>(1);
   readonly currentYear = new Date().getUTCFullYear();
   readonly maximumBirthDate = new Date().toISOString().slice(0, 10);
   readonly grades = CUMULATIVE_GRADES;
   readonly militaryStatuses = MILITARY_STATUSES;
+  readonly universities = EGYPTIAN_UNIVERSITIES;
+  readonly faculties = FACULTIES;
+  readonly degreeLevels = DEGREE_LEVELS;
+  readonly majors = MAJORS;
   readonly copy = computed(() => PROFILE_COPY[this.locale.locale()]);
   readonly isArabic = computed(() => this.locale.locale() === 'ar');
   readonly steps = computed(
@@ -132,6 +148,7 @@ export class ProfilePage implements OnInit {
       validators: [
         Validators.required,
         notBlankValidator(),
+        englishNameValidator(),
         Validators.maxLength(300),
       ],
     }),
@@ -140,6 +157,7 @@ export class ProfilePage implements OnInit {
       validators: [
         Validators.required,
         notBlankValidator(),
+        arabicNameValidator(),
         Validators.maxLength(300),
       ],
     }),
@@ -260,6 +278,21 @@ export class ProfilePage implements OnInit {
     }
   });
 
+  private readonly redirectAfterSuccessfulCompletion = effect(() => {
+    const savedAt = this.store.savedAt();
+
+    if (!this.awaitingSaveCompletion || savedAt === null) {
+      return;
+    }
+
+    this.awaitingSaveCompletion = false;
+
+    if (this.store.isComplete() && !this.store.isLocked()) {
+      this.store.clearSaveFeedback();
+      void this.router.navigateByUrl('/applications');
+    }
+  });
+
   constructor() {
     this.form.controls.gender.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -324,6 +357,7 @@ export class ProfilePage implements OnInit {
       return;
     }
 
+    this.awaitingSaveCompletion = true;
     this.store.save(formValueToRequest(this.form.getRawValue()));
   }
 
@@ -344,6 +378,14 @@ export class ProfilePage implements OnInit {
 
     if (control.hasError('required')) {
       return [copy.required];
+    }
+
+    if (field === 'fullNameEn' && control.hasError('englishName')) {
+      return [copy.englishNameOnly];
+    }
+
+    if (field === 'fullNameAr' && control.hasError('arabicName')) {
+      return [copy.arabicNameOnly];
     }
 
     if (field === 'nationalId' && control.hasError('pattern')) {
@@ -408,6 +450,17 @@ export class ProfilePage implements OnInit {
       default:
         return copy.selectOption;
     }
+  }
+
+  academicOptionLabel(option: LocalizedAcademicOption): string {
+    return option[this.locale.locale()];
+  }
+
+  hasUnlistedAcademicOption(
+    options: readonly LocalizedAcademicOption[],
+    value: string,
+  ): boolean {
+    return value.length > 0 && !options.some((option) => option.value === value);
   }
 
   private configureMilitaryStatus(gender: ProfileGender | null | ''): void {

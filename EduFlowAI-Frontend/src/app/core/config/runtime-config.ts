@@ -1,8 +1,16 @@
 import { Injectable } from '@angular/core';
 
+import { environment } from '../../../environments/environment';
+
+function normalizeApiBaseUrl(configuredUrl: string): string {
+  const normalized = configuredUrl.trim().replace(/\/+$/, '');
+
+  return /\/api$/i.test(normalized) ? normalized : `${normalized}/api`;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RuntimeConfig {
-  readonly apiBaseUrl = '/api';
+  readonly apiBaseUrl = normalizeApiBaseUrl(environment.apiUrl);
 
   isTrustedApiUrl(url: string): boolean {
     if (url.startsWith('/api/')) {
@@ -15,23 +23,11 @@ export class RuntimeConfig {
 
     try {
       const parsedUrl = new URL(url);
-      const isApiPath = parsedUrl.pathname.startsWith('/api/');
-
-      if (!isApiPath) {
-        return false;
-      }
-
-      if (
-        typeof window !== 'undefined' &&
-        parsedUrl.origin === window.location.origin
-      ) {
-        return true;
-      }
+      const configuredApiUrl = new URL(`${this.apiBaseUrl}/`);
 
       return (
-        (parsedUrl.hostname === 'localhost' && parsedUrl.port === '7159') ||
-        (parsedUrl.protocol === 'https:' &&
-          parsedUrl.hostname === 'api.eduflowai.com')
+        parsedUrl.origin === configuredApiUrl.origin &&
+        parsedUrl.pathname.startsWith(configuredApiUrl.pathname)
       );
     } catch {
       return false;

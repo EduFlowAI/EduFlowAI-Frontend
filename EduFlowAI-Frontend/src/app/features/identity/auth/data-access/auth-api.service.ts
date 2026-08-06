@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import {
   ConfirmEmailRequest,
   ForgotPasswordRequest,
@@ -16,7 +17,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/auth';
+  private readonly baseUrl = `${inject(RuntimeConfig).apiBaseUrl}/auth`;
 
   register(request: RegisterRequest): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${this.baseUrl}/register`, request);
