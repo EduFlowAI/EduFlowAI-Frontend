@@ -34,6 +34,17 @@ describe('AdmissionAdminApiService', () => {
     request.flush({ isSuccess: true, data: {}, statusCode: 200, message: '' });
   });
 
+  it('deletes the selected program and its unlocked configuration', () => {
+    const programId = '11111111-1111-1111-1111-111111111111';
+
+    service.deleteProgram(programId).subscribe();
+
+    const request = http.expectOne(`/api/admin/programs/${programId}`);
+    expect(request.request.method).toBe('DELETE');
+    expect(request.request.body).toBeNull();
+    request.flush({ isSuccess: true, data: true, statusCode: 200, message: '' });
+  });
+
   it('replaces program document requirements with the backend contract', () => {
     const programId = '11111111-1111-1111-1111-111111111111';
     const body = {
