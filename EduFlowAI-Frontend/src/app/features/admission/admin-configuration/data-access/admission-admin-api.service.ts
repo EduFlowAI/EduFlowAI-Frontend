@@ -71,6 +71,10 @@ export class AdmissionAdminApiService {
     return this.put<ProgramDto>(`/api/admin/programs/${programId}`, request);
   }
 
+  deleteProgram(programId: string): Observable<boolean> {
+    return this.delete<boolean>(`/api/admin/programs/${programId}`);
+  }
+
   getProgramRequirements(
     programId: string,
   ): Observable<readonly ProgramDocumentRequirementDto[]> {
