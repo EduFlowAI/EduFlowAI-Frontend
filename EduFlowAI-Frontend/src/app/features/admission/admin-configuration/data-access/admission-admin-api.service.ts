@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import {
   AdminAdmissionDashboardDto,
   AdminTrackDto,
@@ -31,6 +32,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AdmissionAdminApiService {
   private readonly http = inject(HttpClient);
+  private readonly apiBaseUrl = inject(RuntimeConfig).apiBaseUrl;
 
   getDashboard(programId?: string): Observable<AdminAdmissionDashboardDto> {
     const query = programId
@@ -192,26 +194,31 @@ export class AdmissionAdminApiService {
 
   private get<T>(url: string): Observable<T> {
     return this.http
-      .get<ApiResult<T>>(url)
+      .get<ApiResult<T>>(this.toApiUrl(url))
       .pipe(map((response) => this.unwrap(response)));
   }
 
   private post<T>(url: string, body: unknown): Observable<T> {
     return this.http
-      .post<ApiResult<T>>(url, body)
+      .post<ApiResult<T>>(this.toApiUrl(url), body)
       .pipe(map((response) => this.unwrap(response)));
   }
 
   private put<T>(url: string, body: unknown): Observable<T> {
     return this.http
-      .put<ApiResult<T>>(url, body)
+      .put<ApiResult<T>>(this.toApiUrl(url), body)
       .pipe(map((response) => this.unwrap(response)));
   }
 
   private delete<T>(url: string): Observable<T> {
     return this.http
-      .delete<ApiResult<T>>(url)
+      .delete<ApiResult<T>>(this.toApiUrl(url))
       .pipe(map((response) => this.unwrap(response)));
+  }
+
+  private toApiUrl(url: string): string {
+    const relativePath = url.replace(/^\/api(?=\/|$)/i, '');
+    return `${this.apiBaseUrl}${relativePath}`;
   }
 
   private unwrap<T>(response: ApiResult<T>): T {
