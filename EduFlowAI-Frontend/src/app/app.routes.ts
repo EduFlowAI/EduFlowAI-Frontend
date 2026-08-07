@@ -152,6 +152,14 @@ export const routes: Routes = [
         pathMatch: 'full',
         redirectTo: 'admission',
       },
+      {
+        path: 'knowledge-base',
+        title: 'Knowledge Base | EduFlow AI',
+        loadComponent: () =>
+          import(
+            './features/ai/knowledge-base/pages/knowledge-base-page/knowledge-base-page'
+          ).then((component) => component.KnowledgeBasePage),
+      },
     ],
   },
   {

@@ -338,6 +338,78 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.footer.accessibility': 'Accessibility',
     'landing.footer.copyright': '© 2026 EduFlowAI. ITI Admissions experience.',
 
+    // ---------------- Knowledge Base ---------------------------------------------------
+    'knowledgeBase.title': 'Knowledge Base',
+    'knowledgeBase.subtitle':
+      'Manage the documents and text sources used by the admission assistant.',
+    'knowledgeBase.syncAll': 'Sync all',
+    'knowledgeBase.syncing': 'Syncing…',
+    'knowledgeBase.syncCompleted':
+      'Sync completed: {{indexed}} indexed, {{failed}} failed, {{total}} total.',
+
+    'knowledgeBase.upload.title': 'Upload document',
+    'knowledgeBase.upload.description':
+      'Add PDF, Markdown, or plain-text documents to the knowledge base.',
+    'knowledgeBase.upload.document': 'Document',
+    'knowledgeBase.upload.action': 'Upload document',
+    'knowledgeBase.upload.uploading': 'Uploading…',
+
+    'knowledgeBase.text.title': 'Add text source',
+    'knowledgeBase.text.description':
+      'Add knowledge directly without uploading a document.',
+    'knowledgeBase.text.fieldTitle': 'Title',
+    'knowledgeBase.text.optionalTitle': 'Optional title',
+    'knowledgeBase.text.content': 'Content',
+    'knowledgeBase.text.contentPlaceholder':
+      'Paste or type knowledge base content…',
+    'knowledgeBase.text.add': 'Add text source',
+    'knowledgeBase.text.adding': 'Adding…',
+
+    'knowledgeBase.sources.title': 'Knowledge sources',
+    'knowledgeBase.sources.description':
+      'Search, filter, monitor, and manage indexed assistant content.',
+    'knowledgeBase.sources.search': 'Search',
+    'knowledgeBase.sources.searchPlaceholder': 'Search by document name',
+    'knowledgeBase.sources.status': 'Status',
+    'knowledgeBase.sources.rows': 'Rows',
+    'knowledgeBase.sources.refresh': 'Refresh',
+    'knowledgeBase.sources.refreshing': 'Refreshing…',
+    'knowledgeBase.sources.empty':
+      'No knowledge base documents match the current filters.',
+
+    'knowledgeBase.table.document': 'Document',
+    'knowledgeBase.table.status': 'Status',
+    'knowledgeBase.table.added': 'Added',
+    'knowledgeBase.table.actions': 'Actions',
+
+    'knowledgeBase.status.all': 'All statuses',
+    'knowledgeBase.status.pending': 'Pending',
+    'knowledgeBase.status.indexing': 'Indexing',
+    'knowledgeBase.status.indexed': 'Indexed',
+    'knowledgeBase.status.failed': 'Failed',
+    'knowledgeBase.status.unknown': 'Unknown',
+
+    'knowledgeBase.delete': 'Delete',
+    'knowledgeBase.deleting': 'Deleting…',
+
+    'knowledgeBase.pagination.showing':
+      'Showing {{start}}–{{end}} of {{total}}',
+    'knowledgeBase.pagination.page':
+      'Page {{current}} of {{total}}',
+    'knowledgeBase.pagination.previous': 'Previous',
+    'knowledgeBase.pagination.next': 'Next',
+
+    'knowledgeBase.error.load':
+      'Could not load knowledge base documents.',
+    'knowledgeBase.error.upload':
+      'Could not upload the knowledge base file.',
+    'knowledgeBase.error.addText':
+      'Could not add the knowledge base text.',
+    'knowledgeBase.error.delete':
+      'Could not delete the knowledge base document.',
+    'knowledgeBase.error.sync':
+      'Could not re-sync the knowledge base.',
+
     // Shared UI — shared/ui/file-dropzone
     'common.fileDropzone.cta': 'Click to upload or drag and drop',
     'common.fileDropzone.hint': '{{types}}, max {{size}}MB',
@@ -700,6 +772,77 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.footer.accessibility': 'إمكانية الوصول',
     //'landing.footer.copyright': '© 2026 EduFlowAI. تجربة قبول ITI.',
 
+    // ---------------- Knowledge Base ---------------------------------------------------
+    'knowledgeBase.title': 'قاعدة المعرفة',
+    'knowledgeBase.subtitle':
+      'أدر المستندات والمصادر النصية التي يستخدمها مساعد القبول.',
+    'knowledgeBase.syncAll': 'مزامنة الكل',
+    'knowledgeBase.syncing': 'جارٍ المزامنة…',
+    'knowledgeBase.syncCompleted':
+      'اكتملت المزامنة: {{indexed}} تمت فهرستها، {{failed}} فشلت، {{total}} إجماليًا.',
+
+    'knowledgeBase.upload.title': 'رفع مستند',
+    'knowledgeBase.upload.description':
+      'أضف مستندات PDF أو Markdown أو ملفات نصية إلى قاعدة المعرفة.',
+    'knowledgeBase.upload.document': 'المستند',
+    'knowledgeBase.upload.action': 'رفع المستند',
+    'knowledgeBase.upload.uploading': 'جارٍ الرفع…',
+
+    'knowledgeBase.text.title': 'إضافة مصدر نصي',
+    'knowledgeBase.text.description':
+      'أضف محتوى معرفيًا مباشرة دون رفع مستند.',
+    'knowledgeBase.text.fieldTitle': 'العنوان',
+    'knowledgeBase.text.optionalTitle': 'عنوان اختياري',
+    'knowledgeBase.text.content': 'المحتوى',
+    'knowledgeBase.text.contentPlaceholder':
+      'الصق أو اكتب محتوى قاعدة المعرفة…',
+    'knowledgeBase.text.add': 'إضافة المصدر النصي',
+    'knowledgeBase.text.adding': 'جارٍ الإضافة…',
+
+    'knowledgeBase.sources.title': 'مصادر المعرفة',
+    'knowledgeBase.sources.description':
+      'ابحث وصفِّ وراقب وأدر المحتوى المفهرس المستخدم بواسطة المساعد.',
+    'knowledgeBase.sources.search': 'بحث',
+    'knowledgeBase.sources.searchPlaceholder': 'ابحث باسم المستند',
+    'knowledgeBase.sources.status': 'الحالة',
+    'knowledgeBase.sources.rows': 'الصفوف',
+    'knowledgeBase.sources.refresh': 'تحديث',
+    'knowledgeBase.sources.refreshing': 'جارٍ التحديث…',
+    'knowledgeBase.sources.empty':
+      'لا توجد مستندات في قاعدة المعرفة تطابق عوامل التصفية الحالية.',
+
+    'knowledgeBase.table.document': 'المستند',
+    'knowledgeBase.table.status': 'الحالة',
+    'knowledgeBase.table.added': 'تاريخ الإضافة',
+    'knowledgeBase.table.actions': 'الإجراءات',
+
+    'knowledgeBase.status.all': 'كل الحالات',
+    'knowledgeBase.status.pending': 'قيد الانتظار',
+    'knowledgeBase.status.indexing': 'جارٍ الفهرسة',
+    'knowledgeBase.status.indexed': 'تمت الفهرسة',
+    'knowledgeBase.status.failed': 'فشل',
+    'knowledgeBase.status.unknown': 'غير معروف',
+
+    'knowledgeBase.delete': 'حذف',
+    'knowledgeBase.deleting': 'جارٍ الحذف…',
+
+    'knowledgeBase.pagination.showing':
+      'عرض {{start}}–{{end}} من {{total}}',
+    'knowledgeBase.pagination.page':
+      'صفحة {{current}} من {{total}}',
+    'knowledgeBase.pagination.previous': 'السابق',
+    'knowledgeBase.pagination.next': 'التالي',
+
+    'knowledgeBase.error.load':
+      'تعذر تحميل مستندات قاعدة المعرفة.',
+    'knowledgeBase.error.upload':
+      'تعذر رفع ملف قاعدة المعرفة.',
+    'knowledgeBase.error.addText':
+      'تعذر إضافة النص إلى قاعدة المعرفة.',
+    'knowledgeBase.error.delete':
+      'تعذر حذف مستند قاعدة المعرفة.',
+    'knowledgeBase.error.sync':
+      'تعذرت إعادة مزامنة قاعدة المعرفة.',
 
     'common.fileDropzone.cta': 'انقر للتحميل أو اسحب وأفلت الملف هنا',
     'common.fileDropzone.hint': '{{types}}، بحد أقصى {{size}} ميجابايت',
