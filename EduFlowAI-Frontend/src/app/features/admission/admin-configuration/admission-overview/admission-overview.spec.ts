@@ -6,7 +6,10 @@ import {
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import { AdmissionOverview } from './admission-overview';
+
+const apiBaseUrl = 'https://admission.example.test/api';
 
 describe('AdmissionOverview', () => {
   let component: AdmissionOverview;
@@ -17,6 +20,7 @@ describe('AdmissionOverview', () => {
     await TestBed.configureTestingModule({
       imports: [AdmissionOverview],
       providers: [
+        { provide: RuntimeConfig, useValue: { apiBaseUrl } },
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -35,7 +39,7 @@ describe('AdmissionOverview', () => {
 
     fixture.detectChanges();
 
-    const programsRequest = http.expectOne('/api/admin/programs');
+    const programsRequest = http.expectOne(`${apiBaseUrl}/admin/programs`);
     programsRequest.flush({
       isSuccess: true,
       data: [
@@ -55,7 +59,7 @@ describe('AdmissionOverview', () => {
     });
 
     const dashboardRequest = http.expectOne(
-      `/api/admin/dashboard?programId=${programId}`,
+      `${apiBaseUrl}/admin/dashboard?programId=${programId}`,
     );
     dashboardRequest.flush({
       isSuccess: true,
