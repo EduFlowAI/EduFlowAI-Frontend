@@ -1,12 +1,11 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { EligibilityDetailsDto } from '../../models/application.model';
 
 @Component({
   selector: 'app-eligibility-result',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './eligibility-result.component.html',
   styleUrls: ['./eligibility-result.component.scss']
 })
