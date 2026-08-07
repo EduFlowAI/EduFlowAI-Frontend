@@ -5,11 +5,14 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import {
   DocumentType,
   RequirementGender,
 } from '../models/admission-admin.model';
 import { AdmissionAdminApiService } from './admission-admin-api.service';
+
+const apiBaseUrl = 'https://admission.example.test/api';
 
 describe('AdmissionAdminApiService', () => {
   let service: AdmissionAdminApiService;
@@ -17,7 +20,12 @@ describe('AdmissionAdminApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        AdmissionAdminApiService,
+        { provide: RuntimeConfig, useValue: { apiBaseUrl } },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
 
     service = TestBed.inject(AdmissionAdminApiService);
@@ -26,10 +34,14 @@ describe('AdmissionAdminApiService', () => {
 
   afterEach(() => http.verify());
 
-  it('loads the Super Admin dashboard', () => {
-    service.getDashboard().subscribe();
+  it('loads the Super Admin dashboard for the selected program', () => {
+    const programId = '11111111-1111-1111-1111-111111111111';
 
-    const request = http.expectOne('/api/admin/dashboard');
+    service.getDashboard(programId).subscribe();
+
+    const request = http.expectOne(
+      `${apiBaseUrl}/admin/dashboard?programId=${programId}`,
+    );
     expect(request.request.method).toBe('GET');
     request.flush({ isSuccess: true, data: {}, statusCode: 200, message: '' });
   });
@@ -39,7 +51,7 @@ describe('AdmissionAdminApiService', () => {
 
     service.deleteProgram(programId).subscribe();
 
-    const request = http.expectOne(`/api/admin/programs/${programId}`);
+    const request = http.expectOne(`${apiBaseUrl}/admin/programs/${programId}`);
     expect(request.request.method).toBe('DELETE');
     expect(request.request.body).toBeNull();
     request.flush({ isSuccess: true, data: true, statusCode: 200, message: '' });
@@ -59,7 +71,7 @@ describe('AdmissionAdminApiService', () => {
     service.updateProgramRequirements(programId, body).subscribe();
 
     const request = http.expectOne(
-      `/api/admin/programs/${programId}/document-requirements`,
+      `${apiBaseUrl}/admin/programs/${programId}/document-requirements`,
     );
     expect(request.request.method).toBe('PUT');
     expect(request.request.body).toEqual(body);
@@ -76,7 +88,9 @@ describe('AdmissionAdminApiService', () => {
 
     service.createOffering(cycleId, body).subscribe();
 
-    const request = http.expectOne(`/api/admin/cycles/${cycleId}/offerings`);
+    const request = http.expectOne(
+      `${apiBaseUrl}/admin/cycles/${cycleId}/offerings`,
+    );
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(body);
     request.flush({ isSuccess: true, data: {}, statusCode: 201, message: '' });
@@ -90,7 +104,7 @@ describe('AdmissionAdminApiService', () => {
     service.updateOffering(cycleId, offeringId, body).subscribe();
 
     const request = http.expectOne(
-      `/api/admin/cycles/${cycleId}/offerings/${offeringId}`,
+      `${apiBaseUrl}/admin/cycles/${cycleId}/offerings/${offeringId}`,
     );
     expect(request.request.method).toBe('PUT');
     expect(request.request.body).toEqual(body);
@@ -104,7 +118,7 @@ describe('AdmissionAdminApiService', () => {
     service.deleteOffering(cycleId, offeringId).subscribe();
 
     const request = http.expectOne(
-      `/api/admin/cycles/${cycleId}/offerings/${offeringId}`,
+      `${apiBaseUrl}/admin/cycles/${cycleId}/offerings/${offeringId}`,
     );
     expect(request.request.method).toBe('DELETE');
     expect(request.request.body).toBeNull();
@@ -116,7 +130,9 @@ describe('AdmissionAdminApiService', () => {
 
     service.activateCycle(cycleId).subscribe();
 
-    const request = http.expectOne(`/api/admin/cycles/${cycleId}/activate`);
+    const request = http.expectOne(
+      `${apiBaseUrl}/admin/cycles/${cycleId}/activate`,
+    );
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toBeNull();
     request.flush({ isSuccess: true, data: {}, statusCode: 200, message: '' });

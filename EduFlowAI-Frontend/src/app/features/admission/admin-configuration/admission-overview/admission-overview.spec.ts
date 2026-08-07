@@ -6,7 +6,10 @@ import {
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import { AdmissionOverview } from './admission-overview';
+
+const apiBaseUrl = 'https://admission.example.test/api';
 
 describe('AdmissionOverview', () => {
   let component: AdmissionOverview;
@@ -17,6 +20,7 @@ describe('AdmissionOverview', () => {
     await TestBed.configureTestingModule({
       imports: [AdmissionOverview],
       providers: [
+        { provide: RuntimeConfig, useValue: { apiBaseUrl } },
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -30,11 +34,34 @@ describe('AdmissionOverview', () => {
 
   afterEach(() => http.verify());
 
-  it('creates and loads dashboard counts', () => {
+  it('loads dashboard counts for the first available program', () => {
+    const programId = '11111111-1111-1111-1111-111111111111';
+
     fixture.detectChanges();
 
-    const request = http.expectOne('/api/admin/dashboard');
-    request.flush({
+    const programsRequest = http.expectOne(`${apiBaseUrl}/admin/programs`);
+    programsRequest.flush({
+      isSuccess: true,
+      data: [
+        {
+          id: programId,
+          institutionId: '22222222-2222-2222-2222-222222222222',
+          institutionName: 'ITI',
+          name: '9-Month Program',
+          code: '9M',
+          durationMonths: 9,
+          trackCount: 10,
+          cycleCount: 1,
+        },
+      ],
+      statusCode: 200,
+      message: '',
+    });
+
+    const dashboardRequest = http.expectOne(
+      `${apiBaseUrl}/admin/dashboard?programId=${programId}`,
+    );
+    dashboardRequest.flush({
       isSuccess: true,
       data: {
         institutionCount: 1,
@@ -55,5 +82,8 @@ describe('AdmissionOverview', () => {
 
     expect(component).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain('Admission overview');
+    expect(
+      (fixture.nativeElement.querySelector('select') as HTMLSelectElement).value,
+    ).toBe(programId);
   });
 });
