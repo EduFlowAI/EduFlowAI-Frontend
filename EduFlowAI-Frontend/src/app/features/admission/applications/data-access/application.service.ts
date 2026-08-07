@@ -7,7 +7,8 @@ import {
     UpdateApplicationPreferencesDto, ActiveAdmissionCycleDto,
     PaginatedResult, QueryParameters, ApplicationListDto,
     ApplicationStatusDto, EligibilityDetailsDto, SimulatedStageDto,
-    EvaluateEligibilityRequestDto, EligibilityResult, DocumentReviewResultDto
+    EvaluateEligibilityRequestDto, EligibilityResult, DocumentReviewResultDto,
+    EnrollmentChecklistDto
   } from '../models/application.model';
 
 // providedIn: 'root' makes this service a singleton (one instance for the whole app)
@@ -101,6 +102,14 @@ export class ApplicationService {
         // Execute the GET request with the constructed parameters
         // The return type tightly couples Result -> PaginatedResult -> ApplicationListDto
         return this.http.get<Result<PaginatedResult<ApplicationListDto>>>(`${this.applicationsUrl}/my-applications`, { params });
+    }
+
+    /**
+     * Retrieves the enrollment checklist for a specific application.
+     * Maps to GET: api/modules/admission/applications/{applicationId}/enrollment-checklist
+     */
+    getEnrollmentChecklist(applicationId: string): Observable<Result<EnrollmentChecklistDto>> {
+        return this.http.get<Result<EnrollmentChecklistDto>>(`${this.applicationsUrl}/${applicationId}/enrollment-checklist`);
     }
 
     withdrawApplication(applicationId: string): Observable<Result<ApplicationStatusDto>> {
