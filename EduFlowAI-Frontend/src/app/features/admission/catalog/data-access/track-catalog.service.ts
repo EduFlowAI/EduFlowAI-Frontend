@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import {
   ApiResult,
   TrackCatalogItem,
@@ -10,7 +11,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class TrackCatalogService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/tracks';
+  private readonly baseUrl = `${inject(RuntimeConfig).apiBaseUrl}/tracks`;
 
   getTracks(): Observable<readonly TrackCatalogItem[]> {
     return this.http
