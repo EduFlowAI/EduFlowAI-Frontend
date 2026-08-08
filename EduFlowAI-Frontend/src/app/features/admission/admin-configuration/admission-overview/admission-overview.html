@@ -15,10 +15,32 @@
         }}
       </p>
     </div>
-    <button class="secondary-button" type="button" (click)="load()" [disabled]="loading()">
-      <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
-      {{ copy.text('Refresh', 'تحديث') }}
-    </button>
+
+    <div class="page-actions">
+      <label class="program-filter">
+        <span>{{ copy.text('Program', 'البرنامج') }}</span>
+        <select
+          [value]="selectedProgramId()"
+          (change)="onProgramChange($event)"
+          [disabled]="loading() || programs().length === 0"
+        >
+          @if (programs().length === 0) {
+            <option value="">
+              {{ copy.text('No programs available', 'لا توجد برامج متاحة') }}
+            </option>
+          } @else {
+            @for (program of programs(); track program.id) {
+              <option [value]="program.id">{{ program.name }}</option>
+            }
+          }
+        </select>
+      </label>
+
+      <button class="secondary-button" type="button" (click)="load()" [disabled]="loading()">
+        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+        {{ copy.text('Refresh', 'تحديث') }}
+      </button>
+    </div>
   </header>
 
   @if (loading()) {
@@ -109,8 +131,8 @@
           <p class="empty-copy">
             {{
               copy.text(
-                'Create a cycle, configure eligibility and offerings, then activate it.',
-                'أنشئ دورة وحدد قواعد الأهلية والمسارات والفروع ثم فعّلها.'
+                'Create a cycle, configure eligibility and offerings, then activate it for the selected program.',
+                'أنشئ دورة وحدد قواعد الأهلية والمسارات والفروع ثم فعّلها للبرنامج المحدد.'
               )
             }}
           </p>

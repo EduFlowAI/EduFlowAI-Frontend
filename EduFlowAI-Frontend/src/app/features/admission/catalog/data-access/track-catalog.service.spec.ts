@@ -5,8 +5,11 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import { TrackCatalogItem } from '../models/track-catalog.model';
 import { TrackCatalogService } from './track-catalog.service';
+
+const apiBaseUrl = 'https://admission.example.test/api';
 
 describe('TrackCatalogService', () => {
   let service: TrackCatalogService;
@@ -32,7 +35,12 @@ describe('TrackCatalogService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        TrackCatalogService,
+        { provide: RuntimeConfig, useValue: { apiBaseUrl } },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
 
     service = TestBed.inject(TrackCatalogService);
@@ -48,7 +56,7 @@ describe('TrackCatalogService', () => {
       result = tracks;
     });
 
-    const request = http.expectOne('/api/tracks');
+    const request = http.expectOne(`${apiBaseUrl}/tracks`);
     expect(request.request.method).toBe('GET');
 
     request.flush({
@@ -68,7 +76,7 @@ describe('TrackCatalogService', () => {
       result = item;
     });
 
-    const request = http.expectOne(`/api/tracks/${track.id}`);
+    const request = http.expectOne(`${apiBaseUrl}/tracks/${track.id}`);
     expect(request.request.method).toBe('GET');
 
     request.flush({
