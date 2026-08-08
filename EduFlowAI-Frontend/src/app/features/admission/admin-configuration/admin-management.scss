@@ -522,3 +522,47 @@ button:disabled {
     animation: none;
   }
 }
+
+/* Cycle Management: the cycle list and the selected-cycle configuration
+   are independent columns. This prevents a long cycle list from creating
+   a blank row under the selected-cycle summary. */
+.cycle-workspace {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1.28fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.cycle-workspace__content {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+}
+
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled,
+.list-row__meta input:disabled {
+  border-color: #dce3ea;
+  background: #f4f6f8;
+  color: #6f7d8f;
+  cursor: not-allowed;
+}
+
+.message--warning {
+  border: 1px solid #ead6a8;
+  background: #fff9eb;
+  color: #775818;
+}
+
+.message--info {
+  border: 1px solid #cbddeb;
+  background: #f2f8fd;
+  color: #315f84;
+}
+
+@media (max-width: 62rem) {
+  .cycle-workspace {
+    grid-template-columns: 1fr;
+  }
+}
