@@ -93,6 +93,8 @@ export class CycleManagementPage implements OnInit {
   ] as const;
 
   ngOnInit(): void {
+    // Configuration controls must not look editable until a cycle is selected.
+    this.setConfigurationFormsEditable(false);
     this.load();
   }
 
@@ -201,6 +203,18 @@ export class CycleManagementPage implements OnInit {
     const cycle = this.cycles().find((item) => item.id === cycleId);
 
     if (!cycle) {
+      this.eligibilityForm.reset({
+        requiredNationality: 'EG',
+        requiredDegreeLevel: 'Bachelor',
+        maxYearsSinceGraduation: 5,
+        minGrade: CumulativeGrade.Good,
+      });
+      this.offeringForm.reset({
+        trackId: '',
+        branchId: '',
+        capacity: 1,
+      });
+      this.setConfigurationFormsEditable(false);
       return;
     }
 
@@ -221,6 +235,10 @@ export class CycleManagementPage implements OnInit {
       branchId: branches[0]?.id ?? '',
       capacity: 1,
     });
+
+    // Draft is the only editable configuration state. Active/Closed must
+    // look read-only as well as reject writes.
+    this.setConfigurationFormsEditable(cycle.status === CycleStatus.Draft);
   }
 
   protected saveEligibility(): void {
@@ -413,8 +431,8 @@ export class CycleManagementPage implements OnInit {
 
     const confirmed = window.confirm(
       this.copy.text(
-        'Activate this cycle? Any other active cycle will block activation.',
-        'هل تريد تفعيل هذه الدورة؟ لا يمكن أن توجد دورتان نشطتان في نفس الوقت.',
+        'Activate this cycle? Another active cycle for the same program will block activation.',
+        'هل تريد تفعيل هذه الدورة؟ وجود دورة نشطة أخرى لنفس البرنامج سيمنع التفعيل.',
       ),
     );
     if (!confirmed) {
@@ -504,6 +522,17 @@ export class CycleManagementPage implements OnInit {
         error: (error: unknown) =>
           this.showError(error, 'Unable to change cycle status.'),
       });
+  }
+
+  private setConfigurationFormsEditable(editable: boolean): void {
+    if (editable) {
+      this.eligibilityForm.enable({ emitEvent: false });
+      this.offeringForm.enable({ emitEvent: false });
+      return;
+    }
+
+    this.eligibilityForm.disable({ emitEvent: false });
+    this.offeringForm.disable({ emitEvent: false });
   }
 
   private clearMessages(): void {
