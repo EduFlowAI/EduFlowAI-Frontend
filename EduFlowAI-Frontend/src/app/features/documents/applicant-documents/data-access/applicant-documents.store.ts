@@ -10,8 +10,8 @@ interface ApplicantDocumentsState {
     requiredTypes: DocumentType[];
     documents: ApplicantDocumentDto[];
     loading: boolean;
-    /** The DocumentType currently being uploaded, or null if nothing is in flight. */
-    uploadingType: DocumentType | null;
+    /** The set of DocumentTypes currently being uploaded. */
+    uploadingTypes: Set<DocumentType>;
     submitting: boolean;
     error: string | null;
 }
@@ -20,7 +20,7 @@ const initialState: ApplicantDocumentsState = {
     requiredTypes: [],
     documents: [],
     loading: false,
-    uploadingType: null,
+    uploadingTypes: new Set<DocumentType>(),
     submitting: false,
     error: null,
 };
@@ -39,7 +39,7 @@ function extractErrorMessage(err: unknown): string {
 export const ApplicantDocumentsStore = signalStore(
     withState(initialState),
 
-    withComputed(({ requiredTypes, documents, uploadingType, submitting }) => {
+    withComputed(({ requiredTypes, documents, uploadingTypes, submitting }) => {
         /** Latest document (if any) per required type. */
         const documentByType = computed(() => {
             const map = new Map<DocumentType, ApplicantDocumentDto>();
@@ -62,7 +62,7 @@ export const ApplicantDocumentsStore = signalStore(
             () =>
                 requiredTypes().length > 0 &&
                 missingTypes().length === 0 &&
-                uploadingType() === null &&
+                uploadingTypes().size === 0 &&
                 !submitting(),
         );
 
@@ -86,15 +86,24 @@ export const ApplicantDocumentsStore = signalStore(
         },
 
         /** Uploads a new document, or overwrites an existing one of the same type (same endpoint). */
-        uploadDocument(applicationId: string, documentType: DocumentType, file: File): void {
-            patchState(store, { uploadingType: documentType, error: null });
+        uploadDocument(applicationId: string, documentType: DocumentType, file: File, onSuccess?: () => void): void {
+            const next = new Set(store.uploadingTypes());
+            next.add(documentType);
+            patchState(store, { uploadingTypes: next, error: null });
 
             api.uploadDocument(applicationId, documentType, file).subscribe({
                 next: () => {
-                    patchState(store, { uploadingType: null });
+                    const updated = new Set(store.uploadingTypes());
+                    updated.delete(documentType);
+                    patchState(store, { uploadingTypes: updated });
+                    onSuccess?.();
                     this.load(applicationId); // refresh document list/status after a successful upload
                 },
-                error: (err) => patchState(store, { error: extractErrorMessage(err), uploadingType: null }),
+                error: (err) => {
+                    const updated = new Set(store.uploadingTypes());
+                    updated.delete(documentType);
+                    patchState(store, { error: extractErrorMessage(err), uploadingTypes: updated });
+                },
             });
         },
 
