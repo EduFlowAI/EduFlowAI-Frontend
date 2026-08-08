@@ -9,7 +9,7 @@ import {
   ApplicationDetailsDto, ApplicationRequestDto, UpdateApplicationPreferencesDto,
   ActiveAdmissionCycleDto, ApplicationListDto, PaginatedResult, QueryParameters,
   EligibilityDetailsDto, SimulatedStageDto, EvaluateEligibilityRequestDto,
-  DocumentReviewResultDto
+  DocumentReviewResultDto, EnrollmentChecklistDto
 } from '../models/application.model';
 
 // 1. Define the state shape tailored for the Applicant Dashboard
@@ -26,6 +26,9 @@ type ApplicationState = {
   stagesResults: SimulatedStageDto[],
   isStatusDetailsLoading: boolean, // Useful for showing spinners on the micro-view
 
+  enrollmentChecklist: EnrollmentChecklistDto | null;
+  isLoadingChecklist: boolean;
+
   isLoading: boolean;
   error: string | null;
 };
@@ -41,9 +44,12 @@ const initialState: ApplicationState = {
   isWithdrawing: false,
 
   eligibilityDetails: null as EligibilityDetailsDto | null,
-    stagesResults: [] as SimulatedStageDto[],
-    isStatusDetailsLoading: false, // Useful for showing spinners on the micro-views
+  stagesResults: [] as SimulatedStageDto[],
+  isStatusDetailsLoading: false, // Useful for showing spinners on the micro-views
   
+  enrollmentChecklist: null,
+  isLoadingChecklist: false,
+
   isLoading: false,
   error: null,
 };
@@ -355,6 +361,36 @@ export const ApplicationsStore = signalStore(
             })
           })
         ))
+      )
+    ),
+
+    /**
+     * Loads the enrollment checklist details for the given application ID
+     */
+    loadEnrollmentChecklist: rxMethod<string>(
+      pipe(
+        tap(() => patchState(store, { isLoadingChecklist: true, error: null })),
+        switchMap((applicationId) => 
+          api.getEnrollmentChecklist(applicationId).pipe(
+            tapResponse({
+              next: (response) => {
+                if (response.isSuccess && response.data) {
+                  patchState(store, { 
+                    enrollmentChecklist: response.data, 
+                    isLoadingChecklist: false 
+                  });
+                }
+              },
+              error: (error: any) => {
+                console.error('Error loading enrollment checklist:', error);
+                patchState(store, { 
+                  error: error.error?.message || 'Failed to load enrollment checklist',
+                  isLoadingChecklist: false 
+                });
+              }
+            })
+          )
+        )
       )
     ),
   }))

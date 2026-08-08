@@ -185,3 +185,24 @@ export interface DocumentReviewResultDto {
     isAgentUncertain: boolean;
     reviewedByUserId?: string | null;
 }
+
+/**
+ * Represents a single task in the enrollment checklist.
+ */
+export interface EnrollmentTaskItemDto {
+    id: string;
+    title: string;
+    status: string; 
+    taskType: string; 
+    subtextMessage?: string;
+    actionUrl?: string;
+  }
+  
+  /**
+   * Represents the full enrollment checklist dashboard.
+   */
+  export interface EnrollmentChecklistDto {
+    completedTasksCount: number;
+    totalTasksCount: number;
+    tasks: EnrollmentTaskItemDto[];
+  }

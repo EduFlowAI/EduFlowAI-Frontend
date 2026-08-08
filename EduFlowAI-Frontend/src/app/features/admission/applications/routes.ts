@@ -40,14 +40,6 @@ export default [
               .then(r => r.APPLICANT_DOCUMENTS_ROUTES),
           title: 'Document Uploads'
         },
-        // The dynamic ':id' route MUST be at the very bottom
-        {
-          path: ':id',  // Add ':' to make it a dynamic route parameter
-          // Lazy loading the standalone component
-          loadComponent: () => import('./pages/applicant-dashboard-page/applicant-dashboard-page')
-            .then(c => c.ApplicantDashboardPage),
-          title: 'Application Dashboard'
-        },
         // Detailed status and document review page route
         {
           path: ':id/status',
@@ -70,6 +62,14 @@ export default [
             import('./../assessment/pages/enrollment-checklist-page/enrollment-checklist-page')
             .then(c => c.EnrollmentChecklistPage),
           title: 'Enrollment Checklist'
+        },
+        // The dynamic ':id' route MUST be at the very bottom
+        {
+          path: ':id',  // Add ':' to make it a dynamic route parameter
+          // Lazy loading the standalone component
+          loadComponent: () => import('./pages/applicant-dashboard-page/applicant-dashboard-page')
+            .then(c => c.ApplicantDashboardPage),
+          title: 'Application Dashboard'
         },
         // Other routes owned by Halim (like application-create-page) will go here
       ]

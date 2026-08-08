@@ -32,7 +32,7 @@
               
               <!-- This link is projected into the [success-action] slot -->
               <a success-action
-                routerLink="/applicant/documents/Upload" 
+                [routerLink]="['/applications', applicationId, 'documents']"
                 class="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md py-3.5 px-8 rounded-lg shadow-sm transition-all duration-200 active:scale-95 flex items-center gap-2">
                 Proceed to Document Upload
                 <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
