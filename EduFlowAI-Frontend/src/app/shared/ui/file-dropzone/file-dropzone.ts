@@ -84,7 +84,13 @@ export class FileDropzone {
 
   protected onDragLeave(event: DragEvent): void {
     event.preventDefault();
-    this.isDragOver.set(false);
+    // dragleave fires on every child element crossing — only reset when
+    // the pointer has genuinely left the dropzone's bounding rect.
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const { clientX: x, clientY: y } = event;
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+      this.isDragOver.set(false);
+    }
   }
 
   protected onDrop(event: DragEvent): void {

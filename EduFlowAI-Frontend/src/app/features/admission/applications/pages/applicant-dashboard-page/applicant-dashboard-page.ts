@@ -24,7 +24,6 @@ export class ApplicantDashboardPage implements OnInit {
 
   ngOnInit(): void {
     // Extract the 'applicationId' parameter from the active route
-    // this.currentApplicationId = this.route.snapshot.paramMap.get('applicationId');
     this.currentApplicationId = this.route.snapshot.paramMap.get('id');
 
     if (this.currentApplicationId) {

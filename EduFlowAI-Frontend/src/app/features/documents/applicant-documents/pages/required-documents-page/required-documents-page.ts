@@ -106,7 +106,13 @@ export class RequiredDocumentsPage implements OnInit {
   }
 
   protected onFileSelected(documentType: DocumentType, file: File): void {
-    this.store.uploadDocument(this.id, documentType, file);
+    this.store.uploadDocument(this.id, documentType, file, () => {
+      // Clear the "replacing" flag so the card flips back to file-info view
+      const next = new Set(this._replacingTypes());
+      if (next.delete(documentType)) {
+        this._replacingTypes.set(next);
+      }
+    });
   }
 
   protected onSubmit(): void {

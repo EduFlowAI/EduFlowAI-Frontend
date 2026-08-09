@@ -19,13 +19,13 @@ export class DocumentsApi {
 
   getRequiredDocumentTypes(applicationId: string): Observable<RequiredDocumentsResponse> {
     return this.http.get<RequiredDocumentsResponse>(
-      `${this.baseUrl}/applications/${applicationId}/documents/required`
+      `${this.baseUrl}/api/applications/${applicationId}/documents/required`
     );
   }
 
   getDocuments(applicationId: string): Observable<{ documents: ApplicantDocumentDto[] }> {
     return this.http.get<{ documents: ApplicantDocumentDto[] }>(
-      `${this.baseUrl}/applications/${applicationId}/documents`
+      `${this.baseUrl}/api/applications/${applicationId}/documents`
     );
   }
 
@@ -39,20 +39,20 @@ export class DocumentsApi {
     formData.append('DocumentType', documentType.toString());
 
     return this.http.post<UploadDocumentResponse>(
-      `${this.baseUrl}/applications/${applicationId}/documents`,
+      `${this.baseUrl}/api/applications/${applicationId}/documents`,
       formData
     );
   }
 
   submitPackage(applicationId: string): Observable<SubmitPackageResponse> {
     return this.http.post<SubmitPackageResponse>(
-      `${this.baseUrl}/applications/${applicationId}/documents/submit`,
+      `${this.baseUrl}/api/applications/${applicationId}/documents/submit`,
       null
     );
   }
 
   downloadFile(documentId: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/documents/${documentId}/file`, {
+    return this.http.get(`${this.baseUrl}/api/documents/${documentId}/file`, {
       responseType: 'blob',
     });
   }

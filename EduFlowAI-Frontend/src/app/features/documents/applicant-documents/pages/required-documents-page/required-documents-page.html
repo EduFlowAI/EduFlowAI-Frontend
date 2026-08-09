@@ -65,7 +65,7 @@
           {{ typeLabel(type) }}
         </h3>
 
-        @if (store.uploadingType() !== type) {
+        @if (!store.uploadingTypes().has(type)) {
         @switch (store.documentByType().get(type)?.status) {
         @case (DocumentStatus.Uploaded) {
         <span class="badge badge--success">
@@ -99,7 +99,7 @@
       </div>
 
       <!-- Currently uploading -->
-      @if (store.uploadingType() === type) {
+      @if (store.uploadingTypes().has(type)) {
       <app-upload-progress [label]="locale.t('documents.page.uploading')" />
       }
 
