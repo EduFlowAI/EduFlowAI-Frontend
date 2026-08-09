@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { environment } from '../../../../../environments/environment.development';
+
 import {
   AssistantMessageRequest,
   AssistantResponse,
@@ -13,11 +15,14 @@ import {
 export class AssistantApiService {
   private readonly http = inject(HttpClient);
 
+  private readonly assistantUrl =
+    `${environment.apiUrl}/api/assistant/message`;
+
   sendMessage(
     request: AssistantMessageRequest,
   ): Observable<AssistantResponse> {
     return this.http.post<AssistantResponse>(
-      '/api/assistant/message',
+      this.assistantUrl,
       request,
     );
   }
