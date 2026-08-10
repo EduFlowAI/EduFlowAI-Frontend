@@ -2,17 +2,9 @@
   <section
     class="chat-popup"
     [class.chat-popup--maximized]="isMaximized()"
-    aria-label="Admission Assistant"
   >
     <header class="chat-header">
       <div class="chat-header__identity">
-        <div
-          class="chat-header__avatar"
-          aria-hidden="true"
-        >
-          AI
-        </div>
-
         <div>
           <h2>Admission Assistant</h2>
           <span>Available 24/7</span>
@@ -101,50 +93,113 @@
               ) {
                 <section class="recommendation-cards">
                   @for (
-                    track of
-                      result.metadata.recommendations;
+                    track of result.metadata.recommendations;
                     track track.trackId
                   ) {
-                    <article class="recommendation-card">
-                      <div
-                        class="recommendation-card__rank"
-                      >
+                    <article
+                      class="recommendation-card"
+                      [class.recommendation-card--selected]="
+                        isTrackSelected(track.trackId)
+                      "
+                    >
+                      <div class="recommendation-card__rank">
                         {{ track.rank }}
                       </div>
 
-                      <div
-                        class="recommendation-card__content"
-                      >
+                      <div class="recommendation-card__content">
                         <h3>{{ track.trackName }}</h3>
                         <p>{{ track.reason }}</p>
                       </div>
 
-                      <button
-                        type="button"
-                        class="recommendation-card__action"
+                      <div
+                        class="recommendation-card__actions"
+                        [class.recommendation-card__actions--single]="
+                          !canOfferComparison()
+                        "
                       >
-                        View details
-                      </button>
+                        @if (canOfferComparison()) {
+                          <button
+                            type="button"
+                            class="recommendation-card__action"
+                            [class.is-selected]="
+                              isTrackSelected(track.trackId)
+                            "
+                            [disabled]="
+                              !isTrackSelected(track.trackId) &&
+                              selectedComparisonTracks().length >= 3
+                            "
+                            (click)="toggleTrackForComparison(track)"
+                          >
+                            @if (isTrackSelected(track.trackId)) {
+                              ✓ Selected
+                            } @else {
+                              Compare
+                            }
+                          </button>
+                        }
+
+                        <button
+                          type="button"
+                          class="recommendation-card__action"
+                          [disabled]="isLoadingTrackDetails()"
+                          (click)="openTrackDetails(track)"
+                        >
+                          {{
+                            isLoadingTrackDetails()
+                              ? 'Loading...'
+                              : 'View details'
+                          }}
+                        </button>
+                      </div>
                     </article>
                   }
                 </section>
-              }
 
-              @if (result.sources.length > 0) {
-                <details class="assistant-message__sources">
-                  <summary>
-                    References ({{ result.sources.length }})
-                  </summary>
+                @if (
+                  canOfferComparison() &&
+                  selectedComparisonTracks().length > 0
+                ) {
+                  <div class="comparison-selection-bar">
+                    <div class="comparison-selection-bar__summary">
+                      <strong>
+                        {{ selectedComparisonTracks().length }}
+                        / 3 selected
+                      </strong>
 
-                  <ul>
-                    @for (
-                      source of result.sources;
-                      track source
-                    ) {
-                      <li>{{ source }}</li>
-                    }
-                  </ul>
-                </details>
+                      @if (!canCompare()) {
+                        <span>
+                          Select at least 2 tracks to compare.
+                        </span>
+                      } @else {
+                        <span>
+                          Ready to compare.
+                        </span>
+                      }
+                    </div>
+
+                    <button
+                      type="button"
+                      class="secondary-action"
+                      (click)="openComparison()"
+                      [disabled]="
+                        !canCompare() ||
+                        isLoadingComparison()
+                      "
+                    >
+                      {{
+                        isLoadingComparison()
+                          ? 'Loading comparison...'
+                          : 'Compare selected'
+                      }}
+                    </button>
+                  </div>
+
+                  @if (comparisonError()) {
+                    <p class="comparison-error">
+                      {{ comparisonError() }}
+                    </p>
+                  }
+                }
               }
 
               @if (
@@ -222,6 +277,271 @@
   </section>
 }
 
+@if (isComparisonOpen()) {
+  <div
+    class="comparison-backdrop"
+    (click)="closeComparison()"
+  >
+    <section
+      class="comparison-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="comparison-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="comparison-modal__header">
+        <div>
+          <h2 id="comparison-title">
+            Compare recommended tracks
+          </h2>
+
+          <p>
+            Review the differences before choosing a track.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="comparison-modal__close"
+          (click)="closeComparison()"
+          aria-label="Close comparison"
+        >
+          ✕
+        </button>
+      </header>
+
+      <div class="comparison-grid">
+        @for (
+          track of comparisonTracks();
+          track track.id
+        ) {
+          <article class="comparison-track">
+            <header class="comparison-track__header">
+              <h3>{{ track.name }}</h3>
+
+              <span class="comparison-track__status">
+                {{
+                  track.isActive
+                    ? 'Active'
+                    : 'Unavailable'
+                }}
+              </span>
+            </header>
+
+            <section class="comparison-track__section">
+              <h4>Why it was recommended</h4>
+
+              <p>
+                {{ recommendationReason(track.id) }}
+              </p>
+            </section>
+
+            <section class="comparison-track__section">
+              <h4>Description</h4>
+
+              <p>
+                {{
+                  track.description ||
+                    'No description available.'
+                }}
+              </p>
+            </section>
+
+            <section class="comparison-track__section">
+              <h4>Prerequisites</h4>
+
+              @if (track.prerequisiteTopics.length > 0) {
+                <ul>
+                  @for (
+                    topic of track.prerequisiteTopics;
+                    track topic
+                  ) {
+                    <li>{{ topic }}</li>
+                  }
+                </ul>
+              } @else {
+                <p>No prerequisites listed.</p>
+              }
+            </section>
+
+            <section class="comparison-track__section">
+              <h4>Available branches</h4>
+
+              @if (track.offerings.length > 0) {
+                <ul class="comparison-branches">
+                  @for (
+                    offering of track.offerings;
+                    track offering.offeringId
+                  ) {
+                    <li>
+                      <strong>
+                        {{ offering.branchName }}
+                      </strong>
+
+                      @if (offering.governorate) {
+                        <span>
+                          {{ offering.governorate }}
+                        </span>
+                      }
+
+                      <small>
+                        Capacity:
+                        {{ offering.capacity }}
+                      </small>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p>No active branch offerings.</p>
+              }
+            </section>
+
+          </article>
+        }
+      </div>
+
+      <footer class="comparison-modal__footer">
+        <p>
+          Recommendations are advisory and do not determine
+          admission eligibility.
+        </p>
+
+        <button
+          type="button"
+          class="secondary-action"
+          (click)="closeComparison()"
+        >
+          Close
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+@if (isTrackDetailsOpen() && selectedTrackDetails()) {
+  <div
+    class="comparison-backdrop"
+    (click)="closeTrackDetails()"
+  >
+    <section
+      class="comparison-modal track-details-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="track-details-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="comparison-modal__header">
+        <div>
+          <h2 id="track-details-title">
+            {{ selectedTrackDetails()!.name }}
+          </h2>
+
+          <p>
+            Recommended track details
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="comparison-modal__close"
+          (click)="closeTrackDetails()"
+          aria-label="Close track details"
+        >
+          ✕
+        </button>
+      </header>
+
+      <div class="track-details-content">
+        @if (selectedTrackRecommendation()?.reason) {
+          <section class="comparison-track__section">
+            <h4>Why it was recommended</h4>
+            <p>
+              {{ selectedTrackRecommendation()!.reason }}
+            </p>
+          </section>
+        }
+
+        <section class="comparison-track__section">
+          <h4>Description</h4>
+          <p>
+            {{
+              selectedTrackDetails()!.description ||
+                'No description available.'
+            }}
+          </p>
+        </section>
+
+        <section class="comparison-track__section">
+          <h4>Prerequisites</h4>
+
+          @if (
+            selectedTrackDetails()!.prerequisiteTopics.length > 0
+          ) {
+            <ul>
+              @for (
+                topic of selectedTrackDetails()!.prerequisiteTopics;
+                track topic
+              ) {
+                <li>{{ topic }}</li>
+              }
+            </ul>
+          } @else {
+            <p>No prerequisites listed.</p>
+          }
+        </section>
+
+        <section class="comparison-track__section">
+          <h4>Available branches</h4>
+
+          @if (selectedTrackDetails()!.offerings.length > 0) {
+            <ul class="comparison-branches">
+              @for (
+                offering of selectedTrackDetails()!.offerings;
+                track offering.offeringId
+              ) {
+                <li>
+                  <strong>
+                    {{ offering.branchName }}
+                  </strong>
+
+                  @if (offering.governorate) {
+                    <span>
+                      {{ offering.governorate }}
+                    </span>
+                  }
+
+                  <small>
+                    Capacity:
+                    {{ offering.capacity }}
+                  </small>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p>No active branch offerings.</p>
+          }
+        </section>
+      </div>
+
+      <footer class="comparison-modal__footer">
+        <p>
+          Recommendations are advisory and do not determine
+          admission eligibility.
+        </p>
+
+        <button
+          type="button"
+          class="secondary-action"
+          (click)="closeTrackDetails()"
+        >
+          Close
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+
 <button
   type="button"
   class="chat-fab"
@@ -241,7 +561,10 @@
     stroke-width="1.8"
     aria-hidden="true"
   >
-    <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"></path>
+    <path
+      d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"
+    ></path>
+
     <path d="M8 9h8M8 13h5"></path>
   </svg>
 </button>

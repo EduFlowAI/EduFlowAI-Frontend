@@ -2,18 +2,22 @@ import { Component, OnInit, computed, effect, inject, signal } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApplicationsStore } from '../../data-access/applications.store'; // Adjust path
-import { TrackService } from '../../data-access/track.service'; // Adjust path
-import { TrackDto, BranchOfferingDto } from '../../models/track.model'; // Adjust path
-import { UpdateApplicationPreferencesDto, PreferenceDto } from '../../models/application.model'; // Adjust path
+import { ApplicationsStore } from '../../data-access/applications.store';
+import { TrackService } from '../../data-access/track.service';
+import { TrackDto, BranchOfferingDto } from '../../models/track.model';
+import { UpdateApplicationPreferencesDto, PreferenceDto } from '../../models/application.model';
 
-// Custom validator to ensure Preference 1 and 2 tracks are different
-function distinctTracksValidator(control: AbstractControl): ValidationErrors | null {
+// Custom validator to ensure Preference 1 and 2 are different
+function distinctPreferencesValidator(control: AbstractControl): ValidationErrors | null {
   const track1 = control.get('preference1.trackId')?.value;
+  const branch1 = control.get('preference1.branchId')?.value;
+  
   const track2 = control.get('preference2.trackId')?.value;
+  const branch2 = control.get('preference2.branchId')?.value;
 
-  if (track1 && track2 && track1 === track2) {
-    return { duplicateTracks: true };
+  // Check if both Track AND Branch are identical in both preferences
+  if (track1 && track2 && branch1 && branch2 && (track1 === track2) && (branch1 === branch2)) {
+    return { duplicatePreferences: true };
   }
   return null;
 }
@@ -42,7 +46,7 @@ export class PreferenceSelectionPage implements OnInit{
       trackId: [''],
       branchId: ['']
     })
-  }, { validators: distinctTracksValidator });
+  }, { validators: distinctPreferencesValidator });
 
   // State signals for tracks and branches
   applicationId = signal<string>('');

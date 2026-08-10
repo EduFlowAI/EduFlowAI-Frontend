@@ -4,21 +4,80 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap, tap } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
 import { ApplicationService } from '../../applications/data-access/application.service'; 
-import { SimulatedStageDto } from '../../applications/models/application.model'; 
+import { SimulatedStageDto, SelectionStage } from '../../applications/models/application.model'; 
 import { AssessmentStageStatus } from '../../../../shared/ui/stage-stepper/stage-stepper'; 
+import { AssessmentService } from './assessment.service';
 
 // Define the shape of our state
 interface AssessmentState {
   stages: SimulatedStageDto[];
   isLoading: boolean;
   error: string | null;
+
+  isOverriding: boolean;
+  overrideError: string | null;
+  overrideSuccessMessage: string | null;
+
+  isSimulating: boolean;
+  simulateError: string | null;
+  bulkSimulateSuccessMessage: string | null;
+  completedStages: number[];
+
+  isAllocating: boolean;
+  allocationError: string | null;
+  allocationSuccessMessage: string | null;
 }
 
 const initialState: AssessmentState = {
   stages: [],
   isLoading: false,
   error: null,
+
+  isOverriding: false,
+  overrideError: null,
+  overrideSuccessMessage: null,
+
+  isSimulating: false,
+  simulateError: null,
+  bulkSimulateSuccessMessage: null,
+  completedStages: [],
+
+  isAllocating: false,
+  allocationError: null,
+  allocationSuccessMessage: null,
 };
+
+// Helper function placed OUTSIDE the store to extract error messages safely
+function extractErrorMessage(err: any, fallbackMessage: string): string {
+  if (!err) return fallbackMessage;
+  
+  // 1. If Angular successfully parsed the JSON body
+  if (err.error && typeof err.error === 'object' && err.error.message) {
+    return err.error.message;
+  }
+  
+  // 2. If the backend returned a stringified JSON that Angular didn't parse
+  if (err.error && typeof err.error === 'string') {
+    try {
+      const parsed = JSON.parse(err.error);
+      if (parsed.message) return parsed.message;
+    } catch {
+      return err.error; // Return the raw text if it's not JSON
+    }
+  }
+  
+  // 3. If an interceptor unwrapped the response or it's a standard Error object
+  if (err.message && !err.message.startsWith('Http failure response')) {
+    return err.message;
+  }
+  
+  // 4. Fallback for ASP.NET Core ProblemDetails
+  if (err.error && err.error.title) {
+    return err.error.title;
+  }
+  
+  return fallbackMessage;
+}
 
 // Helper function placed OUTSIDE the store to fix TypeScript Signal errors
 // It maps the C# StageResult Enum to the frontend AssessmentStageStatus
@@ -102,5 +161,123 @@ export const AssessmentStore = signalStore(
     clearState: () => {
       patchState(store, initialState);
     }
+  })),
+
+  withMethods((store, assessmentService = inject(AssessmentService)) => ({
+    
+    /**
+     * Submits the manual eligibility override request to the backend.
+     */
+    submitEligibilityOverride: rxMethod<{ applicationId: string; reason: string }>(
+      pipe(
+        // Set loading state and clear previous messages
+        tap(() => patchState(store, { isOverriding: true, overrideError: null, overrideSuccessMessage: null })),
+        switchMap(({ applicationId, reason }) =>
+          assessmentService.overrideEligibility(applicationId, reason).pipe(
+            tapResponse({
+              next: (response) => {
+                patchState(store, {
+                  isOverriding: false,
+                  overrideSuccessMessage: response.message || 'Override authorized successfully.'
+                });
+              },
+              error: (err: any) => {
+                patchState(store, {
+                  isOverriding: false,
+                  overrideError: err.error?.message || 'Failed to authorize override. Please try again.'
+                });
+              }
+            })
+          )
+        )
+      )
+    ),
+
+    /**
+     * Helper method to reset the override state when opening/closing the modal.
+     */
+    resetOverrideState: () => {
+      patchState(store, { isOverriding: false, overrideError: null, overrideSuccessMessage: null });
+    },
+
+    /**
+     * Submits the bulk simulate stage request to the backend for an entire cycle.
+     */
+    submitBulkSimulateStage: rxMethod<{ cycleId: string; stage: SelectionStage }>(
+      pipe(
+        tap(() => patchState(store, { isSimulating: true, simulateError: null, bulkSimulateSuccessMessage: null })),
+        switchMap(({ cycleId, stage }) =>
+          assessmentService.bulkSimulateStage(cycleId, stage).pipe(
+            tapResponse({
+              next: (response: any) => {
+                patchState(store, (state) => {
+                  const newStages = state.completedStages.includes(stage) 
+                    ? state.completedStages 
+                    : [...state.completedStages, stage];
+
+                  return {
+                    isSimulating: false,
+                    bulkSimulateSuccessMessage: response.message || 'Bulk simulation executed successfully.',
+                    completedStages: newStages
+                  };
+                });
+              },
+              error: (err: any) => {
+                // Use our new smart extractor!
+                const errorMsg = extractErrorMessage(err, 'Failed to execute bulk simulation. Please check the Cycle ID.');
+                
+                patchState(store, {
+                  isSimulating: false,
+                  simulateError: errorMsg 
+                });
+              }
+            })
+          )
+        )
+      )
+    ),
+
+    /**
+     * Helper method to reset the bulk simulation state.
+     */
+    resetBulkSimulateState: () => {
+      patchState(store, { 
+        isSimulating: false, 
+        simulateError: null, 
+        bulkSimulateSuccessMessage: null,
+        completedStages: [] // <-- Clear the list on reset
+      });
+    },
+
+    /**
+     * Submits the request to run the allocation engine.
+     */
+    submitRunAllocation: rxMethod<string>(
+      pipe(
+        tap(() => patchState(store, { isAllocating: true, allocationError: null, allocationSuccessMessage: null })),
+        switchMap((cycleId) =>
+          assessmentService.runAllocation(cycleId).pipe(
+            tapResponse({
+              next: (response) => {
+                patchState(store, {
+                  isAllocating: false,
+                  allocationSuccessMessage: response.message || 'Allocation engine executed successfully.'
+                });
+              },
+              error: (err: any) => {
+                // Use our new smart extractor here too!
+                const errorMsg = extractErrorMessage(err, 'Failed to run allocation engine.');
+
+                patchState(store, {
+                  isAllocating: false,
+                  allocationError: errorMsg
+                });
+              }
+            })
+          )
+        )
+      )
+    ),
+    
   }))
 );

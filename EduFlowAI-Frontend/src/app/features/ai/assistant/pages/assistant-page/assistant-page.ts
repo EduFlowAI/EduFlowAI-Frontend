@@ -1,9 +1,17 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
+
+import {
+  TrackCatalogItem,
+} from '../../../../admission/catalog/models/track-catalog.model';
+import {
+  TrackCatalogService,
+} from '../../../../admission/catalog/data-access/track-catalog.service';
 
 import {
   ChatMessage,
+  RecommendedTrack,
   RecommendationQuestionKey,
   RecommendationQuestionnaireProgress,
 } from '../../models/assistant.models';
@@ -18,16 +26,53 @@ import { AssistantLauncherService } from '../../services/assistant-launcher.serv
 })
 export class AssistantPage {
   private readonly assistantApi = inject(AssistantApiService);
+
   private readonly assistantLauncher =
     inject(AssistantLauncherService);
+
+  private readonly trackCatalogService =
+    inject(TrackCatalogService);
 
   readonly messages = signal<ChatMessage[]>([]);
   readonly isSending = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
   readonly isOpen = this.assistantLauncher.isOpen;
   readonly isMaximized = signal(false);
+
   readonly activeRecommendationQuestionKey =
     signal<RecommendationQuestionKey | null>(null);
+
+  readonly latestRecommendedTracks =
+    signal<RecommendedTrack[]>([]);
+
+  readonly selectedComparisonTracks =
+    signal<RecommendedTrack[]>([]);
+
+  readonly comparisonTracks =
+    signal<TrackCatalogItem[]>([]);
+
+  readonly isComparisonOpen = signal(false);
+  readonly isLoadingComparison = signal(false);
+  readonly comparisonError = signal<string | null>(null);
+
+  readonly selectedTrackDetails =
+    signal<TrackCatalogItem | null>(null);
+
+  readonly selectedTrackRecommendation =
+    signal<RecommendedTrack | null>(null);
+
+  readonly isTrackDetailsOpen = signal(false);
+  readonly isLoadingTrackDetails = signal(false);
+  readonly trackDetailsError = signal<string | null>(null);
+
+  readonly canCompare = computed(
+    () => this.selectedComparisonTracks().length >= 2,
+  );
+
+  readonly canOfferComparison = computed(
+    () => this.latestRecommendedTracks().length >= 2,
+  );
 
   message = '';
   sessionId: string | null = null;
@@ -94,6 +139,136 @@ export class AssistantPage {
   closeChat(): void {
     this.assistantLauncher.close();
     this.isMaximized.set(false);
+
+    this.closeComparison();
+    this.closeTrackDetails();
+  }
+
+  isTrackSelected(trackId: string): boolean {
+    return this.selectedComparisonTracks().some(
+      track => track.trackId === trackId,
+    );
+  }
+
+  toggleTrackForComparison(track: RecommendedTrack): void {
+    if (!this.canOfferComparison()) {
+      return;
+    }
+
+    const selected = this.selectedComparisonTracks();
+
+    const alreadySelected = selected.some(
+      item => item.trackId === track.trackId,
+    );
+
+    if (alreadySelected) {
+      this.selectedComparisonTracks.set(
+        selected.filter(
+          item => item.trackId !== track.trackId,
+        ),
+      );
+
+      return;
+    }
+
+    if (selected.length >= 3) {
+      return;
+    }
+
+    this.selectedComparisonTracks.set([
+      ...selected,
+      track,
+    ]);
+  }
+
+  openTrackDetails(track: RecommendedTrack): void {
+    if (this.isLoadingTrackDetails()) {
+      return;
+    }
+
+    this.isLoadingTrackDetails.set(true);
+    this.trackDetailsError.set(null);
+    this.selectedTrackDetails.set(null);
+    this.selectedTrackRecommendation.set(track);
+
+    this.trackCatalogService
+      .getTrack(track.trackId)
+      .pipe(
+        finalize(() => {
+          this.isLoadingTrackDetails.set(false);
+        }),
+      )
+      .subscribe({
+        next: trackDetails => {
+          this.selectedTrackDetails.set(trackDetails);
+          this.isTrackDetailsOpen.set(true);
+        },
+        error: () => {
+          this.selectedTrackRecommendation.set(null);
+
+          this.trackDetailsError.set(
+            'Could not load track details. Please try again.',
+          );
+        },
+      });
+  }
+
+  closeTrackDetails(): void {
+    this.isTrackDetailsOpen.set(false);
+    this.selectedTrackDetails.set(null);
+    this.selectedTrackRecommendation.set(null);
+    this.trackDetailsError.set(null);
+  }
+
+  openComparison(): void {
+    const selected = this.selectedComparisonTracks();
+
+    if (
+      !this.canOfferComparison() ||
+      selected.length < 2 ||
+      this.isLoadingComparison()
+    ) {
+      return;
+    }
+
+    this.isLoadingComparison.set(true);
+    this.comparisonError.set(null);
+    this.comparisonTracks.set([]);
+
+    forkJoin(
+      selected.map(track =>
+        this.trackCatalogService.getTrack(track.trackId),
+      ),
+    )
+      .pipe(
+        finalize(() => {
+          this.isLoadingComparison.set(false);
+        }),
+      )
+      .subscribe({
+        next: tracks => {
+          this.comparisonTracks.set([...tracks]);
+          this.isComparisonOpen.set(true);
+        },
+        error: () => {
+          this.comparisonError.set(
+            'Could not load track details for comparison.',
+          );
+        },
+      });
+  }
+
+  closeComparison(): void {
+    this.isComparisonOpen.set(false);
+    this.comparisonError.set(null);
+  }
+
+  recommendationReason(trackId: string): string {
+    return (
+      this.selectedComparisonTracks().find(
+        track => track.trackId === trackId,
+      )?.reason ?? ''
+    );
   }
 
   private applyRecommendationAnswer(
@@ -239,15 +414,53 @@ export class AssistantPage {
           const recommendationResult =
             response.results.find(
               result =>
+                result.intent === 'recommendation',
+            );
+
+          const collectingRecommendationResult =
+            response.results.find(
+              result =>
                 result.intent === 'recommendation' &&
                 result.metadata.state ===
                   'collecting_answers',
             );
 
           this.activeRecommendationQuestionKey.set(
-            recommendationResult?.metadata.questionKey ??
-              null,
+            collectingRecommendationResult
+              ?.metadata.questionKey ?? null,
           );
+
+          if (
+            recommendationResult &&
+            Array.isArray(
+              recommendationResult.metadata.recommendations,
+            )
+          ) {
+            const recommendations =
+              recommendationResult.metadata.recommendations as
+                RecommendedTrack[];
+
+            this.latestRecommendedTracks.set(
+              recommendations,
+            );
+
+            if (recommendations.length < 2) {
+              this.selectedComparisonTracks.set([]);
+              this.comparisonTracks.set([]);
+              this.closeComparison();
+            } else {
+              const recommendationIds = new Set(
+                recommendations.map(track => track.trackId),
+              );
+
+              this.selectedComparisonTracks.update(
+                selected =>
+                  selected.filter(track =>
+                    recommendationIds.has(track.trackId),
+                  ),
+              );
+            }
+          }
 
           this.messages.update(messages => [
             ...messages,

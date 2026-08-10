@@ -121,9 +121,9 @@
           <!-- Preference 2 -->
           <div formGroupName="preference2" 
                class="bg-surface-container-lowest border rounded-xl p-6 shadow-sm relative overflow-hidden"
-               [ngClass]="preferencesForm.errors?.['duplicateTracks'] ? 'border-error' : 'border-outline-variant'">
+               [ngClass]="preferencesForm.errors?.['duplicatePreferences'] ? 'border-error' : 'border-outline-variant'">
             <div class="absolute top-0 left-0 w-1 h-full" 
-                 [ngClass]="preferencesForm.errors?.['duplicateTracks'] ? 'bg-error' : (store.canEdit() ? 'bg-surface-variant' : 'bg-surface-variant')"></div>
+                 [ngClass]="preferencesForm.errors?.['duplicatePreferences'] ? 'bg-error' : (store.canEdit() ? 'bg-surface-variant' : 'bg-surface-variant')"></div>
             
             <div class="flex justify-between items-start mb-6 border-b border-surface-variant pb-4">
               <div class="flex items-center gap-3">
@@ -140,11 +140,11 @@
               }
             </div>
 
-            <!-- Validation Error Message for Duplicate Tracks -->
-            @if (preferencesForm.errors?.['duplicateTracks'] && store.canEdit()) {
+            <!-- Validation Error Message for Duplicate Preferences -->
+            @if (preferencesForm.errors?.['duplicatePreferences'] && store.canEdit()) {
               <div class="mb-6 p-3 bg-error-container text-on-error-container rounded-md flex items-start gap-2 border border-error/20">
                 <span class="material-symbols-outlined text-error mt-0.5">error</span>
-                <p class="font-body-sm text-body-sm">You cannot select the same track for both preferences. Please choose a different track for your backup choice.</p>
+                <p class="font-body-sm text-body-sm">You cannot select the exact same track and branch combination for both preferences. Please choose a different track or branch for your backup choice.</p>
               </div>
             }
 
@@ -154,14 +154,14 @@
                 <div class="relative">
                   <select formControlName="trackId" (change)="onTrackChange(2)"
                           class="w-full bg-surface-container-lowest border border-outline rounded-md px-4 py-3 text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary appearance-none"
-                          [class.border-error]="preferencesForm.errors?.['duplicateTracks']">
+                          [class.border-error]="preferencesForm.errors?.['duplicatePreferences']">
                     <option value="">None (Skip Backup)</option>
                     @for (track of availableTracks(); track track.id) {
                       <option [value]="track.id">{{ track.name }}</option>
                     }
                   </select>
                   <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
-                        [class.text-error]="preferencesForm.errors?.['duplicateTracks']">expand_more</span>
+                        [class.text-error]="preferencesForm.errors?.['duplicatePreferences']">expand_more</span>
                 </div>
               </div>
 
@@ -169,13 +169,15 @@
                 <label class="block font-label-md text-label-md text-on-surface">Preferred Branch</label>
                 <div class="relative">
                   <select formControlName="branchId"
-                          class="w-full bg-surface-container-lowest border border-outline rounded-md px-4 py-3 text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary appearance-none">
+                          class="w-full bg-surface-container-lowest border border-outline rounded-md px-4 py-3 text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary appearance-none"
+                          [class.border-error]="preferencesForm.errors?.['duplicatePreferences']">
                     <option value="" disabled>Choose a branch...</option>
                     @for (branch of availableBranches2(); track branch.branchId) {
                       <option [value]="branch.branchId">{{ branch.branchName }}</option>
                     }
                   </select>
-                  <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+                  <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
+                        [class.text-error]="preferencesForm.errors?.['duplicatePreferences']">expand_more</span>
                 </div>
               </div>
             </div>

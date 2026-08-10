@@ -9,6 +9,11 @@ export interface ApplicationDashboardSummary {
     currentStatus: string;
     eligibilityResult: string;
     statusMessage: string;
+
+    // Fields for Allocation Outcomes
+    trackName?: string;
+    branchName?: string;
+    waitlistPosition?: number;
     
     // Fields for the dynamic timeline
     timelineProgressPercentage: number;
