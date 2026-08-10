@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HubConnection, HubConnectionState } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
-
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import { SignalrConnection } from '../../../../core/realtime/signalr-connection';
 import {
   NotificationCreatedMessage,
@@ -20,8 +20,15 @@ type NotificationCreatedEnvelope = Partial<NotificationCreatedMessage> & {
 
 @Injectable({ providedIn: 'root' })
 export class NotificationRealtimeService {
+  // private readonly connection: HubConnection =
+  //   inject(SignalrConnection).create('/hubs/notifications');
+  private readonly backendUrl =
+    inject(RuntimeConfig).apiBaseUrl.replace(/\/api$/i, '');
+
   private readonly connection: HubConnection =
-    inject(SignalrConnection).create('/hubs/notifications');
+    inject(SignalrConnection).create(
+      `${this.backendUrl}/hubs/notifications`,
+    );
   private readonly created = new Subject<NotificationItem>();
   private subscribers = 0;
   private starting = false;
