@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 
 import {
   MarkAllReadResponse,
@@ -26,7 +27,8 @@ const TYPES_BY_VALUE: Record<number, NotificationType> = {
 @Injectable({ providedIn: 'root' })
 export class NotificationApi {
   private readonly http = inject(HttpClient);
-  private readonly notificationsUrl = '/api/communication/notifications';
+  private readonly notificationsUrl =
+    `${inject(RuntimeConfig).apiBaseUrl}/communication/notifications`;
 
   getNotifications(query: NotificationQuery): Observable<PaginatedResult<NotificationItem>> {
     let params = new HttpParams().set('Page', query.page).set('PageSize', query.pageSize);

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
-
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import {
   PaginatedReplacementRequests,
   ReplacementRequestItem,
@@ -26,8 +26,9 @@ const STATUS_BY_VALUE: Record<number, ReplacementRequestStatus> = {
 @Injectable({ providedIn: 'root' })
 export class ReplacementRequestApi {
   private readonly http = inject(HttpClient);
+  private readonly apiBaseUrl = inject(RuntimeConfig).apiBaseUrl;
   private readonly applicantRequestsUrl =
-    '/api/ReplacementRequest/applicant/replacement-requests';
+    `${this.apiBaseUrl}/ReplacementRequest/applicant/replacement-requests`;
 
   getAll(): Observable<ReplacementRequestItem[]> {
     const pageSize = 100;
@@ -60,7 +61,7 @@ export class ReplacementRequestApi {
     body.append('file', file, file.name);
 
     return this.http.post<ReplacementUploadResponse>(
-      `/api/replacement-requests/${requestId}/upload`,
+      `${this.apiBaseUrl}/replacement-requests/${requestId}/upload`,
       body,
     );
   }
