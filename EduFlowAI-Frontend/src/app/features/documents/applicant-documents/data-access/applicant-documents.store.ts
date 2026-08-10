@@ -5,13 +5,14 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 
 import { DocumentsApi } from './documents.api';
 import { ApplicantDocumentDto, DocumentStatus, DocumentType } from '../models/Document.model';
+import { Router } from '@angular/router';
 
 interface ApplicantDocumentsState {
     requiredTypes: DocumentType[];
     documents: ApplicantDocumentDto[];
     loading: boolean;
-    /** The DocumentType currently being uploaded, or null if nothing is in flight. */
-    uploadingType: DocumentType | null;
+    /** The set of DocumentTypes currently being uploaded. */
+    uploadingTypes: Set<DocumentType>;
     submitting: boolean;
     error: string | null;
 }
@@ -20,7 +21,7 @@ const initialState: ApplicantDocumentsState = {
     requiredTypes: [],
     documents: [],
     loading: false,
-    uploadingType: null,
+    uploadingTypes: new Set<DocumentType>(),
     submitting: false,
     error: null,
 };
@@ -30,6 +31,8 @@ function extractErrorMessage(err: unknown): string {
     return httpError?.error?.error ?? 'Something went wrong. Please try again.';
 }
 
+
+
 /**
  * Route-scoped state for the applicant-documents feature.
  * No `{ providedIn: 'root' }` — provide this in the page/route's own `providers`
@@ -37,9 +40,10 @@ function extractErrorMessage(err: unknown): string {
  * matching how it was scoped before this refactor.
  */
 export const ApplicantDocumentsStore = signalStore(
+
     withState(initialState),
 
-    withComputed(({ requiredTypes, documents, uploadingType, submitting }) => {
+    withComputed(({ requiredTypes, documents, uploadingTypes, submitting }) => {
         /** Latest document (if any) per required type. */
         const documentByType = computed(() => {
             const map = new Map<DocumentType, ApplicantDocumentDto>();
@@ -62,14 +66,14 @@ export const ApplicantDocumentsStore = signalStore(
             () =>
                 requiredTypes().length > 0 &&
                 missingTypes().length === 0 &&
-                uploadingType() === null &&
+                uploadingTypes().size === 0 &&
                 !submitting(),
         );
 
         return { documentByType, missingTypes, canSubmit };
     }),
 
-    withMethods((store, api = inject(DocumentsApi)) => ({
+    withMethods((store, api = inject(DocumentsApi), router = inject(Router)) => ({
         /** Loads both the required-types list and the applicant's existing documents. */
         load(applicationId: string): void {
             patchState(store, { loading: true, error: null });
@@ -86,15 +90,24 @@ export const ApplicantDocumentsStore = signalStore(
         },
 
         /** Uploads a new document, or overwrites an existing one of the same type (same endpoint). */
-        uploadDocument(applicationId: string, documentType: DocumentType, file: File): void {
-            patchState(store, { uploadingType: documentType, error: null });
+        uploadDocument(applicationId: string, documentType: DocumentType, file: File, onSuccess?: () => void): void {
+            const next = new Set(store.uploadingTypes());
+            next.add(documentType);
+            patchState(store, { uploadingTypes: next, error: null });
 
             api.uploadDocument(applicationId, documentType, file).subscribe({
                 next: () => {
-                    patchState(store, { uploadingType: null });
+                    const updated = new Set(store.uploadingTypes());
+                    updated.delete(documentType);
+                    patchState(store, { uploadingTypes: updated });
+                    onSuccess?.();
                     this.load(applicationId); // refresh document list/status after a successful upload
                 },
-                error: (err) => patchState(store, { error: extractErrorMessage(err), uploadingType: null }),
+                error: (err) => {
+                    const updated = new Set(store.uploadingTypes());
+                    updated.delete(documentType);
+                    patchState(store, { error: extractErrorMessage(err), uploadingTypes: updated });
+                },
             });
         },
 
@@ -105,7 +118,9 @@ export const ApplicantDocumentsStore = signalStore(
                 next: (res) => {
                     patchState(store, { submitting: false });
                     onSuccess?.(res.submittedCount);
-                    this.load(applicationId); // refresh statuses (Uploaded -> Verifying)
+                    // navigate to page application/:id
+                    router.navigate(['/application', applicationId]);
+                    // this.load(applicationId); // refresh statuses (Uploaded -> Verifying)
                 },
                 error: (err) => patchState(store, { error: extractErrorMessage(err), submitting: false }),
             });

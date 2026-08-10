@@ -413,6 +413,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
     // Shared UI — shared/ui/file-dropzone
     'common.fileDropzone.cta': 'Click to upload or drag and drop',
     'common.fileDropzone.hint': '{{types}}, max {{size}}MB',
+    'common.fileDropzone.dropHere': 'Drop it here!',
     'common.fileDropzone.errorType': 'Unsupported file type. Allowed: {{allowed}}',
     'common.fileDropzone.errorSize': 'File too large. Max {{size}}MB.',
 
@@ -846,6 +847,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
 
     'common.fileDropzone.cta': 'انقر للتحميل أو اسحب وأفلت الملف هنا',
     'common.fileDropzone.hint': '{{types}}، بحد أقصى {{size}} ميجابايت',
+    'common.fileDropzone.dropHere': 'أفلت الملف هنا!',
     'common.fileDropzone.errorType': 'نوع الملف غير مدعوم. الأنواع المسموحة: {{allowed}}',
     'common.fileDropzone.errorSize': 'حجم الملف كبير جدًا. الحد الأقصى {{size}} ميجابايت.',
 
