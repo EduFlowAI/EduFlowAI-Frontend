@@ -53,10 +53,13 @@
 
   <!-- FINAL RESULT CARD INTEGRATION -->
   @if (summary.currentStatus === 'Admitted' || summary.currentStatus === 'Waitlisted' || summary.currentStatus === 'NotSelected') {
-    <!-- Pass the currentApplicationId to the card component -->
+    <!-- Pass the currentApplicationId and the new allocation details to the card component -->
     <app-final-result-card 
         [status]="summary.currentStatus"
-        [applicationId]="currentApplicationId">
+        [applicationId]="currentApplicationId"
+        [trackName]="summary.trackName || 'TBD'"
+        [branchName]="summary.branchName || 'TBD'"
+        [waitlistPosition]="summary.waitlistPosition || 0">
     </app-final-result-card>
   }
 

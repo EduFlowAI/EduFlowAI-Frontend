@@ -196,13 +196,24 @@ export interface EnrollmentTaskItemDto {
     taskType: string; 
     subtextMessage?: string;
     actionUrl?: string;
-  }
-  
-  /**
-   * Represents the full enrollment checklist dashboard.
-   */
-  export interface EnrollmentChecklistDto {
+}
+
+/**
+ * Represents the full enrollment checklist dashboard.
+ */
+export interface EnrollmentChecklistDto {
     completedTasksCount: number;
     totalTasksCount: number;
     tasks: EnrollmentTaskItemDto[];
-  }
+}
+
+/**
+ * Enum representing the assessment stages, mapping directly to C# SelectionStage.
+ */
+export enum SelectionStage {
+    None = 0,
+    EnglishExamAndIq = 1,
+    ProgrammingExam = 2,
+    TechnicalInterview = 3,
+    SoftSkillsInterview = 4
+}
