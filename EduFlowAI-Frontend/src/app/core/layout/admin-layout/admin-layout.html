@@ -25,13 +25,25 @@
         <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
         {{ text('Overview', 'نظرة عامة') }}
       </a>
+      <a routerLink="/admin/admission/institutions" routerLinkActive="is-active">
+        <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
+        {{ text('Institutions', 'المؤسسات') }}
+      </a>
       <a routerLink="/admin/admission/programs" routerLinkActive="is-active">
         <span class="material-symbols-outlined" aria-hidden="true">school</span>
         {{ text('Programs', 'البرامج') }}
       </a>
-      <a routerLink="/admin/admission/catalog" routerLinkActive="is-active">
-        <span class="material-symbols-outlined" aria-hidden="true">hub</span>
-        {{ text('Tracks & branches', 'المسارات والفروع') }}
+      <a routerLink="/admin/admission/document-requirements" routerLinkActive="is-active">
+        <span class="material-symbols-outlined" aria-hidden="true">description</span>
+        {{ text('Document Requirements', 'المستندات المطلوبة') }}
+      </a>
+      <a routerLink="/admin/admission/tracks" routerLinkActive="is-active">
+        <span class="material-symbols-outlined" aria-hidden="true">route</span>
+        {{ text('Tracks', 'المسارات') }}
+      </a>
+      <a routerLink="/admin/admission/branches" routerLinkActive="is-active">
+        <span class="material-symbols-outlined" aria-hidden="true">apartment</span>
+        {{ text('Branches', 'الفروع') }}
       </a>
       <a routerLink="/admin/admission/cycles" routerLinkActive="is-active">
         <span class="material-symbols-outlined" aria-hidden="true">event_note</span>

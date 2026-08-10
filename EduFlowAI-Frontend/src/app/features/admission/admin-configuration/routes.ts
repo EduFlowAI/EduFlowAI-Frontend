@@ -10,20 +10,49 @@ export const ADMISSION_ADMIN_ROUTES: Routes = [
       ),
   },
   {
+    path: 'institutions',
+    title: 'Institutions | EduFlow AI',
+    loadComponent: () =>
+      import('./institution-management/institution-management-page').then(
+        (component) => component.InstitutionManagementPage,
+      ),
+  },
+  {
     path: 'programs',
-    title: 'Programs & requirements | EduFlow AI',
+    title: 'Programs | EduFlow AI',
     loadComponent: () =>
       import('./program-management/program-management-page').then(
         (component) => component.ProgramManagementPage,
       ),
   },
   {
-    path: 'catalog',
-    title: 'Tracks & branches | EduFlow AI',
+    path: 'document-requirements',
+    title: 'Document Requirements | EduFlow AI',
     loadComponent: () =>
-      import('./catalog-management/catalog-management-page').then(
-        (component) => component.CatalogManagementPage,
+      import('./document-requirements/document-requirements-page').then(
+        (component) => component.DocumentRequirementsPage,
       ),
+  },
+  {
+    path: 'tracks',
+    title: 'Tracks | EduFlow AI',
+    loadComponent: () =>
+      import('./track-management/track-management-page').then(
+        (component) => component.TrackManagementPage,
+      ),
+  },
+  {
+    path: 'branches',
+    title: 'Branches | EduFlow AI',
+    loadComponent: () =>
+      import('./branch-management/branch-management-page').then(
+        (component) => component.BranchManagementPage,
+      ),
+  },
+  {
+    path: 'catalog',
+    redirectTo: 'tracks',
+    pathMatch: 'full',
   },
   {
     path: 'cycles',

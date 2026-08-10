@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Observable, finalize, forkJoin } from 'rxjs';
 
 import { AdmissionAdminCopy } from '../admission-admin.copy';
@@ -26,7 +25,7 @@ import { admissionAdminErrorMessage } from '../utils/admission-admin-error.util'
 
 @Component({
   selector: 'app-cycle-management-page',
-  imports: [ReactiveFormsModule, RouterLink, RouterLinkActive],
+  imports: [ReactiveFormsModule],
   templateUrl: './cycle-management-page.html',
   styleUrl: '../admin-management.scss',
 })
@@ -47,6 +46,7 @@ export class CycleManagementPage implements OnInit {
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly success = signal<string | null>(null);
+  protected readonly activeSubTab = signal<'overview' | 'eligibility' | 'offerings'>('overview');
 
   protected readonly selectedCycle = computed(() =>
     this.cycles().find((cycle) => cycle.id === this.selectedCycleId()) ?? null,
@@ -123,17 +123,14 @@ export class CycleManagementPage implements OnInit {
             this.cycleForm.controls.programId.setValue(programs[0].id);
           }
 
-          const requestedCycleId = preferredCycleId || this.selectedCycleId();
-          const requestedCycleExists = cycles.some(
-            (cycle) => cycle.id === requestedCycleId,
-          );
-          const cycleId = requestedCycleExists
-            ? requestedCycleId
-            : (cycles.find((cycle) => cycle.status === CycleStatus.Active)?.id ??
-              cycles[0]?.id ??
-              '');
-
-          this.selectCycle(cycleId);
+          // Only auto-select a cycle when we were asked to land on a specific
+          // one (e.g. after creating or saving). On the initial page open
+          // (no preferredCycleId) we stay on the list view so the user can
+          // pick the cycle they want.
+          if (preferredCycleId) {
+            const exists = cycles.some((c) => c.id === preferredCycleId);
+            this.selectCycle(exists ? preferredCycleId : '');
+          }
         },
         error: (error: unknown) =>
           this.showError(error, 'Unable to load cycle configuration.'),
@@ -200,6 +197,7 @@ export class CycleManagementPage implements OnInit {
 
   protected selectCycle(cycleId: string): void {
     this.selectedCycleId.set(cycleId);
+    this.activeSubTab.set('overview');
     const cycle = this.cycles().find((item) => item.id === cycleId);
 
     if (!cycle) {
@@ -239,6 +237,17 @@ export class CycleManagementPage implements OnInit {
     // Draft is the only editable configuration state. Active/Closed must
     // look read-only as well as reject writes.
     this.setConfigurationFormsEditable(cycle.status === CycleStatus.Draft);
+  }
+
+  protected deselectCycle(): void {
+    this.selectedCycleId.set('');
+    this.activeSubTab.set('overview');
+    this.clearMessages();
+  }
+
+  protected setSubTab(tab: 'overview' | 'eligibility' | 'offerings'): void {
+    this.activeSubTab.set(tab);
+    this.clearMessages();
   }
 
   protected saveEligibility(): void {
