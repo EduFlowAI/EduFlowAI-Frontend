@@ -33,6 +33,13 @@ export const ADMISSION_ADMIN_ROUTES: Routes = [
         (component) => component.CycleManagementPage,
       ),
   },
+  // Load the assessment routes lazily when the URL contains 'assessment'
+  {
+    path: 'assessment',
+    title: 'Assessment & Operations',
+    loadChildren: () =>
+      import('../assessment/routes').then((m) => m.default),
+  }
 ];
 
 export default ADMISSION_ADMIN_ROUTES;

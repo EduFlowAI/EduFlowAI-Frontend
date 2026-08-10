@@ -121,12 +121,22 @@
               <dd>{{ data.activeCycleCapacity }}</dd>
             </div>
           </dl>
-          <a class="primary-link" routerLink="/admin/admission/cycles">
-            {{ copy.text('Manage cycle', 'إدارة الدورة') }}
-            <span class="material-symbols-outlined" aria-hidden="true">
-              {{ copy.isRtl() ? 'arrow_back' : 'arrow_forward' }}
-            </span>
-          </a>
+          
+          <!-- Action buttons container -->
+          <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem; flex-wrap: wrap;">
+            <a class="primary-link" routerLink="/admin/admission/cycles">
+              {{ copy.text('Manage cycle', 'إدارة الدورة') }}
+              <span class="material-symbols-outlined" aria-hidden="true">
+                {{ copy.isRtl() ? 'arrow_back' : 'arrow_forward' }}
+              </span>
+            </a>
+            
+            <!-- Demo Tools Button routing to our new simulation page and passing the cycleId -->
+            <a class="secondary-button" routerLink="/admin/admission/assessment/simulate" [queryParams]="{ cycleId: cycle.id }" title="Demo Tools: Simulate & Allocate">
+              <span class="material-symbols-outlined" aria-hidden="true">magic_button</span>
+              {{ copy.text('Demo: Simulate & Allocate', 'محاكاة وتنسيق (للعرض)') }}
+            </a>
+          </div>
         } @else {
           <p class="empty-copy">
             {{
