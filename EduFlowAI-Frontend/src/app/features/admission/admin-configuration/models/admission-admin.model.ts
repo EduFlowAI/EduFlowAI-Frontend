@@ -10,7 +10,6 @@ export interface InstitutionDto {
   name: string;
   code: string;
   programCount: number;
-  isSourceManaged: boolean;
 }
 
 export interface ProgramDto {
@@ -22,7 +21,6 @@ export interface ProgramDto {
   durationMonths: number;
   trackCount: number;
   cycleCount: number;
-  isSourceManaged: boolean;
 }
 
 export interface CreateInstitutionRequest {
@@ -90,7 +88,6 @@ export interface AdminTrackDto {
   graduationYearLimitYears: number | null;
   prerequisiteTopics: string[];
   isActive: boolean;
-  isSourceManaged: boolean;
   locations: TrackLocationDto[];
   offerings: BranchOfferingDto[];
 }
@@ -129,7 +126,6 @@ export interface BranchDto {
   name: string;
   governorate: string | null;
   isActive: boolean;
-  isSourceManaged: boolean;
   isOfficialIntake47Location: boolean;
 }
 

@@ -74,9 +74,6 @@ export class InstitutionManagementPage implements OnInit {
 
   protected openDrawer(institution?: InstitutionDto): void {
     this.clearMessages();
-    if (institution?.isSourceManaged) {
-      return;
-    }
     if (institution) {
       this.editingInstitution.set(institution);
       this.institutionForm.setValue({

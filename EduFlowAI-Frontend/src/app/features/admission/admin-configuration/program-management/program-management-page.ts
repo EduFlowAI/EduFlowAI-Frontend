@@ -83,9 +83,6 @@ export class ProgramManagementPage implements OnInit {
 
   protected openDrawer(program?: ProgramDto): void {
     this.clearMessages();
-    if (program?.isSourceManaged) {
-      return;
-    }
     if (program) {
       this.editingProgram.set(program);
       this.programForm.setValue({
@@ -157,9 +154,6 @@ export class ProgramManagementPage implements OnInit {
   }
 
   protected deleteProgram(program: ProgramDto): void {
-    if (program.isSourceManaged) {
-      return;
-    }
     this.clearMessages();
 
     const confirmed = window.confirm(

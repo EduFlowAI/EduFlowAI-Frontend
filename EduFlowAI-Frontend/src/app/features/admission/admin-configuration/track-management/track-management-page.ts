@@ -30,12 +30,7 @@ export class TrackManagementPage implements OnInit {
   protected readonly searchQuery = signal('');
   protected readonly drawerOpen = signal(false);
   protected readonly editingTrack = signal<AdminTrackDto | null>(null);
-  protected readonly editingSourceManagedTrack = computed(
-    () => this.editingTrack()?.isSourceManaged === true,
-  );
-  protected readonly editablePrograms = computed(() =>
-    this.programs().filter((program) => !program.isSourceManaged),
-  );
+  protected readonly editablePrograms = computed(() => this.programs());
 
   protected readonly filteredTracks = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -109,23 +104,15 @@ export class TrackManagementPage implements OnInit {
         prerequisiteTopics: track.prerequisiteTopics.join(', '),
         isActive: track.isActive,
       });
-      // Tracks cannot be moved between programs after creation. Official
-      // Intake-47 catalog fields are managed by the authoritative source.
+      // Tracks cannot be moved between programs after creation.
       this.trackForm.controls.programId.disable();
-      this.setSourceManagedFieldsDisabled(track.isSourceManaged);
     } else {
       const program = this.editablePrograms()[0];
       if (!program) {
-        this.error.set(
-          this.copy.text(
-            'The available program is source-managed. Create a separate program before adding custom tracks.',
-            'البرنامج المتاح يدار من المصدر. أنشئ برنامجًا منفصلًا قبل إضافة مسارات مخصصة.',
-          ),
-        );
+        this.error.set(this.copy.text('Create a program before adding tracks.', 'أنشئ برنامجًا قبل إضافة المسارات.'));
         return;
       }
       this.editingTrack.set(null);
-      this.setSourceManagedFieldsDisabled(false);
       this.trackForm.reset({
         programId: program.id,
         name: '',
@@ -141,7 +128,6 @@ export class TrackManagementPage implements OnInit {
   protected closeDrawer(): void {
     this.drawerOpen.set(false);
     this.editingTrack.set(null);
-    this.setSourceManagedFieldsDisabled(false);
     this.trackForm.controls.programId.enable();
     this.trackForm.reset({
       programId: this.editablePrograms()[0]?.id ?? '',
@@ -163,9 +149,6 @@ export class TrackManagementPage implements OnInit {
     const value = this.trackForm.getRawValue();
     const topics = this.parseTopics(value.prerequisiteTopics);
     const editing = this.editingTrack();
-    if (editing?.isSourceManaged) {
-      return;
-    }
     const common = {
       name: value.name.trim(),
       description: value.description.trim() || null,
@@ -205,23 +188,6 @@ export class TrackManagementPage implements OnInit {
           .filter(Boolean),
       ),
     ].slice(0, 50);
-  }
-
-  private setSourceManagedFieldsDisabled(disabled: boolean): void {
-    const controls = [
-      this.trackForm.controls.name,
-      this.trackForm.controls.description,
-      this.trackForm.controls.prerequisiteTopics,
-      this.trackForm.controls.isActive,
-    ];
-
-    for (const control of controls) {
-      if (disabled) {
-        control.disable();
-      } else {
-        control.enable();
-      }
-    }
   }
 
   private clearMessages(): void {

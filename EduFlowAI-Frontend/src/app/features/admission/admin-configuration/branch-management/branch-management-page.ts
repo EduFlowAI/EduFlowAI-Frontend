@@ -75,9 +75,6 @@ export class BranchManagementPage implements OnInit {
 
   protected openDrawer(branch?: BranchDto): void {
     this.clearMessages();
-    if (branch?.isSourceManaged) {
-      return;
-    }
     if (branch) {
       this.editingBranch.set(branch);
       this.branchForm.setValue({

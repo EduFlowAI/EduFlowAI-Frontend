@@ -41,14 +41,7 @@ export class AdmissionAdminApiService {
   }
 
   getInstitutions(): Observable<readonly InstitutionDto[]> {
-    return this.get<InstitutionDto[]>('/api/admin/institutions').pipe(
-      map((institutions) =>
-        institutions.map((institution) => ({
-          ...institution,
-          isSourceManaged: institution.isSourceManaged ?? false,
-        })),
-      ),
-    );
+    return this.get<InstitutionDto[]>('/api/admin/institutions');
   }
 
   createInstitution(request: CreateInstitutionRequest): Observable<InstitutionDto> {
@@ -63,14 +56,7 @@ export class AdmissionAdminApiService {
   }
 
   getPrograms(): Observable<readonly ProgramDto[]> {
-    return this.get<ProgramDto[]>('/api/admin/programs').pipe(
-      map((programs) =>
-        programs.map((program) => ({
-          ...program,
-          isSourceManaged: program.isSourceManaged ?? false,
-        })),
-      ),
-    );
+    return this.get<ProgramDto[]>('/api/admin/programs');
   }
 
   createProgram(request: CreateProgramRequest): Observable<ProgramDto> {
@@ -124,7 +110,6 @@ export class AdmissionAdminApiService {
       map((branches) =>
         branches.map((branch) => ({
           ...branch,
-          isSourceManaged: branch.isSourceManaged ?? false,
           isOfficialIntake47Location: branch.isOfficialIntake47Location ?? false,
         })),
       ),
@@ -231,7 +216,6 @@ export class AdmissionAdminApiService {
       officialTrackId: track.officialTrackId ?? null,
       officialTrackUrl: track.officialTrackUrl ?? null,
       isOfficialIntake47: track.isOfficialIntake47 ?? false,
-      isSourceManaged: track.isSourceManaged ?? false,
       intake: track.intake ?? null,
       year: track.year ?? null,
       category: track.category ?? null,

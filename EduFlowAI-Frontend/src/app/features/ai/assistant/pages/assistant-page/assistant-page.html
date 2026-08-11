@@ -254,11 +254,11 @@
                 <dd>{{ formatTotalHours(track) }}</dd>
               </div>
               <div>
-                <dt>Minimum grade</dt>
+                <dt>Official published minimum grade</dt>
                 <dd>{{ track.minimumGrade || 'Not specified' }}</dd>
               </div>
               <div>
-                <dt>Graduation window</dt>
+                <dt>Official published graduation window</dt>
                 <dd>{{ formatGraduationWindow(track) }}</dd>
               </div>
             </dl>
@@ -280,7 +280,7 @@
             </section>
 
             <section class="comparison-track__section">
-              <h4>Eligibility</h4>
+              <h4>Official ITI reference eligibility</h4>
               <p>
                 {{ track.eligibilitySummary || 'No eligibility summary published.' }}
               </p>
@@ -344,7 +344,7 @@
       </div>
 
       <footer class="comparison-modal__footer">
-        <p>Recommendations are advisory and do not determine admission eligibility.</p>
+        <p>Recommendations are advisory. Official track eligibility metadata is reference information only; the active cycle common rule determines application eligibility.</p>
 
         <button type="button" class="secondary-action" (click)="closeComparison()">Close</button>
       </footer>
@@ -400,11 +400,11 @@
             <dd>{{ formatTotalHours(selectedTrackDetails()!) }}</dd>
           </div>
           <div>
-            <dt>Minimum grade</dt>
+            <dt>Official published minimum grade</dt>
             <dd>{{ selectedTrackDetails()!.minimumGrade || 'Not specified' }}</dd>
           </div>
           <div>
-            <dt>Graduation window</dt>
+            <dt>Official published graduation window</dt>
             <dd>{{ formatGraduationWindow(selectedTrackDetails()!) }}</dd>
           </div>
         </dl>
@@ -417,7 +417,7 @@
         </section>
 
         <section class="comparison-track__section">
-          <h4>Eligibility</h4>
+          <h4>Official ITI reference eligibility</h4>
           <p>
             {{ selectedTrackDetails()!.eligibilitySummary || 'No eligibility summary published.' }}
           </p>
@@ -492,7 +492,7 @@
       </div>
 
       <footer class="comparison-modal__footer">
-        <p>Recommendations are advisory and do not determine admission eligibility.</p>
+        <p>Recommendations are advisory. Official track eligibility metadata is reference information only; the active cycle common rule determines application eligibility.</p>
 
         <button type="button" class="secondary-action" (click)="closeTrackDetails()">Close</button>
       </footer>

@@ -16,7 +16,6 @@ describe('TrackManagementPage', () => {
     durationMonths: 9,
     trackCount: 31,
     cycleCount: 1,
-    isSourceManaged: true,
   };
 
   const track: AdminTrackDto = {
@@ -24,7 +23,6 @@ describe('TrackManagementPage', () => {
     programId: program.id,
     officialTrackId: '59d2e6c7-7221-4024-fe29-08dbe75ac461',
     officialTrackUrl: 'https://iti.gov.eg/tracks/industrial-automation',
-    isSourceManaged: true,
     isOfficialIntake47: true,
     intake: 47,
     year: 2026,
@@ -49,7 +47,7 @@ describe('TrackManagementPage', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('renders official 9M tracks read-only and blocks custom creation in that program', async () => {
+  it('keeps official 9M tracks editable and allows custom track creation in that program', async () => {
     await TestBed.configureTestingModule({
       imports: [TrackManagementPage],
       providers: [
@@ -80,8 +78,8 @@ describe('TrackManagementPage', () => {
     const addTrack = buttons.find((button) => button.textContent?.includes('Add Track'));
 
     expect(root.textContent).toContain('Industrial Automation');
-    expect(root.textContent).toContain('Source-managed');
-    expect(addTrack?.disabled).toBe(true);
-    expect(buttons.some((button) => button.textContent?.trim() === 'Edit')).toBe(false);
+    expect(root.textContent).not.toContain('Source-managed');
+    expect(addTrack?.disabled).toBe(false);
+    expect(buttons.some((button) => button.textContent?.includes('Edit'))).toBe(true);
   });
 });

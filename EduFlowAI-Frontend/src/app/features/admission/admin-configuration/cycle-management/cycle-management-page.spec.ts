@@ -242,7 +242,6 @@ describe('CycleManagementPage', () => {
         name: 'Alexandria',
         governorate: 'Alexandria',
         isActive: true,
-        isSourceManaged: true,
         isOfficialIntake47Location: true,
       },
       {
@@ -250,7 +249,6 @@ describe('CycleManagementPage', () => {
         name: 'Smart Village',
         governorate: 'Giza',
         isActive: true,
-        isSourceManaged: true,
         isOfficialIntake47Location: true,
       },
     ];
@@ -272,7 +270,6 @@ describe('CycleManagementPage', () => {
         graduationYearLimitYears: null,
         prerequisiteTopics: [],
         isActive: true,
-        isSourceManaged: true,
         locations: [
           {
             branchId: 'smart-village',

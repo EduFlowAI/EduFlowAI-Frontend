@@ -262,28 +262,15 @@
                     }
                   </td>
                   <td class="px-5 py-3.5 text-end">
-                    @if (track.isSourceManaged) {
-                      <span
-                        class="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-label-sm text-primary"
-                      >
-                        <span class="material-symbols-outlined text-base" aria-hidden="true"
-                          >verified</span
-                        >
-                        {{ copy.text('Source-managed', 'تدار من المصدر') }}
-                      </span>
-                    } @else {
-                      <button
-                        type="button"
-                        (click)="openDrawer(track)"
-                        [disabled]="busy()"
-                        class="inline-flex items-center gap-1 rounded-card px-2.5 py-1.5 text-label-sm text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
-                      >
-                        <span class="material-symbols-outlined text-base" aria-hidden="true"
-                          >edit</span
-                        >
-                        {{ copy.text('Edit', 'تعديل') }}
-                      </button>
-                    }
+                    <button
+                      type="button"
+                      (click)="openDrawer(track)"
+                      [disabled]="busy()"
+                      class="inline-flex items-center gap-1 rounded-card px-2.5 py-1.5 text-label-sm text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
+                    >
+                      <span class="material-symbols-outlined text-base" aria-hidden="true">edit</span>
+                      {{ copy.text('Edit', 'تعديل') }}
+                    </button>
                   </td>
                 </tr>
               }
@@ -389,19 +376,6 @@
         class="flex flex-1 flex-col overflow-y-auto"
       >
         <div class="flex-1 space-y-5 px-6 py-5">
-          @if (editingSourceManagedTrack()) {
-            <p
-              class="rounded-card border border-primary/20 bg-primary/5 px-4 py-3 text-body-sm text-on-surface-variant"
-            >
-              {{
-                copy.text(
-                  'This track belongs to the official ITI Intake 47 catalog and is managed from the authoritative source. Configure current availability through cycle offerings.',
-                  'هذا المسار جزء من القائمة الرسمية للدفعة 47 في معهد تكنولوجيا المعلومات وتتم إدارته من المصدر المعتمد. اضبط الإتاحة الحالية من خلال عروض دورة التقديم.'
-                )
-              }}
-            </p>
-          }
-
           <!-- Program Select -->
           <div class="space-y-1.5">
             <label for="drawer-track-program" class="block text-label-md text-on-surface-variant">
@@ -510,7 +484,7 @@
           </button>
           <button
             type="submit"
-            [disabled]="busy() || editingSourceManagedTrack()"
+            [disabled]="busy()"
             class="inline-flex items-center gap-1.5 rounded-card bg-primary px-4 py-2 text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span class="material-symbols-outlined text-base" aria-hidden="true">save</span>

@@ -49,7 +49,7 @@ describe('LandingPage', () => {
 
     expect(root.querySelector('.track-card')).toBeNull();
     expect(root.textContent).toContain('Browse the official track catalog');
-    expect(root.textContent).toContain('API-backed ITI Intake 47 catalog');
+    expect(root.textContent).toContain('only active-cycle offerings');
     expect(catalogLink?.getAttribute('href')).toBe('/tracks');
   });
 

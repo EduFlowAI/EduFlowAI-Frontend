@@ -214,7 +214,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.programs.egyptian': 'Egyptian',
     'landing.programs.militaryStatus': 'Exempted or Deferred or Completed',
     'landing.programs.bachelorDegree': 'Bachelor Degree',
-    'landing.programs.gradeVaries': 'Varies by track',
+    'landing.programs.gradeVaries': 'Set by the active admission cycle',
     'landing.programs.professional.name': 'Professional Training Program (9 Months)',
     'landing.programs.professional.description':
       'The ITI 9-Month Professional Training Program is a scholarship for Egyptian university graduates. The program bridges the gap between academic education and needs of the ICT job market.',
@@ -222,7 +222,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.programs.professional.graduates': '16k+ Graduates',
     'landing.programs.professional.duration': '9 Months',
     'landing.programs.professional.graduationYear':
-      'Track-specific (5 years for Industrial Automation)',
+      'Set by the active admission cycle',
     'landing.programs.icc.name': 'Intensive Code Camps (ICC)',
     'landing.programs.icc.description':
       'The Intensive Code Camp program provides a wide range of tracks that are aligned with the needs of the local and global markets with a focus on specific job profiles aiming for employment.',
@@ -243,14 +243,14 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.eligibility.graduationCopy': 'Graduated within the accepted eligibility period.',
     'landing.eligibility.grade': 'Minimum grade',
     'landing.eligibility.gradeCopy':
-      'Requirements vary by track; see the official catalog.',
+      'The active admission cycle sets the application minimum grade; track pages may also show ITI published reference requirements.',
     'landing.tracks.eyebrow': 'Official ITI Intake 47 catalog',
-    'landing.tracks.title': 'Explore every official 9-Month track.',
+    'landing.tracks.title': 'Explore the 9-Month tracks currently offered for application.',
     'landing.tracks.copy':
-      'Open the live catalog to compare official categories, eligibility, hours, and training locations.',
+      'Open the live catalog to compare active offerings with official ITI track reference information.',
     'landing.tracks.catalogTitle': 'Browse the official track catalog',
     'landing.tracks.availabilityNote':
-      'Track details come from the API-backed ITI Intake 47 catalog. Active-cycle capacity is shown only when configured.',
+      'The live catalog shows only active-cycle offerings, enriched with official ITI Intake 47 track reference information.',
     'landing.tracks.viewCatalog': 'View all tracks',
     'landing.process.eyebrow': 'Through EduFlowAI',
     'landing.process.title': 'One application. Clear steps.',
@@ -607,7 +607,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.programs.egyptian': 'مصري',
     'landing.programs.militaryStatus': 'إعفاء أو تأجيل أو إتمام الخدمة',
     'landing.programs.bachelorDegree': 'درجة البكالوريوس',
-    'landing.programs.gradeVaries': 'يختلف حسب المسار',
+    'landing.programs.gradeVaries': 'تحددها دورة التقديم النشطة',
     'landing.programs.professional.name': 'برنامج التدريب الاحترافي (PTP)',
     'landing.programs.professional.description':
       'برنامج التدريب الاحترافي لمدة 9 أشهر في معهد تكنولوجيا المعلومات هو منحة لخريجي الجامعات المصرية. يسد البرنامج الفجوة بين التعليم الأكاديمي والاحتياجات المتطورة لسوق عمل تكنولوجيا المعلومات.',
@@ -615,7 +615,7 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.programs.professional.graduates': 'أكثر من 16 ألف خريج',
     'landing.programs.professional.duration': '9 أشهر',
     'landing.programs.professional.graduationYear':
-      'تختلف حسب المسار (5 سنوات لمسار Industrial Automation)',
+      'تحددها دورة التقديم النشطة',
     'landing.programs.icc.name': 'منحة التدريب المكثف (ICC)',
     'landing.programs.icc.description':
       'يوفر برنامج التدريب المكثف مجموعة واسعة من المسارات المتوافقة مع احتياجات الأسواق المحلية والعالمية في مجالات متنوعة من تكنولوجيا المعلومات، مع التركيز على ملفات وظيفية محددة من أجل التوظيف.',
@@ -635,14 +635,14 @@ const translations: Record<AppLocale, Record<string, string>> = {
     'landing.eligibility.graduationCopy': 'التخرج خلال الفترة المعتمدة لشروط القبول.',
     'landing.eligibility.grade': 'الحد الأدنى للتقدير',
     'landing.eligibility.gradeCopy':
-      'تختلف المتطلبات حسب المسار؛ راجع القائمة الرسمية.',
+      'تحدد دورة التقديم النشطة الحد الأدنى الفعلي للتقدير عند التقديم؛ وقد تعرض صفحات المسارات أيضًا المتطلبات المرجعية المنشورة من ITI.',
     'landing.tracks.eyebrow': 'قائمة مسارات الدفعة 47 الرسمية',
-    'landing.tracks.title': 'استكشف جميع مسارات برنامج التسعة أشهر الرسمية.',
+    'landing.tracks.title': 'استكشف مسارات برنامج التسعة أشهر المتاحة حاليًا للتقديم.',
     'landing.tracks.copy':
-      'افتح القائمة المباشرة لمقارنة الفئات الرسمية وشروط القبول والساعات ومواقع التدريب.',
+      'افتح القائمة المباشرة لمقارنة العروض النشطة بمعلومات المسارات المرجعية الرسمية من ITI.',
     'landing.tracks.catalogTitle': 'تصفح قائمة المسارات الرسمية',
     'landing.tracks.availabilityNote':
-      'تأتي بيانات المسارات من قائمة الدفعة 47 عبر واجهة API، ولا تظهر السعة إلا عند إعداد دورة تقديم نشطة.',
+      'تعرض القائمة المباشرة فقط عروض دورة التقديم النشطة مع معلومات مرجعية رسمية لمسارات الدفعة 47.',
     'landing.tracks.viewCatalog': 'عرض جميع المسارات',
     'landing.process.eyebrow': 'عبر EduFlowAI',
     'landing.process.title': 'طلب واحد. خطوات واضحة.',
