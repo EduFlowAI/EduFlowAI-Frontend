@@ -58,10 +58,10 @@
 
     <!-- Phase 3: Assessment Tracking -->
     @case ('AssessmentInProgress') {
-    <!-- <app-assessment-progress-tracking [stages]="store.stagesResults()"></app-assessment-progress-tracking> -->
-    <div class="p-8 text-center text-on-surface-variant border-2 border-dashed border-outline-variant rounded-xl">
-      [Assessment Progress Component Placeholder]
-    </div>
+      <app-assessment-progress-tracking [stages]="store.stagesResults()"></app-assessment-progress-tracking>
+    }
+    @case ('AssessmentCompleted') {
+      <app-assessment-progress-tracking [stages]="store.stagesResults()"></app-assessment-progress-tracking>
     }
 
     <!-- Default Fallback (e.g. Under Verification, Draft, Expired, etc.) -->
