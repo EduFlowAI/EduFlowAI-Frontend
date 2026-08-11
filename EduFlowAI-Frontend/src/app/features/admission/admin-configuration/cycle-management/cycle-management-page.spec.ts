@@ -77,6 +77,24 @@ describe('CycleManagementPage', () => {
     return fixture;
   }
 
+  /** Click the Eligibility Rules sub-tab so its content is rendered. */
+  function switchToEligibilityTab(host: HTMLElement): void {
+    const tab = Array.from(host.querySelectorAll('.sub-tabs button')).find(
+      (btn) => btn.textContent?.includes('Eligibility'),
+    ) as HTMLElement;
+    tab.click();
+  }
+
+  /** Click the first row in the cycles table to enter the detail view. */
+  function selectFirstCycle(
+    host: HTMLElement,
+    fixture: { detectChanges(): void },
+  ): void {
+    const row = host.querySelector('.cycles-table tbody tr') as HTMLElement;
+    row.click();
+    fixture.detectChanges();
+  }
+
   afterEach(() => TestBed.resetTestingModule());
 
   it('does not display unsaved defaults as a stored rule on an Active cycle', async () => {
@@ -85,8 +103,17 @@ describe('CycleManagementPage', () => {
     const fixture = await render();
     const host: HTMLElement = fixture.nativeElement;
 
+    // Enter the detail view by clicking the first cycle row
+    selectFirstCycle(host, fixture);
+
+    // Overview tab should show Missing eligibility
     expect(host.textContent).toContain('Eligibility');
     expect(host.textContent).toContain('Missing');
+
+    // Switch to eligibility tab to see the warning message
+    switchToEligibilityTab(host);
+    fixture.detectChanges();
+
     expect(host.textContent).toContain(
       'No eligibility rule is stored for this cycle.',
     );
@@ -109,6 +136,12 @@ describe('CycleManagementPage', () => {
 
     const fixture = await render();
     const host: HTMLElement = fixture.nativeElement;
+
+    // Enter the detail view, then switch to eligibility tab
+    selectFirstCycle(host, fixture);
+    switchToEligibilityTab(host);
+    fixture.detectChanges();
+
     const nationality = host.querySelector(
       '[formcontrolname="requiredNationality"]',
     ) as HTMLInputElement;
@@ -134,6 +167,12 @@ describe('CycleManagementPage', () => {
 
     const fixture = await render();
     const host: HTMLElement = fixture.nativeElement;
+
+    // Enter the detail view, then switch to eligibility tab
+    selectFirstCycle(host, fixture);
+    switchToEligibilityTab(host);
+    fixture.detectChanges();
+
     const save = host.querySelector(
       '[data-testid="save-eligibility"]',
     ) as HTMLButtonElement;
@@ -156,6 +195,12 @@ describe('CycleManagementPage', () => {
 
     const fixture = await render();
     const host: HTMLElement = fixture.nativeElement;
+
+    // Enter the detail view, then switch to eligibility tab
+    selectFirstCycle(host, fixture);
+    switchToEligibilityTab(host);
+    fixture.detectChanges();
+
     const save = host.querySelector(
       '[data-testid="save-eligibility"]',
     ) as HTMLButtonElement;
@@ -164,17 +209,30 @@ describe('CycleManagementPage', () => {
     expect(save.disabled).toBe(false);
   });
 
-  it('renders configuration in the same right-side workspace as the summary', async () => {
+  it('renders a cycles table in list view and detail with sub-tabs when a cycle is selected', async () => {
     cycles = [cycle(CycleStatus.Draft, null)];
 
     const fixture = await render();
     const host: HTMLElement = fixture.nativeElement;
 
-    const workspace = host.querySelector('.cycle-workspace');
-    const content = host.querySelector('.cycle-workspace__content');
+    // Page now starts on the list view — table should be immediately visible
+    const table = host.querySelector('.cycles-table');
+    expect(table).not.toBeNull();
 
-    expect(workspace).not.toBeNull();
-    expect(content?.textContent).toContain('Eligibility rule');
-    expect(content?.textContent).toContain('Track / branch offerings');
+    // Click the first row to enter the detail view
+    selectFirstCycle(host, fixture);
+
+    // Detail view: back button, sub-tabs, and cycle-detail should appear
+    const detail = host.querySelector('.cycle-detail');
+    const subTabs = host.querySelector('.sub-tabs');
+    expect(detail).not.toBeNull();
+    expect(subTabs).not.toBeNull();
+
+    // Switch to Eligibility tab
+    switchToEligibilityTab(host);
+    fixture.detectChanges();
+
+    expect(host.textContent).toContain('Eligibility rule');
+    expect(host.textContent).toContain('No rule has been saved yet.');
   });
 });

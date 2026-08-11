@@ -566,3 +566,131 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Cycles data-table (list view) ────────────────────────── */
+.cycles-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.78rem;
+}
+
+.cycles-table th,
+.cycles-table td {
+  padding: 0.72rem 0.85rem;
+  text-align: start;
+}
+
+.cycles-table thead th {
+  border-block-end: 1px solid #dce5ee;
+  background: #f6f9fc;
+  color: #42566f;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.cycles-table tbody tr {
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.cycles-table tbody tr:hover {
+  background: #eef5fc;
+}
+
+.cycles-table tbody td {
+  border-block-end: 1px solid #edf0f4;
+  color: #29445f;
+}
+
+.cycles-table tbody td:first-child {
+  color: #768397;
+  font-weight: 700;
+}
+
+/* ── Cycle detail header (back + name + badge) ────────────── */
+.cycle-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-block-end: 1rem;
+}
+
+.cycle-detail-header h2 {
+  margin: 0;
+  color: #082b4f;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.cycle-detail-header p {
+  margin: 0;
+  margin-block-start: 0.2rem;
+  color: #627187;
+  font-size: 0.75rem;
+}
+
+.cycle-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 0;
+  background: transparent;
+  padding: 0.4rem 0.6rem;
+  color: #22608f;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+  border-radius: 0.5rem;
+}
+
+.cycle-detail-back:hover {
+  background: #eaf3fb;
+  color: #0c4778;
+}
+
+/* ── Sub-tabs (pill bar inside detail view) ───────────────── */
+.sub-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  border: 1px solid #dfe6ee;
+  border-radius: 0.85rem;
+  background: #f6f9fc;
+  padding: 0.35rem;
+  margin-block-end: 1.15rem;
+}
+
+.sub-tabs button {
+  min-height: 2.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  background: transparent;
+  padding: 0.48rem 0.85rem;
+  color: #5d6d82;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.sub-tabs button:hover {
+  background: #eaf3fb;
+  color: #0c4778;
+}
+
+.sub-tabs button.is-active {
+  border-color: #c4d9ed;
+  background: #fff;
+  color: #06335d;
+  box-shadow: 0 1px 3px rgb(3 39 75 / 8%);
+}

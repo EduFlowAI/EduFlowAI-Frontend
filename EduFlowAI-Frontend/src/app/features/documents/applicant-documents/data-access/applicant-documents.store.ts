@@ -119,7 +119,7 @@ export const ApplicantDocumentsStore = signalStore(
                     patchState(store, { submitting: false });
                     onSuccess?.(res.submittedCount);
                     // navigate to page application/:id
-                    router.navigate(['/application', applicationId]);
+                    router.navigate(['/applications', applicationId]);
                     // this.load(applicationId); // refresh statuses (Uploaded -> Verifying)
                 },
                 error: (err) => patchState(store, { error: extractErrorMessage(err), submitting: false }),
