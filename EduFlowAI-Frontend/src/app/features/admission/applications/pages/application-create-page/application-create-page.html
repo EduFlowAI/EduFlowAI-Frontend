@@ -73,10 +73,19 @@
       <div class="mt-12 pt-6 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-end gap-4">
         
         <!-- API Error Display -->
+        <!-- @if (store.error()) {
+          <div class="w-full sm:mr-auto sm:w-auto p-3 bg-error-container text-on-error-container rounded-md flex items-start gap-2 border border-error/20">
+            <span class="material-symbols-outlined text-error mt-0.5 text-[20px]">error</span>
+            <p class="font-body-sm text-body-sm">{{ store.error() }}</p>
+          </div>
+        } -->
         @if (store.error()) {
-          <span class="text-label-sm font-label-sm text-error mr-auto sm:mr-0">
-            {{ store.error() }}
-          </span>
+          <div class="w-full sm:mr-auto sm:w-auto">
+            <app-validation-errors 
+              [title]="'Application Error'" 
+              [errors]="[store.error()!]"> 
+            </app-validation-errors>
+          </div>
         }
         
         <!-- Start Button -->

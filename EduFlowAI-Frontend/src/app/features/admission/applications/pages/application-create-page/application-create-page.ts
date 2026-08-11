@@ -2,10 +2,11 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ApplicationsStore } from './../../data-access/applications.store';
+import { ValidationErrors } from '../../../../../shared/ui/validation-errors/validation-errors'
 
 @Component({
   selector: 'app-application-create-page',
-  imports: [DatePipe, NgClass, RouterLink],
+  imports: [DatePipe, NgClass, ValidationErrors, RouterLink],
   templateUrl: './application-create-page.html',
   styleUrl: './application-create-page.scss',
 })
