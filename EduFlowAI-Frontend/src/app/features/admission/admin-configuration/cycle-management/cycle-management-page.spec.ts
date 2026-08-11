@@ -6,6 +6,8 @@ import { AdmissionAdminCopy } from '../admission-admin.copy';
 import { AdmissionAdminApiService } from '../data-access/admission-admin-api.service';
 import {
   AdmissionCycleDto,
+  AdminTrackDto,
+  BranchDto,
   CumulativeGrade,
   CycleStatus,
 } from '../models/admission-admin.model';
@@ -35,6 +37,8 @@ function cycle(
 
 describe('CycleManagementPage', () => {
   let cycles: AdmissionCycleDto[];
+  let tracks: AdminTrackDto[];
+  let branches: BranchDto[];
 
   const api = {
     getPrograms: () =>
@@ -50,8 +54,8 @@ describe('CycleManagementPage', () => {
           cycleCount: 1,
         },
       ]),
-    getTracks: () => of([]),
-    getBranches: () => of([]),
+    getTracks: () => of(tracks),
+    getBranches: () => of(branches),
     getCycles: () => of(cycles),
   };
 
@@ -59,6 +63,11 @@ describe('CycleManagementPage', () => {
     text: (english: string) => english,
     isRtl: () => false,
   };
+
+  beforeEach(() => {
+    tracks = [];
+    branches = [];
+  });
 
   async function render() {
     await TestBed.configureTestingModule({
@@ -79,17 +88,14 @@ describe('CycleManagementPage', () => {
 
   /** Click the Eligibility Rules sub-tab so its content is rendered. */
   function switchToEligibilityTab(host: HTMLElement): void {
-    const tab = Array.from(host.querySelectorAll('.sub-tabs button')).find(
-      (btn) => btn.textContent?.includes('Eligibility'),
+    const tab = Array.from(host.querySelectorAll('.sub-tabs button')).find((btn) =>
+      btn.textContent?.includes('Eligibility'),
     ) as HTMLElement;
     tab.click();
   }
 
   /** Click the first row in the cycles table to enter the detail view. */
-  function selectFirstCycle(
-    host: HTMLElement,
-    fixture: { detectChanges(): void },
-  ): void {
+  function selectFirstCycle(host: HTMLElement, fixture: { detectChanges(): void }): void {
     const row = host.querySelector('.cycles-table tbody tr') as HTMLElement;
     row.click();
     fixture.detectChanges();
@@ -114,12 +120,8 @@ describe('CycleManagementPage', () => {
     switchToEligibilityTab(host);
     fixture.detectChanges();
 
-    expect(host.textContent).toContain(
-      'No eligibility rule is stored for this cycle.',
-    );
-    expect(
-      host.querySelector('[formcontrolname="requiredNationality"]'),
-    ).toBeNull();
+    expect(host.textContent).toContain('No eligibility rule is stored for this cycle.');
+    expect(host.querySelector('[formcontrolname="requiredNationality"]')).toBeNull();
   });
 
   it('keeps an existing Active-cycle eligibility rule read-only', async () => {
@@ -173,9 +175,7 @@ describe('CycleManagementPage', () => {
     switchToEligibilityTab(host);
     fixture.detectChanges();
 
-    const save = host.querySelector(
-      '[data-testid="save-eligibility"]',
-    ) as HTMLButtonElement;
+    const save = host.querySelector('[data-testid="save-eligibility"]') as HTMLButtonElement;
     const nationality = host.querySelector(
       '[formcontrolname="requiredNationality"]',
     ) as HTMLInputElement;
@@ -201,9 +201,7 @@ describe('CycleManagementPage', () => {
     switchToEligibilityTab(host);
     fixture.detectChanges();
 
-    const save = host.querySelector(
-      '[data-testid="save-eligibility"]',
-    ) as HTMLButtonElement;
+    const save = host.querySelector('[data-testid="save-eligibility"]') as HTMLButtonElement;
 
     expect(host.textContent).toContain('No rule has been saved yet.');
     expect(save.disabled).toBe(false);
@@ -234,5 +232,72 @@ describe('CycleManagementPage', () => {
 
     expect(host.textContent).toContain('Eligibility rule');
     expect(host.textContent).toContain('No rule has been saved yet.');
+  });
+
+  it('offers only canonical locations for an official Intake 47 track', async () => {
+    cycles = [cycle(CycleStatus.Draft, null)];
+    branches = [
+      {
+        id: 'alexandria',
+        name: 'Alexandria',
+        governorate: 'Alexandria',
+        isActive: true,
+        isSourceManaged: true,
+        isOfficialIntake47Location: true,
+      },
+      {
+        id: 'smart-village',
+        name: 'Smart Village',
+        governorate: 'Giza',
+        isActive: true,
+        isSourceManaged: true,
+        isOfficialIntake47Location: true,
+      },
+    ];
+    tracks = [
+      {
+        id: 'official-track',
+        programId,
+        officialTrackId: 'cf198247-911f-4df1-a66e-70beb76cfc09',
+        officialTrackUrl: 'https://iti.gov.eg/tracks/official-track',
+        isOfficialIntake47: true,
+        intake: 47,
+        year: 2026,
+        name: 'Official track',
+        description: 'Description',
+        category: 'Category',
+        totalHours: 1200,
+        minimumGrade: 'Good',
+        eligibilitySummary: 'Eligibility',
+        graduationYearLimitYears: null,
+        prerequisiteTopics: [],
+        isActive: true,
+        isSourceManaged: true,
+        locations: [
+          {
+            branchId: 'smart-village',
+            branchName: 'Smart Village',
+            governorate: 'Giza',
+          },
+        ],
+        offerings: [],
+      },
+    ];
+
+    const fixture = await render();
+    const host: HTMLElement = fixture.nativeElement;
+    selectFirstCycle(host, fixture);
+
+    const offeringsTab = Array.from(host.querySelectorAll('.sub-tabs button')).find((button) =>
+      button.textContent?.includes('Track & Branch'),
+    ) as HTMLElement;
+    offeringsTab.click();
+    fixture.detectChanges();
+
+    const branchSelect = host.querySelector('#offering-branch') as HTMLSelectElement;
+    const optionLabels = Array.from(branchSelect.options).map((option) => option.text.trim());
+
+    expect(optionLabels).toEqual(['Select branch', 'Smart Village']);
+    expect(branchSelect.value).toBe('smart-village');
   });
 });

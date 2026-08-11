@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
@@ -37,6 +30,12 @@ export class TrackManagementPage implements OnInit {
   protected readonly searchQuery = signal('');
   protected readonly drawerOpen = signal(false);
   protected readonly editingTrack = signal<AdminTrackDto | null>(null);
+  protected readonly editingSourceManagedTrack = computed(
+    () => this.editingTrack()?.isSourceManaged === true,
+  );
+  protected readonly editablePrograms = computed(() =>
+    this.programs().filter((program) => !program.isSourceManaged),
+  );
 
   protected readonly filteredTracks = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -44,13 +43,21 @@ export class TrackManagementPage implements OnInit {
     if (!query) {
       return items;
     }
-    return items.filter(
-      (track) =>
-        track.name.toLowerCase().includes(query) ||
-        this.programName(track.programId).toLowerCase().includes(query) ||
-        track.prerequisiteTopics.some((topic) =>
-          topic.toLowerCase().includes(query),
-        ),
+    return items.filter((track) =>
+      [
+        track.name,
+        this.programName(track.programId),
+        track.category,
+        track.minimumGrade,
+        track.eligibilitySummary,
+        track.totalHours?.toString(),
+        track.intake?.toString(),
+        track.year?.toString(),
+        ...track.prerequisiteTopics,
+        ...track.locations.flatMap((location) => [location.branchName, location.governorate]),
+      ]
+        .filter((value): value is string => Boolean(value))
+        .some((value) => value.toLowerCase().includes(query)),
     );
   });
 
@@ -83,8 +90,7 @@ export class TrackManagementPage implements OnInit {
           this.programs.set(programs);
           this.tracks.set(tracks);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to load tracks.'),
+        error: (error: unknown) => this.showError(error, 'Unable to load tracks.'),
       });
   }
 
@@ -103,12 +109,25 @@ export class TrackManagementPage implements OnInit {
         prerequisiteTopics: track.prerequisiteTopics.join(', '),
         isActive: track.isActive,
       });
-      // Disable programId when editing — tracks can't be moved between programs
+      // Tracks cannot be moved between programs after creation. Official
+      // Intake-47 catalog fields are managed by the authoritative source.
       this.trackForm.controls.programId.disable();
+      this.setSourceManagedFieldsDisabled(track.isSourceManaged);
     } else {
+      const program = this.editablePrograms()[0];
+      if (!program) {
+        this.error.set(
+          this.copy.text(
+            'The available program is source-managed. Create a separate program before adding custom tracks.',
+            'البرنامج المتاح يدار من المصدر. أنشئ برنامجًا منفصلًا قبل إضافة مسارات مخصصة.',
+          ),
+        );
+        return;
+      }
       this.editingTrack.set(null);
+      this.setSourceManagedFieldsDisabled(false);
       this.trackForm.reset({
-        programId: this.programs()[0]?.id ?? '',
+        programId: program.id,
         name: '',
         description: '',
         prerequisiteTopics: '',
@@ -122,9 +141,10 @@ export class TrackManagementPage implements OnInit {
   protected closeDrawer(): void {
     this.drawerOpen.set(false);
     this.editingTrack.set(null);
+    this.setSourceManagedFieldsDisabled(false);
     this.trackForm.controls.programId.enable();
     this.trackForm.reset({
-      programId: this.programs()[0]?.id ?? '',
+      programId: this.editablePrograms()[0]?.id ?? '',
       name: '',
       description: '',
       prerequisiteTopics: '',
@@ -143,6 +163,9 @@ export class TrackManagementPage implements OnInit {
     const value = this.trackForm.getRawValue();
     const topics = this.parseTopics(value.prerequisiteTopics);
     const editing = this.editingTrack();
+    if (editing?.isSourceManaged) {
+      return;
+    }
     const common = {
       name: value.name.trim(),
       description: value.description.trim() || null,
@@ -161,24 +184,16 @@ export class TrackManagementPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.copy.text(
-              'Track saved successfully.',
-              'تم حفظ المسار بنجاح.',
-            ),
-          );
+          this.success.set(this.copy.text('Track saved successfully.', 'تم حفظ المسار بنجاح.'));
           this.closeDrawer();
           this.loadData();
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to save track.'),
+        error: (error: unknown) => this.showError(error, 'Unable to save track.'),
       });
   }
 
   protected programName(programId: string): string {
-    return (
-      this.programs().find((program) => program.id === programId)?.name ?? ''
-    );
+    return this.programs().find((program) => program.id === programId)?.name ?? '';
   }
 
   private parseTopics(value: string): string[] {
@@ -190,6 +205,23 @@ export class TrackManagementPage implements OnInit {
           .filter(Boolean),
       ),
     ].slice(0, 50);
+  }
+
+  private setSourceManagedFieldsDisabled(disabled: boolean): void {
+    const controls = [
+      this.trackForm.controls.name,
+      this.trackForm.controls.description,
+      this.trackForm.controls.prerequisiteTopics,
+      this.trackForm.controls.isActive,
+    ];
+
+    for (const control of controls) {
+      if (disabled) {
+        control.disable();
+      } else {
+        control.enable();
+      }
+    }
   }
 
   private clearMessages(): void {

@@ -36,27 +36,81 @@
         <div class="details__hero-copy">
           <span class="details__status">
             <span class="details__status-dot" aria-hidden="true"></span>
-            {{ copy.text('activeIntake') }}
+            {{ copy.text(item.isOfficialIntake47 ? 'activeIntake' : 'activeTrack') }}
           </span>
+          @if (item.category) {
+            <span class="details__category">{{ item.category }}</span>
+          }
           <h1>{{ item.name }}</h1>
           <p>{{ item.description || copy.text('notProvided') }}</p>
+          @if (item.officialTrackUrl) {
+            <a
+              class="details__official-link"
+              [href]="item.officialTrackUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ copy.text('officialTrackPage') }}
+              <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+            </a>
+          }
         </div>
 
         <div class="details__summary" aria-label="Track availability summary">
           <div>
             <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
-            <strong>{{ item.offerings.length }}</strong>
+            <strong>{{ item.locations.length }}</strong>
             <small>
-              {{ copy.text('branchCount', { count: item.offerings.length }) }}
+              {{ copy.text('locationCount', { count: item.locations.length }) }}
             </small>
           </div>
-          <div>
-            <span class="material-symbols-outlined" aria-hidden="true">groups</span>
-            <strong>{{ totalCapacity() }}</strong>
-            <small>{{ copy.text('capacity') }}</small>
-          </div>
+          @if (item.isOfficialIntake47) {
+            <div>
+              <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+              <strong>{{ formatHours(item) }}</strong>
+              <small>{{ copy.text('totalHours') }}</small>
+            </div>
+            <div>
+              <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
+              <strong>{{ item.minimumGrade || copy.text('notProvided') }}</strong>
+              <small>{{ copy.text('minimumGrade') }}</small>
+            </div>
+          }
+          @if (item.offerings.length > 0) {
+            <div>
+              <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+              <strong>{{ totalCapacity() }}</strong>
+              <small>{{ copy.text('capacity') }}</small>
+            </div>
+          }
         </div>
       </header>
+
+      @if (item.isOfficialIntake47) {
+        <section class="details-panel">
+          <div class="details-panel__heading">
+            <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>
+            <div>
+              <h2>{{ copy.text('eligibility') }}</h2>
+              <p>{{ copy.text('eligibilityDescription') }}</p>
+            </div>
+          </div>
+
+          <p class="details-panel__eligibility">
+            {{ item.eligibilitySummary || copy.text('notProvided') }}
+          </p>
+          <dl class="eligibility-facts">
+            <div>
+              <dt>{{ copy.text('minimumGrade') }}</dt>
+              <dd>{{ item.minimumGrade || copy.text('notProvided') }}</dd>
+            </div>
+            <div>
+              <dt>{{ copy.text('graduationWindow') }}</dt>
+              <dd>{{ graduationWindow(item) }}</dd>
+            </div>
+          </dl>
+        </section>
+      }
 
       <section class="details-panel details-panel--about">
         <div class="details-panel__heading">
@@ -84,33 +138,53 @@
         <div class="details-panel__heading">
           <span class="material-symbols-outlined" aria-hidden="true">apartment</span>
           <div>
-            <h2>{{ copy.text('branchOfferings') }}</h2>
-            <p>{{ copy.text('branchOfferingsDescription') }}</p>
+            <h2>
+              {{ copy.text(item.isOfficialIntake47 ? 'officialLocations' : 'branchOfferings') }}
+            </h2>
+            <p>
+              {{
+                copy.text(
+                  item.isOfficialIntake47
+                    ? 'officialLocationsDescription'
+                    : 'branchOfferingsDescription'
+                )
+              }}
+            </p>
           </div>
         </div>
 
-        <div class="offering-grid">
-          @for (offering of item.offerings; track offering.offeringId) {
-            <article class="offering-card">
-              <div class="offering-card__icon">
-                <span class="material-symbols-outlined" aria-hidden="true">domain</span>
-              </div>
-              <div class="offering-card__body">
-                <h3>{{ offering.branchName }}</h3>
-                <dl>
-                  <div>
-                    <dt>{{ copy.text('governorate') }}</dt>
-                    <dd>{{ offering.governorate || copy.text('notProvided') }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ copy.text('capacity') }}</dt>
-                    <dd>{{ copy.text('seats', { count: offering.capacity }) }}</dd>
-                  </div>
-                </dl>
-              </div>
-            </article>
-          }
-        </div>
+        @if (item.locations.length > 0) {
+          <div class="offering-grid">
+            @for (location of item.locations; track location.branchId) {
+              <article class="offering-card">
+                <div class="offering-card__icon">
+                  <span class="material-symbols-outlined" aria-hidden="true">domain</span>
+                </div>
+                <div class="offering-card__body">
+                  <h3>{{ location.branchName }}</h3>
+                  <dl>
+                    <div>
+                      <dt>{{ copy.text('governorate') }}</dt>
+                      <dd>{{ location.governorate || copy.text('notProvided') }}</dd>
+                    </div>
+                    @if (capacityForLocation(item, location.branchId); as capacity) {
+                      <div>
+                        <dt>{{ copy.text('capacity') }}</dt>
+                        <dd>{{ copy.text('seats', { count: capacity }) }}</dd>
+                      </div>
+                    }
+                  </dl>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="details-panel__empty">{{ copy.text('noLocations') }}</p>
+        }
+
+        @if (item.offerings.length === 0) {
+          <p class="capacity-note">{{ copy.text('noActiveCapacity') }}</p>
+        }
       </section>
     </article>
   }

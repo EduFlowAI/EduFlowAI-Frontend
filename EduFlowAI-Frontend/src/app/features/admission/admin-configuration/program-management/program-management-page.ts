@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
@@ -80,8 +73,7 @@ export class ProgramManagementPage implements OnInit {
           this.institutions.set(institutions);
           this.programs.set(programs);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to load programs.'),
+        error: (error: unknown) => this.showError(error, 'Unable to load programs.'),
       });
   }
 
@@ -91,6 +83,9 @@ export class ProgramManagementPage implements OnInit {
 
   protected openDrawer(program?: ProgramDto): void {
     this.clearMessages();
+    if (program?.isSourceManaged) {
+      return;
+    }
     if (program) {
       this.editingProgram.set(program);
       this.programForm.setValue({
@@ -153,21 +148,18 @@ export class ProgramManagementPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.copy.text(
-              'Program saved successfully.',
-              'تم حفظ البرنامج بنجاح.',
-            ),
-          );
+          this.success.set(this.copy.text('Program saved successfully.', 'تم حفظ البرنامج بنجاح.'));
           this.closeDrawer();
           this.loadData();
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to save program.'),
+        error: (error: unknown) => this.showError(error, 'Unable to save program.'),
       });
   }
 
   protected deleteProgram(program: ProgramDto): void {
+    if (program.isSourceManaged) {
+      return;
+    }
     this.clearMessages();
 
     const confirmed = window.confirm(
@@ -197,8 +189,7 @@ export class ProgramManagementPage implements OnInit {
           );
           this.loadData();
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to delete program.'),
+        error: (error: unknown) => this.showError(error, 'Unable to delete program.'),
       });
   }
 

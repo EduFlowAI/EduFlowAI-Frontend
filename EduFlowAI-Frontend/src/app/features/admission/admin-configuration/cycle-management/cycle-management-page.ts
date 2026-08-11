@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable, finalize, forkJoin } from 'rxjs';
@@ -48,16 +41,21 @@ export class CycleManagementPage implements OnInit {
   protected readonly success = signal<string | null>(null);
   protected readonly activeSubTab = signal<'overview' | 'eligibility' | 'offerings'>('overview');
 
-  protected readonly selectedCycle = computed(() =>
-    this.cycles().find((cycle) => cycle.id === this.selectedCycleId()) ?? null,
+  protected readonly selectedCycle = computed(
+    () => this.cycles().find((cycle) => cycle.id === this.selectedCycleId()) ?? null,
   );
 
   protected readonly selectedProgramTracks = computed(() => {
     const cycle = this.selectedCycle();
-    return cycle
-      ? this.tracks().filter((track) => track.programId === cycle.programId)
-      : [];
+    return cycle ? this.tracks().filter((track) => track.programId === cycle.programId) : [];
   });
+
+  protected availableOfferingBranches(): readonly BranchDto[] {
+    const track = this.tracks().find(
+      (item) => item.id === this.offeringForm.controls.trackId.value,
+    );
+    return this.branchesForTrack(track, this.branches());
+  }
 
   protected readonly cycleForm = this.formBuilder.group({
     programId: ['', Validators.required],
@@ -68,14 +66,8 @@ export class CycleManagementPage implements OnInit {
 
   protected readonly eligibilityForm = this.formBuilder.group({
     requiredNationality: ['EG', [Validators.required, Validators.maxLength(5)]],
-    requiredDegreeLevel: [
-      'Bachelor',
-      [Validators.required, Validators.maxLength(30)],
-    ],
-    maxYearsSinceGraduation: [
-      5,
-      [Validators.required, Validators.min(0), Validators.max(100)],
-    ],
+    requiredDegreeLevel: ['Bachelor', [Validators.required, Validators.maxLength(30)]],
+    maxYearsSinceGraduation: [5, [Validators.required, Validators.min(0), Validators.max(100)]],
     minGrade: [CumulativeGrade.Good, Validators.required],
   });
 
@@ -132,8 +124,7 @@ export class CycleManagementPage implements OnInit {
             this.selectCycle(exists ? preferredCycleId : '');
           }
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to load cycle configuration.'),
+        error: (error: unknown) => this.showError(error, 'Unable to load cycle configuration.'),
       });
   }
 
@@ -173,10 +164,7 @@ export class CycleManagementPage implements OnInit {
       .subscribe({
         next: (cycle) => {
           this.success.set(
-            this.copy.text(
-              'Draft cycle created successfully.',
-              'تم إنشاء دورة مسودة بنجاح.',
-            ),
+            this.copy.text('Draft cycle created successfully.', 'تم إنشاء دورة مسودة بنجاح.'),
           );
           this.cycleForm.reset({
             programId: this.programs()[0]?.id ?? '',
@@ -186,8 +174,7 @@ export class CycleManagementPage implements OnInit {
           });
           this.load(cycle.id);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to create cycle.'),
+        error: (error: unknown) => this.showError(error, 'Unable to create cycle.'),
       });
   }
 
@@ -227,7 +214,9 @@ export class CycleManagementPage implements OnInit {
     const tracks = this.tracks().filter(
       (track) => track.programId === cycle.programId && track.isActive,
     );
-    const branches = this.branches().filter((branch) => branch.isActive);
+    const branches = this.branchesForTrack(tracks[0], this.branches()).filter(
+      (branch) => branch.isActive,
+    );
     this.offeringForm.reset({
       trackId: tracks[0]?.id ?? '',
       branchId: branches[0]?.id ?? '',
@@ -250,15 +239,19 @@ export class CycleManagementPage implements OnInit {
     this.clearMessages();
   }
 
+  protected onOfferingTrackChange(): void {
+    const branches = this.availableOfferingBranches().filter((branch) => branch.isActive);
+    const selectedBranchId = this.offeringForm.controls.branchId.value;
+    if (!branches.some((branch) => branch.id === selectedBranchId)) {
+      this.offeringForm.controls.branchId.setValue(branches[0]?.id ?? '');
+    }
+  }
+
   protected saveEligibility(): void {
     this.clearMessages();
     const cycle = this.selectedCycle();
 
-    if (
-      !cycle ||
-      cycle.status !== CycleStatus.Draft ||
-      this.eligibilityForm.invalid
-    ) {
+    if (!cycle || cycle.status !== CycleStatus.Draft || this.eligibilityForm.invalid) {
       this.eligibilityForm.markAllAsTouched();
       return;
     }
@@ -278,16 +271,10 @@ export class CycleManagementPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.copy.text(
-              'Eligibility rule saved.',
-              'تم حفظ قاعدة الأهلية.',
-            ),
-          );
+          this.success.set(this.copy.text('Eligibility rule saved.', 'تم حفظ قاعدة الأهلية.'));
           this.load(cycle.id);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to save eligibility rule.'),
+        error: (error: unknown) => this.showError(error, 'Unable to save eligibility rule.'),
       });
   }
 
@@ -295,20 +282,14 @@ export class CycleManagementPage implements OnInit {
     this.clearMessages();
     const cycle = this.selectedCycle();
 
-    if (
-      !cycle ||
-      cycle.status !== CycleStatus.Draft ||
-      this.offeringForm.invalid
-    ) {
+    if (!cycle || cycle.status !== CycleStatus.Draft || this.offeringForm.invalid) {
       this.offeringForm.markAllAsTouched();
       return;
     }
 
     const value = this.offeringForm.getRawValue();
     const duplicate = cycle.offerings.some(
-      (offering) =>
-        offering.trackId === value.trackId &&
-        offering.branchId === value.branchId,
+      (offering) => offering.trackId === value.trackId && offering.branchId === value.branchId,
     );
 
     if (duplicate) {
@@ -331,22 +312,15 @@ export class CycleManagementPage implements OnInit {
       .subscribe({
         next: () => {
           this.success.set(
-            this.copy.text(
-              'Offering added successfully.',
-              'تمت إضافة العرض بنجاح.',
-            ),
+            this.copy.text('Offering added successfully.', 'تمت إضافة العرض بنجاح.'),
           );
           this.load(cycle.id);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to add the offering.'),
+        error: (error: unknown) => this.showError(error, 'Unable to add the offering.'),
       });
   }
 
-  protected updateOfferingCapacity(
-    offering: OfferingDto,
-    rawCapacity: string,
-  ): void {
+  protected updateOfferingCapacity(offering: OfferingDto, rawCapacity: string): void {
     this.clearMessages();
     const cycle = this.selectedCycle();
     const capacity = Number(rawCapacity);
@@ -358,10 +332,7 @@ export class CycleManagementPage implements OnInit {
       capacity <= 0
     ) {
       this.error.set(
-        this.copy.text(
-          'Enter a positive whole-number capacity.',
-          'أدخل سعة صحيحة أكبر من صفر.',
-        ),
+        this.copy.text('Enter a positive whole-number capacity.', 'أدخل سعة صحيحة أكبر من صفر.'),
       );
       return;
     }
@@ -379,16 +350,10 @@ export class CycleManagementPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.copy.text(
-              'Offering capacity updated.',
-              'تم تحديث سعة العرض.',
-            ),
-          );
+          this.success.set(this.copy.text('Offering capacity updated.', 'تم تحديث سعة العرض.'));
           this.load(cycle.id);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to update the offering.'),
+        error: (error: unknown) => this.showError(error, 'Unable to update the offering.'),
       });
   }
 
@@ -419,16 +384,10 @@ export class CycleManagementPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.copy.text(
-              'Offering removed successfully.',
-              'تم حذف العرض بنجاح.',
-            ),
-          );
+          this.success.set(this.copy.text('Offering removed successfully.', 'تم حذف العرض بنجاح.'));
           this.load(cycle.id);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to remove the offering.'),
+        error: (error: unknown) => this.showError(error, 'Unable to remove the offering.'),
       });
   }
 
@@ -451,10 +410,7 @@ export class CycleManagementPage implements OnInit {
     this.runCycleAction(
       this.api.activateCycle(cycle.id),
       cycle.id,
-      this.copy.text(
-        'Cycle activated successfully.',
-        'تم تفعيل الدورة بنجاح.',
-      ),
+      this.copy.text('Cycle activated successfully.', 'تم تفعيل الدورة بنجاح.'),
     );
   }
 
@@ -477,18 +433,12 @@ export class CycleManagementPage implements OnInit {
     this.runCycleAction(
       this.api.closeCycle(cycle.id),
       cycle.id,
-      this.copy.text(
-        'Cycle closed successfully.',
-        'تم إغلاق الدورة بنجاح.',
-      ),
+      this.copy.text('Cycle closed successfully.', 'تم إغلاق الدورة بنجاح.'),
     );
   }
 
   protected cycleCapacity(cycle: AdmissionCycleDto): number {
-    return cycle.offerings.reduce(
-      (total, offering) => total + offering.capacity,
-      0,
-    );
+    return cycle.offerings.reduce((total, offering) => total + offering.capacity, 0);
   }
 
   protected cycleStatusLabel(status: CycleStatus): string {
@@ -528,8 +478,7 @@ export class CycleManagementPage implements OnInit {
           this.success.set(successMessage);
           this.load(cycleId);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to change cycle status.'),
+        error: (error: unknown) => this.showError(error, 'Unable to change cycle status.'),
       });
   }
 
@@ -542,6 +491,18 @@ export class CycleManagementPage implements OnInit {
 
     this.eligibilityForm.disable({ emitEvent: false });
     this.offeringForm.disable({ emitEvent: false });
+  }
+
+  private branchesForTrack(
+    track: AdminTrackDto | undefined,
+    branches: readonly BranchDto[],
+  ): readonly BranchDto[] {
+    if (!track?.isOfficialIntake47) {
+      return branches;
+    }
+
+    const officialBranchIds = new Set(track.locations.map((location) => location.branchId));
+    return branches.filter((branch) => officialBranchIds.has(branch.id));
   }
 
   private clearMessages(): void {

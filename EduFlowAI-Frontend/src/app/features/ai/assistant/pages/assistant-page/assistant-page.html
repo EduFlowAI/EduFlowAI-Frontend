@@ -1,8 +1,5 @@
 @if (isOpen()) {
-  <section
-    class="chat-popup"
-    [class.chat-popup--maximized]="isMaximized()"
-  >
+  <section class="chat-popup" [class.chat-popup--maximized]="isMaximized()">
     <header class="chat-header">
       <div class="chat-header__identity">
         <div>
@@ -16,11 +13,7 @@
           type="button"
           class="chat-header__button"
           (click)="toggleMaximize()"
-          [attr.aria-label]="
-            isMaximized()
-              ? 'Restore chat size'
-              : 'Maximize chat'
-          "
+          [attr.aria-label]="isMaximized() ? 'Restore chat size' : 'Maximize chat'"
         >
           {{ isMaximized() ? '🗗' : '⛶' }}
         </button>
@@ -38,47 +31,29 @@
 
     <main class="chat-body">
       <div class="chat-welcome">
-        <p>
-          Welcome to the EduFlowAI Admission Assistant.
-          How can I help you today?
-        </p>
+        <p>Welcome to the EduFlowAI Admission Assistant. How can I help you today?</p>
       </div>
 
-      @for (
-        chatMessage of messages();
-        track chatMessage.id
-      ) {
+      @for (chatMessage of messages(); track chatMessage.id) {
         @if (chatMessage.role === 'user') {
           <article class="user-message">
             <p>{{ chatMessage.content }}</p>
           </article>
         } @else {
-          @if (
-            chatMessage.response.requiresClarification
-          ) {
+          @if (chatMessage.response.requiresClarification) {
             <article class="assistant-message">
               <header class="assistant-message__header">
                 <strong>Admission Assistant</strong>
               </header>
 
               <p class="assistant-message__content">
-                {{
-                  chatMessage.response
-                    .clarificationMessage ??
-                    'Please clarify your request.'
-                }}
+                {{ chatMessage.response.clarificationMessage ?? 'Please clarify your request.' }}
               </p>
             </article>
           }
 
-          @for (
-            result of chatMessage.response.results;
-            track $index
-          ) {
-            <article
-              class="assistant-message"
-              [attr.data-intent]="result.intent"
-            >
+          @for (result of chatMessage.response.results; track $index) {
+            <article class="assistant-message" [attr.data-intent]="result.intent">
               <header class="assistant-message__header">
                 <strong>Admission Assistant</strong>
               </header>
@@ -87,20 +62,12 @@
                 {{ result.content }}
               </p>
 
-              @if (
-                result.intent === 'recommendation' &&
-                result.metadata.recommendations?.length
-              ) {
+              @if (result.intent === 'recommendation' && result.metadata.recommendations?.length) {
                 <section class="recommendation-cards">
-                  @for (
-                    track of result.metadata.recommendations;
-                    track track.trackId
-                  ) {
+                  @for (track of result.metadata.recommendations; track track.trackId) {
                     <article
                       class="recommendation-card"
-                      [class.recommendation-card--selected]="
-                        isTrackSelected(track.trackId)
-                      "
+                      [class.recommendation-card--selected]="isTrackSelected(track.trackId)"
                     >
                       <div class="recommendation-card__rank">
                         {{ track.rank }}
@@ -113,17 +80,13 @@
 
                       <div
                         class="recommendation-card__actions"
-                        [class.recommendation-card__actions--single]="
-                          !canOfferComparison()
-                        "
+                        [class.recommendation-card__actions--single]="!canOfferComparison()"
                       >
                         @if (canOfferComparison()) {
                           <button
                             type="button"
                             class="recommendation-card__action"
-                            [class.is-selected]="
-                              isTrackSelected(track.trackId)
-                            "
+                            [class.is-selected]="isTrackSelected(track.trackId)"
                             [disabled]="
                               !isTrackSelected(track.trackId) &&
                               selectedComparisonTracks().length >= 3
@@ -144,21 +107,14 @@
                           [disabled]="isLoadingTrackDetails()"
                           (click)="openTrackDetails(track)"
                         >
-                          {{
-                            isLoadingTrackDetails()
-                              ? 'Loading...'
-                              : 'View details'
-                          }}
+                          {{ isLoadingTrackDetails() ? 'Loading...' : 'View details' }}
                         </button>
                       </div>
                     </article>
                   }
                 </section>
 
-                @if (
-                  canOfferComparison() &&
-                  selectedComparisonTracks().length > 0
-                ) {
+                @if (canOfferComparison() && selectedComparisonTracks().length > 0) {
                   <div class="comparison-selection-bar">
                     <div class="comparison-selection-bar__summary">
                       <strong>
@@ -167,13 +123,9 @@
                       </strong>
 
                       @if (!canCompare()) {
-                        <span>
-                          Select at least 2 tracks to compare.
-                        </span>
+                        <span> Select at least 2 tracks to compare. </span>
                       } @else {
-                        <span>
-                          Ready to compare.
-                        </span>
+                        <span> Ready to compare. </span>
                       }
                     </div>
 
@@ -181,16 +133,9 @@
                       type="button"
                       class="secondary-action"
                       (click)="openComparison()"
-                      [disabled]="
-                        !canCompare() ||
-                        isLoadingComparison()
-                      "
+                      [disabled]="!canCompare() || isLoadingComparison()"
                     >
-                      {{
-                        isLoadingComparison()
-                          ? 'Loading comparison...'
-                          : 'Compare selected'
-                      }}
+                      {{ isLoadingComparison() ? 'Loading comparison...' : 'Compare selected' }}
                     </button>
                   </div>
 
@@ -203,14 +148,10 @@
               }
 
               @if (
-                result.intent === 'recommendation' &&
-                result.metadata.state ===
-                  'collecting_answers'
+                result.intent === 'recommendation' && result.metadata.state === 'collecting_answers'
               ) {
                 <div class="recommendation-actions">
-                  @if (
-                    result.metadata.canRecommendNow
-                  ) {
+                  @if (result.metadata.canRecommendNow) {
                     <button
                       type="button"
                       class="secondary-action"
@@ -228,13 +169,7 @@
       }
 
       @if (isSending()) {
-        <div
-          class="
-            assistant-message
-            assistant-message--loading
-          "
-          aria-label="Assistant is typing"
-        >
+        <div class="assistant-message assistant-message--loading" aria-label="Assistant is typing">
           <span></span>
           <span></span>
           <span></span>
@@ -249,10 +184,7 @@
     </main>
 
     <footer class="chat-composer">
-      <form
-        class="chat-composer__form"
-        (ngSubmit)="sendMessage()"
-      >
+      <form class="chat-composer__form" (ngSubmit)="sendMessage()">
         <input
           type="text"
           name="message"
@@ -265,9 +197,7 @@
         <button
           type="submit"
           class="chat-composer__send"
-          [disabled]="
-            isSending() || !message.trim()
-          "
+          [disabled]="isSending() || !message.trim()"
           aria-label="Send message"
         >
           ➤
@@ -278,10 +208,7 @@
 }
 
 @if (isComparisonOpen()) {
-  <div
-    class="comparison-backdrop"
-    (click)="closeComparison()"
-  >
+  <div class="comparison-backdrop" (click)="closeComparison()">
     <section
       class="comparison-modal"
       role="dialog"
@@ -291,13 +218,9 @@
     >
       <header class="comparison-modal__header">
         <div>
-          <h2 id="comparison-title">
-            Compare recommended tracks
-          </h2>
+          <h2 id="comparison-title">Compare recommended tracks</h2>
 
-          <p>
-            Review the differences before choosing a track.
-          </p>
+          <p>Review the differences before choosing a track.</p>
         </div>
 
         <button
@@ -311,22 +234,34 @@
       </header>
 
       <div class="comparison-grid">
-        @for (
-          track of comparisonTracks();
-          track track.id
-        ) {
+        @for (track of comparisonTracks(); track track.id) {
           <article class="comparison-track">
             <header class="comparison-track__header">
               <h3>{{ track.name }}</h3>
 
               <span class="comparison-track__status">
-                {{
-                  track.isActive
-                    ? 'Active'
-                    : 'Unavailable'
-                }}
+                {{ track.isActive ? 'Active' : 'Unavailable' }}
               </span>
             </header>
+
+            <dl class="comparison-track__facts">
+              <div>
+                <dt>Category</dt>
+                <dd>{{ track.category || 'Not specified' }}</dd>
+              </div>
+              <div>
+                <dt>Total hours</dt>
+                <dd>{{ formatTotalHours(track) }}</dd>
+              </div>
+              <div>
+                <dt>Minimum grade</dt>
+                <dd>{{ track.minimumGrade || 'Not specified' }}</dd>
+              </div>
+              <div>
+                <dt>Graduation window</dt>
+                <dd>{{ formatGraduationWindow(track) }}</dd>
+              </div>
+            </dl>
 
             <section class="comparison-track__section">
               <h4>Why it was recommended</h4>
@@ -340,10 +275,14 @@
               <h4>Description</h4>
 
               <p>
-                {{
-                  track.description ||
-                    'No description available.'
-                }}
+                {{ track.description || 'No description available.' }}
+              </p>
+            </section>
+
+            <section class="comparison-track__section">
+              <h4>Eligibility</h4>
+              <p>
+                {{ track.eligibilitySummary || 'No eligibility summary published.' }}
               </p>
             </section>
 
@@ -352,10 +291,7 @@
 
               @if (track.prerequisiteTopics.length > 0) {
                 <ul>
-                  @for (
-                    topic of track.prerequisiteTopics;
-                    track topic
-                  ) {
+                  @for (topic of track.prerequisiteTopics; track topic) {
                     <li>{{ topic }}</li>
                   }
                 </ul>
@@ -365,64 +301,59 @@
             </section>
 
             <section class="comparison-track__section">
-              <h4>Available branches</h4>
+              <h4>{{ track.isOfficialIntake47 ? 'Official locations' : 'Available branches' }}</h4>
 
-              @if (track.offerings.length > 0) {
+              @if (track.locations.length > 0) {
                 <ul class="comparison-branches">
-                  @for (
-                    offering of track.offerings;
-                    track offering.offeringId
-                  ) {
+                  @for (location of track.locations; track location.branchId) {
                     <li>
-                      <strong>
-                        {{ offering.branchName }}
-                      </strong>
+                      <strong>{{ location.branchName }}</strong>
 
-                      @if (offering.governorate) {
-                        <span>
-                          {{ offering.governorate }}
-                        </span>
+                      @if (location.governorate) {
+                        <span>{{ location.governorate }}</span>
                       }
 
-                      <small>
-                        Capacity:
-                        {{ offering.capacity }}
-                      </small>
+                      @if (capacityForLocation(track, location.branchId); as capacity) {
+                        <small>Active-cycle capacity: {{ capacity }}</small>
+                      }
                     </li>
                   }
                 </ul>
               } @else {
-                <p>No active branch offerings.</p>
+                <p>
+                  {{
+                    track.isOfficialIntake47
+                      ? 'No official locations published.'
+                      : 'No active branches available.'
+                  }}
+                </p>
+              }
+
+              @if (track.offerings.length === 0) {
+                <p>No active-cycle capacity configured.</p>
+              }
+
+              @if (track.officialTrackUrl) {
+                <a [href]="track.officialTrackUrl" target="_blank" rel="noopener noreferrer">
+                  View official ITI page
+                </a>
               }
             </section>
-
           </article>
         }
       </div>
 
       <footer class="comparison-modal__footer">
-        <p>
-          Recommendations are advisory and do not determine
-          admission eligibility.
-        </p>
+        <p>Recommendations are advisory and do not determine admission eligibility.</p>
 
-        <button
-          type="button"
-          class="secondary-action"
-          (click)="closeComparison()"
-        >
-          Close
-        </button>
+        <button type="button" class="secondary-action" (click)="closeComparison()">Close</button>
       </footer>
     </section>
   </div>
 }
 
 @if (isTrackDetailsOpen() && selectedTrackDetails()) {
-  <div
-    class="comparison-backdrop"
-    (click)="closeTrackDetails()"
-  >
+  <div class="comparison-backdrop" (click)="closeTrackDetails()">
     <section
       class="comparison-modal track-details-modal"
       role="dialog"
@@ -436,9 +367,7 @@
             {{ selectedTrackDetails()!.name }}
           </h2>
 
-          <p>
-            Recommended track details
-          </p>
+          <p>Recommended track details</p>
         </div>
 
         <button
@@ -461,27 +390,45 @@
           </section>
         }
 
+        <dl class="comparison-track__facts">
+          <div>
+            <dt>Category</dt>
+            <dd>{{ selectedTrackDetails()!.category || 'Not specified' }}</dd>
+          </div>
+          <div>
+            <dt>Total hours</dt>
+            <dd>{{ formatTotalHours(selectedTrackDetails()!) }}</dd>
+          </div>
+          <div>
+            <dt>Minimum grade</dt>
+            <dd>{{ selectedTrackDetails()!.minimumGrade || 'Not specified' }}</dd>
+          </div>
+          <div>
+            <dt>Graduation window</dt>
+            <dd>{{ formatGraduationWindow(selectedTrackDetails()!) }}</dd>
+          </div>
+        </dl>
+
         <section class="comparison-track__section">
           <h4>Description</h4>
           <p>
-            {{
-              selectedTrackDetails()!.description ||
-                'No description available.'
-            }}
+            {{ selectedTrackDetails()!.description || 'No description available.' }}
+          </p>
+        </section>
+
+        <section class="comparison-track__section">
+          <h4>Eligibility</h4>
+          <p>
+            {{ selectedTrackDetails()!.eligibilitySummary || 'No eligibility summary published.' }}
           </p>
         </section>
 
         <section class="comparison-track__section">
           <h4>Prerequisites</h4>
 
-          @if (
-            selectedTrackDetails()!.prerequisiteTopics.length > 0
-          ) {
+          @if (selectedTrackDetails()!.prerequisiteTopics.length > 0) {
             <ul>
-              @for (
-                topic of selectedTrackDetails()!.prerequisiteTopics;
-                track topic
-              ) {
+              @for (topic of selectedTrackDetails()!.prerequisiteTopics; track topic) {
                 <li>{{ topic }}</li>
               }
             </ul>
@@ -491,66 +438,73 @@
         </section>
 
         <section class="comparison-track__section">
-          <h4>Available branches</h4>
+          <h4>
+            {{
+              selectedTrackDetails()!.isOfficialIntake47
+                ? 'Official locations'
+                : 'Available branches'
+            }}
+          </h4>
 
-          @if (selectedTrackDetails()!.offerings.length > 0) {
+          @if (selectedTrackDetails()!.locations.length > 0) {
             <ul class="comparison-branches">
-              @for (
-                offering of selectedTrackDetails()!.offerings;
-                track offering.offeringId
-              ) {
+              @for (location of selectedTrackDetails()!.locations; track location.branchId) {
                 <li>
-                  <strong>
-                    {{ offering.branchName }}
-                  </strong>
+                  <strong>{{ location.branchName }}</strong>
 
-                  @if (offering.governorate) {
-                    <span>
-                      {{ offering.governorate }}
-                    </span>
+                  @if (location.governorate) {
+                    <span>{{ location.governorate }}</span>
                   }
 
-                  <small>
-                    Capacity:
-                    {{ offering.capacity }}
-                  </small>
+                  @if (
+                    capacityForLocation(selectedTrackDetails()!, location.branchId);
+                    as capacity
+                  ) {
+                    <small>Active-cycle capacity: {{ capacity }}</small>
+                  }
                 </li>
               }
             </ul>
           } @else {
-            <p>No active branch offerings.</p>
+            <p>
+              {{
+                selectedTrackDetails()!.isOfficialIntake47
+                  ? 'No official locations published.'
+                  : 'No active branches available.'
+              }}
+            </p>
+          }
+
+          @if (selectedTrackDetails()!.offerings.length === 0) {
+            <p>No active-cycle capacity configured.</p>
+          }
+
+          @if (selectedTrackDetails()!.officialTrackUrl) {
+            <a
+              [href]="selectedTrackDetails()!.officialTrackUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View official ITI page
+            </a>
           }
         </section>
       </div>
 
       <footer class="comparison-modal__footer">
-        <p>
-          Recommendations are advisory and do not determine
-          admission eligibility.
-        </p>
+        <p>Recommendations are advisory and do not determine admission eligibility.</p>
 
-        <button
-          type="button"
-          class="secondary-action"
-          (click)="closeTrackDetails()"
-        >
-          Close
-        </button>
+        <button type="button" class="secondary-action" (click)="closeTrackDetails()">Close</button>
       </footer>
     </section>
   </div>
 }
 
-
 <button
   type="button"
   class="chat-fab"
   (click)="toggleChat()"
-  [attr.aria-label]="
-    isOpen()
-      ? 'Close admission assistant'
-      : 'Open admission assistant'
-  "
+  [attr.aria-label]="isOpen() ? 'Close admission assistant' : 'Open admission assistant'"
 >
   <svg
     width="23"
@@ -561,9 +515,7 @@
     stroke-width="1.8"
     aria-hidden="true"
   >
-    <path
-      d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"
-    ></path>
+    <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"></path>
 
     <path d="M8 9h8M8 13h5"></path>
   </svg>

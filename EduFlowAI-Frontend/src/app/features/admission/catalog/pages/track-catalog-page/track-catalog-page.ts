@@ -28,21 +28,48 @@ export class TrackCatalogPage implements OnInit {
 
   protected readonly tracks = signal<readonly TrackCatalogItem[]>([]);
   protected readonly query = signal('');
+  protected readonly selectedCategory = signal<string | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
 
+  protected readonly categories = computed(() =>
+    Array.from(
+      new Set(
+        this.tracks()
+          .map((track) => track.category?.trim())
+          .filter((category): category is string => Boolean(category)),
+      ),
+    ).sort((left, right) => left.localeCompare(right)),
+  );
+
   protected readonly filteredTracks = computed(() => {
     const query = this.query().trim().toLocaleLowerCase();
-
-    if (!query) {
-      return this.tracks();
-    }
+    const selectedCategory = this.selectedCategory();
 
     return this.tracks().filter((track) => {
+      if (selectedCategory && track.category !== selectedCategory) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
+
       const searchableValues = [
         track.name,
         track.description,
+        track.category,
+        track.minimumGrade,
+        track.eligibilitySummary,
+        track.totalHours?.toString(),
+        track.graduationYearLimitYears?.toString(),
+        track.intake?.toString(),
+        track.year?.toString(),
         ...track.prerequisiteTopics,
+        ...track.locations.flatMap((location) => [
+          location.branchName,
+          location.governorate,
+        ]),
         ...track.offerings.flatMap((offering) => [
           offering.branchName,
           offering.governorate,
@@ -83,8 +110,22 @@ export class TrackCatalogPage implements OnInit {
     this.query.set(input.value);
   }
 
-  protected branchCount(track: TrackCatalogItem): number {
-    return track.offerings.length;
+  protected selectCategory(category: string | null): void {
+    this.selectedCategory.set(category);
+  }
+
+  protected locationCount(track: TrackCatalogItem): number {
+    return track.locations.length;
+  }
+
+  protected formatHours(track: TrackCatalogItem): string {
+    if (track.totalHours === null) {
+      return this.copy.text('notPublished');
+    }
+
+    return this.copy.text('hours', {
+      count: track.totalHours.toLocaleString(),
+    });
   }
 
   protected totalCapacity(track: TrackCatalogItem): number {

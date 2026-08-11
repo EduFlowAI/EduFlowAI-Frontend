@@ -40,6 +40,37 @@ export class TrackDetailsPage implements OnInit {
     ) ?? 0,
   );
 
+  protected formatHours(track: TrackCatalogItem): string {
+    if (track.totalHours === null) {
+      return this.copy.text('notPublished');
+    }
+
+    return this.copy.text('hours', {
+      count: track.totalHours.toLocaleString(),
+    });
+  }
+
+  protected graduationWindow(track: TrackCatalogItem): string {
+    if (track.graduationYearLimitYears === null) {
+      return this.copy.text('notProvided');
+    }
+
+    return this.copy.text('graduationWindowValue', {
+      count: track.graduationYearLimitYears,
+    });
+  }
+
+  protected capacityForLocation(
+    track: TrackCatalogItem,
+    branchId: string,
+  ): number | null {
+    const offering = track.offerings.find(
+      (candidate) => candidate.branchId === branchId,
+    );
+
+    return offering?.capacity ?? null;
+  }
+
   ngOnInit(): void {
     this.load();
   }

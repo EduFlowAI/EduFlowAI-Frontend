@@ -10,6 +10,7 @@ import {
   provideRouter,
 } from '@angular/router';
 
+import { RuntimeConfig } from '../../../../../core/config/runtime-config';
 import { TrackDetailsPage } from './track-details-page';
 
 describe('TrackDetailsPage', () => {
@@ -24,6 +25,7 @@ describe('TrackDetailsPage', () => {
       imports: [TrackDetailsPage],
       providers: [
         provideRouter([]),
+        { provide: RuntimeConfig, useValue: { apiBaseUrl: '/api' } },
         provideHttpClient(),
         provideHttpClientTesting(),
         {
@@ -53,10 +55,29 @@ describe('TrackDetailsPage', () => {
       data: {
         id: trackId,
         programId: '22222222-2222-2222-2222-222222222222',
-        name: '.NET Full Stack',
-        description: 'Build production-ready applications.',
-        prerequisiteTopics: ['C#'],
+        officialTrackId: '59d2e6c7-7221-4024-fe29-08dbe75ac461',
+        officialTrackUrl:
+          'https://iti.gov.eg/intakes/de3fa682-88c3-45e1-aa0c-e42bf47d5071/tracks/59d2e6c7-7221-4024-fe29-08dbe75ac461',
+        isOfficialIntake47: true,
+        intake: 47,
+        year: 2026,
+        name: 'Industrial Automation',
+        description: 'Build and maintain industrial automation systems.',
+        category: 'Industrial Systems',
+        totalHours: null,
+        minimumGrade: 'Good',
+        eligibilitySummary:
+          'Applicants must satisfy the official academic eligibility requirements.',
+        graduationYearLimitYears: 5,
+        prerequisiteTopics: ['Control systems'],
         isActive: true,
+        locations: [
+          {
+            branchId: 'smart-village',
+            branchName: 'Smart Village',
+            governorate: 'Giza',
+          },
+        ],
         offerings: [],
       },
       statusCode: 200,
@@ -65,6 +86,15 @@ describe('TrackDetailsPage', () => {
     fixture.detectChanges();
 
     expect(component).toBeTruthy();
-    expect(fixture.nativeElement.textContent).toContain('.NET Full Stack');
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('Industrial Automation');
+    expect(root.textContent).toContain('Industrial Systems');
+    expect(root.textContent).toContain('Not published');
+    expect(root.textContent).toContain('Within the last 5 years');
+    expect(root.textContent).toContain('Smart Village');
+    expect(root.textContent).toContain('No active-cycle capacity configured');
+    expect(
+      root.querySelector<HTMLAnchorElement>('.details__official-link')?.href,
+    ).toContain('59d2e6c7-7221-4024-fe29-08dbe75ac461');
   });
 });

@@ -11,12 +11,16 @@
         }}
       </p>
     </div>
-    <button class="secondary-button" type="button" (click)="load(selectedCycleId())" [disabled]="loading() || busy()">
+    <button
+      class="secondary-button"
+      type="button"
+      (click)="load(selectedCycleId())"
+      [disabled]="loading() || busy()"
+    >
       <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
       {{ copy.text('Refresh', 'تحديث') }}
     </button>
   </header>
-
 
   @if (loading()) {
     <div class="loading-line" role="status"></div>
@@ -42,7 +46,11 @@
       <div class="panel-heading">
         <div>
           <h2>{{ copy.text('Create admission cycle', 'إنشاء دورة تقديم') }}</h2>
-          <p>{{ copy.text('New cycles always start as Draft.', 'تبدأ جميع الدورات الجديدة كمسودة.') }}</p>
+          <p>
+            {{
+              copy.text('New cycles always start as Draft.', 'تبدأ جميع الدورات الجديدة كمسودة.')
+            }}
+          </p>
         </div>
         <span class="count-badge">{{ cycles().length }}</span>
       </div>
@@ -60,19 +68,30 @@
           </div>
           <div class="field">
             <label for="cycle-label">{{ copy.text('Cycle label', 'اسم الدورة') }}</label>
-            <input id="cycle-label" formControlName="label" maxlength="200" [placeholder]="copy.text('Intake 46 - 2026', 'الدفعة 46 - 2026')" />
+            <input
+              id="cycle-label"
+              formControlName="label"
+              maxlength="200"
+              [placeholder]="copy.text('Intake 46 - 2026', 'الدفعة 46 - 2026')"
+            />
           </div>
           <div class="field">
             <label for="cycle-start">{{ copy.text('Start date', 'تاريخ البداية') }}</label>
             <input id="cycle-start" type="date" formControlName="startDate" />
           </div>
           <div class="field">
-            <label for="cycle-deadline">{{ copy.text('Application deadline', 'آخر موعد للتقديم') }}</label>
+            <label for="cycle-deadline">{{
+              copy.text('Application deadline', 'آخر موعد للتقديم')
+            }}</label>
             <input id="cycle-deadline" type="datetime-local" formControlName="deadlineLocal" />
           </div>
         </div>
         <div class="form-actions">
-          <button class="primary-button" type="submit" [disabled]="busy() || programs().length === 0 || cycleForm.invalid">
+          <button
+            class="primary-button"
+            type="submit"
+            [disabled]="busy() || programs().length === 0 || cycleForm.invalid"
+          >
             <span class="material-symbols-outlined" aria-hidden="true">add</span>
             {{ copy.text('Create draft cycle', 'إنشاء دورة مسودة') }}
           </button>
@@ -85,7 +104,14 @@
       <div class="panel-heading">
         <div>
           <h2>{{ copy.text('All Cycles', 'جميع الدورات') }}</h2>
-          <p>{{ copy.text('Click a cycle to manage its configuration.', 'اضغط على دورة لإدارة إعداداتها.') }}</p>
+          <p>
+            {{
+              copy.text(
+                'Click a cycle to manage its configuration.',
+                'اضغط على دورة لإدارة إعداداتها.'
+              )
+            }}
+          </p>
         </div>
       </div>
 
@@ -106,7 +132,9 @@
             @for (cycle of cycles(); track cycle.id; let i = $index) {
               <tr (click)="selectCycle(cycle.id)">
                 <td>{{ i + 1 }}</td>
-                <td><strong>{{ cycle.label }}</strong></td>
+                <td>
+                  <strong>{{ cycle.label }}</strong>
+                </td>
                 <td>{{ cycle.programName }}</td>
                 <td>
                   <span
@@ -127,7 +155,9 @@
       } @else {
         <div class="empty-state">
           <span class="material-symbols-outlined" aria-hidden="true">event_busy</span>
-          <p>{{ copy.text('No admission cycles are configured.', 'لم تتم إضافة دورات تقديم بعد.') }}</p>
+          <p>
+            {{ copy.text('No admission cycles are configured.', 'لم تتم إضافة دورات تقديم بعد.') }}
+          </p>
         </div>
       }
     </section>
@@ -158,7 +188,10 @@
       </div>
 
       <!-- Sub-tabs navigation -->
-      <nav class="sub-tabs" [attr.aria-label]="copy.text('Cycle configuration tabs', 'علامات تبويب إعدادات الدورة')">
+      <nav
+        class="sub-tabs"
+        [attr.aria-label]="copy.text('Cycle configuration tabs', 'علامات تبويب إعدادات الدورة')"
+      >
         <button
           type="button"
           [class.is-active]="activeSubTab() === 'overview'"
@@ -197,7 +230,9 @@
             <small>{{ copy.text('Total capacity', 'إجمالي السعة') }}</small>
           </article>
           <article>
-            <strong>{{ cycle.eligibilityRule ? copy.text('Ready', 'محددة') : copy.text('Missing', 'ناقصة') }}</strong>
+            <strong>{{
+              cycle.eligibilityRule ? copy.text('Ready', 'محددة') : copy.text('Missing', 'ناقصة')
+            }}</strong>
             <small>{{ copy.text('Eligibility', 'الأهلية') }}</small>
           </article>
           <article>
@@ -208,7 +243,12 @@
 
         <div class="form-actions">
           @if (cycle.status === CycleStatus.Draft) {
-            <button class="success-button" type="button" (click)="activateCycle()" [disabled]="busy()">
+            <button
+              class="success-button"
+              type="button"
+              (click)="activateCycle()"
+              [disabled]="busy()"
+            >
               <span class="material-symbols-outlined" aria-hidden="true">play_circle</span>
               {{ copy.text('Activate cycle', 'تفعيل الدورة') }}
             </button>
@@ -226,7 +266,14 @@
         <div class="panel-heading">
           <div>
             <h2>{{ copy.text('Eligibility rule', 'قاعدة الأهلية') }}</h2>
-            <p>{{ copy.text('These deterministic fields are evaluated before document processing.', 'تُفحص هذه الشروط المحددة قبل معالجة المستندات.') }}</p>
+            <p>
+              {{
+                copy.text(
+                  'These deterministic fields are evaluated before document processing.',
+                  'تُفحص هذه الشروط المحددة قبل معالجة المستندات.'
+                )
+              }}
+            </p>
           </div>
         </div>
 
@@ -274,11 +321,21 @@
                 <input id="degree-level" formControlName="requiredDegreeLevel" maxlength="30" />
               </div>
               <div class="field">
-                <label for="graduation-years">{{ copy.text('Maximum years since graduation', 'أقصى عدد سنوات منذ التخرج') }}</label>
-                <input id="graduation-years" type="number" min="0" max="100" formControlName="maxYearsSinceGraduation" />
+                <label for="graduation-years">{{
+                  copy.text('Maximum years since graduation', 'أقصى عدد سنوات منذ التخرج')
+                }}</label>
+                <input
+                  id="graduation-years"
+                  type="number"
+                  min="0"
+                  max="100"
+                  formControlName="maxYearsSinceGraduation"
+                />
               </div>
               <div class="field">
-                <label for="minimum-grade">{{ copy.text('Minimum grade', 'الحد الأدنى للتقدير') }}</label>
+                <label for="minimum-grade">{{
+                  copy.text('Minimum grade', 'الحد الأدنى للتقدير')
+                }}</label>
                 <select id="minimum-grade" formControlName="minGrade">
                   @for (grade of gradeOptions; track grade.value) {
                     <option [ngValue]="grade.value">{{ copy.text(grade.en, grade.ar) }}</option>
@@ -311,7 +368,14 @@
         <div class="panel-heading">
           <div>
             <h2>{{ copy.text('Track / branch offerings', 'عروض المسارات والفروع') }}</h2>
-            <p>{{ copy.text('Each add, capacity update, or removal is saved separately.', 'كل إضافة أو تعديل للسعة أو حذف يتم حفظه بشكل منفصل.') }}</p>
+            <p>
+              {{
+                copy.text(
+                  'Each add, capacity update, or removal is saved separately.',
+                  'كل إضافة أو تعديل للسعة أو حذف يتم حفظه بشكل منفصل.'
+                )
+              }}
+            </p>
           </div>
           <span class="count-badge">{{ cycle.offerings.length }}</span>
         </div>
@@ -332,7 +396,11 @@
           <div class="form-grid">
             <div class="field">
               <label for="offering-track">{{ copy.text('Track', 'المسار') }}</label>
-              <select id="offering-track" formControlName="trackId">
+              <select
+                id="offering-track"
+                formControlName="trackId"
+                (change)="onOfferingTrackChange()"
+              >
                 <option value="">{{ copy.text('Select track', 'اختر المسار') }}</option>
                 @for (track of selectedProgramTracks(); track track.id) {
                   <option [value]="track.id" [disabled]="!track.isActive">{{ track.name }}</option>
@@ -343,8 +411,10 @@
               <label for="offering-branch">{{ copy.text('Branch', 'الفرع') }}</label>
               <select id="offering-branch" formControlName="branchId">
                 <option value="">{{ copy.text('Select branch', 'اختر الفرع') }}</option>
-                @for (branch of branches(); track branch.id) {
-                  <option [value]="branch.id" [disabled]="!branch.isActive">{{ branch.name }}</option>
+                @for (branch of availableOfferingBranches(); track branch.id) {
+                  <option [value]="branch.id" [disabled]="!branch.isActive">
+                    {{ branch.name }}
+                  </option>
                 }
               </select>
             </div>
@@ -404,7 +474,14 @@
           } @empty {
             <div class="empty-state">
               <span class="material-symbols-outlined" aria-hidden="true">hub</span>
-              <p>{{ copy.text('Add at least one track and branch offering.', 'أضف عرضًا واحدًا على الأقل لمسار وفرع.') }}</p>
+              <p>
+                {{
+                  copy.text(
+                    'Add at least one track and branch offering.',
+                    'أضف عرضًا واحدًا على الأقل لمسار وفرع.'
+                  )
+                }}
+              </p>
             </div>
           }
         </div>
@@ -412,4 +489,3 @@
     </section>
   }
 </section>
-

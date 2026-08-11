@@ -30,6 +30,29 @@
     </div>
   </header>
 
+  @if (!loading() && !error() && categories().length > 0) {
+    <nav class="category-filters" [attr.aria-label]="copy.text('category')">
+      <button
+        type="button"
+        [class.is-active]="selectedCategory() === null"
+        [attr.aria-pressed]="selectedCategory() === null"
+        (click)="selectCategory(null)"
+      >
+        {{ copy.text('allCategories') }}
+      </button>
+      @for (category of categories(); track category) {
+        <button
+          type="button"
+          [class.is-active]="selectedCategory() === category"
+          [attr.aria-pressed]="selectedCategory() === category"
+          (click)="selectCategory(category)"
+        >
+          {{ category }}
+        </button>
+      }
+    </nav>
+  }
+
   @if (loading()) {
     <div class="catalog-state catalog-state--loading" role="status">
       <span class="loading-spinner" aria-hidden="true"></span>
@@ -80,11 +103,11 @@
           <div class="track-card__header">
             <span class="track-card__status">
               <span class="track-card__status-dot" aria-hidden="true"></span>
-              {{ copy.text('activeIntake') }}
+              {{ copy.text(track.isOfficialIntake47 ? 'activeIntake' : 'activeTrack') }}
             </span>
-            <span class="material-symbols-outlined track-card__icon" aria-hidden="true">
-              school
-            </span>
+            @if (track.category) {
+              <span class="track-card__category">{{ track.category }}</span>
+            }
           </div>
 
           <div class="track-card__body">
@@ -92,6 +115,26 @@
             <p class="track-card__description">
               {{ track.description || copy.text('notProvided') }}
             </p>
+
+            @if (track.isOfficialIntake47) {
+              <dl class="track-card__facts">
+                <div>
+                  <dt>{{ copy.text('totalHours') }}</dt>
+                  <dd>{{ formatHours(track) }}</dd>
+                </div>
+                <div>
+                  <dt>{{ copy.text('minimumGrade') }}</dt>
+                  <dd>{{ track.minimumGrade || copy.text('notProvided') }}</dd>
+                </div>
+              </dl>
+            }
+
+            @if (track.eligibilitySummary) {
+              <section class="track-card__section track-card__eligibility">
+                <h3>{{ copy.text('eligibility') }}</h3>
+                <p>{{ track.eligibilitySummary }}</p>
+              </section>
+            }
 
             <section class="track-card__section">
               <h3>{{ copy.text('prerequisites') }}</h3>
@@ -108,39 +151,62 @@
 
             <section class="track-card__section">
               <div class="track-card__section-heading">
-                <h3>{{ copy.text('branches') }}</h3>
+                <h3>{{ copy.text('locations') }}</h3>
                 <span>
-                  {{ copy.text('branchCount', { count: branchCount(track) }) }}
+                  {{ copy.text('locationCount', { count: locationCount(track) }) }}
                 </span>
               </div>
 
-              <ul class="branch-preview">
-                @for (offering of track.offerings.slice(0, 3); track offering.offeringId) {
-                  <li>
-                    <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
-                    <span>
-                      <strong>{{ offering.branchName }}</strong>
-                      <small>
-                        {{ offering.governorate || copy.text('notProvided') }}
-                      </small>
-                    </span>
-                  </li>
-                }
-              </ul>
+              @if (track.locations.length > 0) {
+                <ul class="branch-preview">
+                  @for (location of track.locations.slice(0, 3); track location.branchId) {
+                    <li>
+                      <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                      <span>
+                        <strong>{{ location.branchName }}</strong>
+                        <small>
+                          {{ location.governorate || copy.text('notProvided') }}
+                        </small>
+                      </span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="track-card__muted">{{ copy.text('noLocations') }}</p>
+              }
             </section>
           </div>
 
           <footer class="track-card__footer">
-            <span class="capacity-summary">
-              <span class="material-symbols-outlined" aria-hidden="true">groups</span>
-              {{ copy.text('seats', { count: totalCapacity(track) }) }}
-            </span>
-            <a [routerLink]="['/tracks', track.id]">
-              {{ copy.text('viewDetails') }}
-              <span class="material-symbols-outlined" aria-hidden="true">
-                {{ copy.isRtl() ? 'arrow_back' : 'arrow_forward' }}
+            @if (track.offerings.length > 0) {
+              <span class="capacity-summary">
+                <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+                {{ copy.text('seats', { count: totalCapacity(track) }) }}
               </span>
-            </a>
+            } @else {
+              <span class="capacity-summary">
+                <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                {{ copy.text('noActiveCapacity') }}
+              </span>
+            }
+            <span class="track-card__actions">
+              @if (track.officialTrackUrl) {
+                <a
+                  class="track-card__official-link"
+                  [href]="track.officialTrackUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ copy.text('officialTrackPage') }}
+                </a>
+              }
+              <a [routerLink]="['/tracks', track.id]">
+                {{ copy.text('viewDetails') }}
+                <span class="material-symbols-outlined" aria-hidden="true">
+                  {{ copy.isRtl() ? 'arrow_back' : 'arrow_forward' }}
+                </span>
+              </a>
+            </span>
           </footer>
         </article>
       }

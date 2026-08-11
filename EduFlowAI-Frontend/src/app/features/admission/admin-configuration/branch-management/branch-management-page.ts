@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -72,8 +65,7 @@ export class BranchManagementPage implements OnInit {
       )
       .subscribe({
         next: (branches) => this.branches.set(branches),
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to load branches.'),
+        error: (error: unknown) => this.showError(error, 'Unable to load branches.'),
       });
   }
 
@@ -83,6 +75,9 @@ export class BranchManagementPage implements OnInit {
 
   protected openDrawer(branch?: BranchDto): void {
     this.clearMessages();
+    if (branch?.isSourceManaged) {
+      return;
+    }
     if (branch) {
       this.editingBranch.set(branch);
       this.branchForm.setValue({
@@ -130,17 +125,11 @@ export class BranchManagementPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.copy.text(
-              'Branch saved successfully.',
-              'تم حفظ الفرع بنجاح.',
-            ),
-          );
+          this.success.set(this.copy.text('Branch saved successfully.', 'تم حفظ الفرع بنجاح.'));
           this.closeDrawer();
           this.loadBranches();
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to save branch.'),
+        error: (error: unknown) => this.showError(error, 'Unable to save branch.'),
       });
   }
 
