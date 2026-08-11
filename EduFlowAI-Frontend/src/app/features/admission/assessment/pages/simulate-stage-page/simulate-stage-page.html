@@ -24,9 +24,11 @@
 
                 <!-- Simulation Error Alert -->
                 @if (store.simulateError()) {
-                    <div class="bg-error-container border border-error text-on-error-container p-3 rounded-lg flex gap-2 mb-6">
-                        <span class="material-symbols-outlined shrink-0">error</span>
-                        <p class="font-body-sm">{{ store.simulateError() }}</p>
+                    <div class="mb-6">
+                        <app-validation-errors 
+                            [title]="'Simulation Failed'" 
+                            [errors]="[store.simulateError()!]">
+                        </app-validation-errors>
                     </div>
                 }
 
@@ -89,9 +91,11 @@
 
                     <!-- Allocation Error -->
                     @if (store.allocationError()) {
-                        <div class="bg-error-container border border-error text-on-error-container p-3 rounded-lg flex gap-2 mb-4">
-                            <span class="material-symbols-outlined shrink-0 text-[18px]">error</span>
-                            <p class="font-body-sm">{{ store.allocationError() }}</p>
+                        <div class="mb-4">
+                            <app-validation-errors 
+                                [title]="'Allocation Engine Error'" 
+                                [errors]="[store.allocationError()!]">
+                            </app-validation-errors>
                         </div>
                     }
 

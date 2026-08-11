@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AssessmentStore } from '../../data-access/assessment.store';
 import { SelectionStage } from '../../../applications/models/application.model';
+import { ValidationErrors } from '../../../../../shared/ui/validation-errors/validation-errors';
 
 @Component({
   selector: 'app-simulate-stage-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ValidationErrors],
   templateUrl: './simulate-stage-page.html',
   styleUrl: './simulate-stage-page.scss',
   // Enforce optimized change detection
