@@ -70,6 +70,13 @@ export class ApplicantDashboardPage implements OnInit {
           icon: 'fact_check', 
           path: statusPath 
         };
+        case 'AssessmentInProgress':
+        case 'AssessmentCompleted':
+          return {
+            label: 'Track Progress',
+            icon: 'monitoring', 
+            path: statusPath
+          };
       case 'English/IQ Pending':
       case 'Technical Pending':
         return { 

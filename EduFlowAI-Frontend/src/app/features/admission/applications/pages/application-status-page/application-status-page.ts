@@ -3,16 +3,14 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApplicationsStore } from '../../data-access/applications.store';
 import { EligibilityResultComponent } from './../../ui/eligibility-result.component/eligibility-result.component';
-// We will import the micro-view components here once we create them
-// import { AssessmentProgressTrackingComponent } from './components/assessment-progress-tracking.component';
+import { AssessmentProgressTrackingComponent } from './../../ui/assessment-progress-tracking.component/assessment-progress-tracking.component';
 
 @Component({
   selector: 'app-application-status-page',
   standalone: true,
   imports: [
-    CommonModule, RouterLink, EligibilityResultComponent
-    // Add micro-view components to imports later
-    // AssessmentProgressTrackingComponent
+    CommonModule, RouterLink, EligibilityResultComponent,
+    AssessmentProgressTrackingComponent
   ],
   templateUrl: './application-status-page.html',
   styleUrls: ['./application-status-page.scss']

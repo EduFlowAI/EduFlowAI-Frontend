@@ -161,6 +161,8 @@ export interface EligibilityResult {
 export interface SimulatedStageDto {
     stageId: string;
     stageType: string;
+    title: string;
+    description: string;
     score?: number | null;
     maxScore: number;
     result: string;
