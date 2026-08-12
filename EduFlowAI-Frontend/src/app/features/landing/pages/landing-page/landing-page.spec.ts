@@ -38,19 +38,40 @@ describe('LandingPage', () => {
     expect(root.querySelector('.programs-state')).toBeNull();
   });
 
-  it('directs visitors to the API-backed official catalog without static track cards', () => {
+  it('combines category filtering with the localized search state', () => {
     const fixture = TestBed.createComponent(LandingPage);
     fixture.detectChanges();
 
-    const root = fixture.nativeElement as HTMLElement;
-    const catalogLink = root.querySelector<HTMLAnchorElement>(
-      '.tracks-catalog-cta a',
+    const component = fixture.componentInstance;
+    component.setActiveFilter('data');
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('.track-card')).toHaveLength(1);
+
+    component.trackSearch.set('not-a-real-track');
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.empty-state')).not.toBeNull();
+  });
+
+  it('shows track prerequisites as tags without requirement accordions', () => {
+    const fixture = TestBed.createComponent(LandingPage);
+    fixture.detectChanges();
+
+    const firstTrack = (fixture.nativeElement as HTMLElement).querySelector('.track-card');
+    const tags = Array.from(firstTrack?.querySelectorAll('.tag') ?? []).map((tag) =>
+      tag.textContent?.trim(),
     );
 
-    expect(root.querySelector('.track-card')).toBeNull();
-    expect(root.textContent).toContain('Browse the official track catalog');
-    expect(root.textContent).toContain('only active-cycle offerings');
-    expect(catalogLink?.getAttribute('href')).toBe('/tracks');
+    expect(tags).toEqual(['Programming fundamentals', 'Logical problem solving']);
+    expect(firstTrack?.querySelector('.track-toggle')).toBeNull();
+    expect(firstTrack?.querySelector('.track-footer')).toBeNull();
+    const durations = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.track-meta span:first-child'),
+    ).map((duration) => duration.textContent?.replace(/\s+/g, ' ').trim());
+    expect(durations.some((duration) => duration?.includes('9 months'))).toBe(true);
+    expect(durations.some((duration) => duration?.includes('4 months'))).toBe(true);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.tracks-note')?.textContent?.trim(),
+    ).toBe('Available tracks vary by program and by the branches offering each program.');
   });
 
   it('reuses persisted locale state and scopes the persisted theme to the page', () => {
@@ -67,7 +88,7 @@ describe('LandingPage', () => {
     expect(localStorage.getItem('iti-theme')).toBe('dark');
     expect(root?.getAttribute('data-theme')).toBe('dark');
     expect(root?.querySelector('.program-card h3')?.textContent?.trim()).toBe(
-      'برنامج التدريب الاحترافي (PTP)',
+      'برنامج التدريب الاحترافي (9 أشهر)',
     );
   });
 });

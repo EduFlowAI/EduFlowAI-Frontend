@@ -89,15 +89,10 @@ describe('HTTP interceptors', () => {
     request.flush({});
   });
 
-  it('does not expose credentials over plaintext or to an absolute host when development uses the proxy', () => {
-    const url = /^https?:\/\//i.test(runtimeConfig.apiBaseUrl)
-      ? (() => {
-          const configuredUrl = new URL(runtimeConfig.apiBaseUrl);
-          configuredUrl.protocol = 'http:';
-          return `${configuredUrl.toString().replace(/\/$/, '')}/profile`;
-        })()
-      : 'http://localhost:7159/api/profile';
-
+  it('does not expose credentials over plaintext to the configured host', () => {
+    const configuredUrl = new URL(runtimeConfig.apiBaseUrl);
+    configuredUrl.protocol = 'http:';
+    const url = `${configuredUrl.toString().replace(/\/$/, '')}/profile`;
     client.get(url).subscribe();
 
     const request = http.expectOne(url);

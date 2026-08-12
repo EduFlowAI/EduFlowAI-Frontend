@@ -271,29 +271,6 @@ export class AssistantPage {
     );
   }
 
-  formatTotalHours(track: TrackCatalogItem): string {
-    return track.totalHours === null
-      ? 'Not published'
-      : `${track.totalHours.toLocaleString()} hours`;
-  }
-
-  formatGraduationWindow(track: TrackCatalogItem): string {
-    return track.graduationYearLimitYears === null
-      ? 'Not specified'
-      : `Within the last ${track.graduationYearLimitYears} years`;
-  }
-
-  capacityForLocation(
-    track: TrackCatalogItem,
-    branchId: string,
-  ): number | null {
-    return (
-      track.offerings.find(
-        offering => offering.branchId === branchId,
-      )?.capacity ?? null
-    );
-  }
-
   private applyRecommendationAnswer(
     questionKey: RecommendationQuestionKey,
     answer: string,

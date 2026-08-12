@@ -13,24 +13,15 @@ describe('RuntimeConfig', () => {
     expect(config.apiBaseUrl).toBe(expectedApiBaseUrl);
   });
 
-  it('trusts relative API URLs and only the configured absolute API origin', () => {
+  it('trusts only relative or configured absolute API URLs', () => {
     const config = new RuntimeConfig();
+    const configuredOrigin = new URL(expectedApiBaseUrl).origin;
 
     expect(config.isTrustedApiUrl('/api/profile')).toBe(true);
+    expect(config.isTrustedApiUrl(`${expectedApiBaseUrl}/profile`)).toBe(true);
     expect(config.isTrustedApiUrl('https://example.com/api/profile')).toBe(false);
-
-    if (/^https?:\/\//i.test(expectedApiBaseUrl)) {
-      const configuredOrigin = new URL(expectedApiBaseUrl).origin;
-
-      expect(config.isTrustedApiUrl(`${expectedApiBaseUrl}/profile`)).toBe(true);
-      expect(
-        config.isTrustedApiUrl(`${configuredOrigin}/outside-api/profile`),
-      ).toBe(false);
-      return;
-    }
-
-    // In development apiUrl is intentionally empty so Angular's /api proxy is used.
-    expect(expectedApiBaseUrl).toBe('/api');
-    expect(config.isTrustedApiUrl('http://localhost:7159/api/profile')).toBe(false);
+    expect(
+      config.isTrustedApiUrl(`${configuredOrigin}/outside-api/profile`),
+    ).toBe(false);
   });
 });

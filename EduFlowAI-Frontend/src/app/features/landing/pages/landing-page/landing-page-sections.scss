@@ -53,36 +53,201 @@
   );
 }
 
-.tracks-catalog-cta {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+.explorer-toolbar {
+  display: flex;
   align-items: center;
-  gap: 22px;
-  padding: 28px;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-btn {
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 650;
+  transition: 0.2s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  border-color: var(--navy-900);
+  background: var(--navy-900);
+  color: #fff;
+}
+
+.search-box {
+  position: relative;
+  width: min(330px, 100%);
+}
+
+.search-box svg {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 14px;
+  color: var(--text-soft);
+  transform: translateY(-50%);
+}
+
+.search-box input {
+  width: 100%;
+  height: 43px;
+  padding-inline: 42px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.search-box input::placeholder {
+  color: var(--gray-500);
+}
+
+.tracks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.track-card {
+  display: flex;
+  overflow: hidden;
+  min-height: 360px;
+  flex-direction: column;
   border: 1px solid var(--border);
   border-radius: 20px;
   background: var(--surface);
   box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
-.tracks-catalog-cta .card-icon {
-  margin: 0;
+.track-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-7px);
 }
 
-.tracks-catalog-cta h3 {
-  margin: 0 0 6px;
-  color: var(--heading);
-  font-size: 1.2rem;
+.track-top-line {
+  height: 5px;
+  background: var(--navy-700);
 }
 
-.tracks-catalog-cta p {
-  margin: 0;
+.track-card.ai .track-top-line {
+  background: var(--amber-600);
+}
+
+.track-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 22px;
+}
+
+.track-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.track-symbol {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  background: var(--blue-100);
+  color: var(--navy-700);
+  place-items: center;
+}
+
+.track-card.ai .track-symbol {
+  background: var(--amber-100);
+  color: var(--amber-700);
+}
+
+.track-category {
   color: var(--text-soft);
-  font-size: 0.9rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
-.tracks-catalog-cta .btn {
-  white-space: nowrap;
+.track-card h3 {
+  margin: 17px 0 8px;
+  color: var(--heading);
+  font-size: 1.22rem;
+  line-height: 1.25;
+}
+
+.track-description {
+  min-height: 62px;
+  margin: 0 0 19px;
+  color: var(--text-soft);
+  font-size: 0.87rem;
+}
+
+.track-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: auto;
+  color: var(--text-soft);
+  font-size: 0.75rem;
+}
+
+.track-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 17px;
+}
+
+.tag {
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tracks-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 20px 0 0;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}
+
+.tracks-note svg {
+  flex: 0 0 auto;
+  color: var(--navy-700);
+}
+
+[data-theme='dark'] .tracks-note svg {
+  color: #c5ddf8;
 }
 
 .process-grid {
@@ -279,6 +444,10 @@
 
   .hero h1 {
     font-size: clamp(2.7rem, 6.2vw, 4.5rem);
+  }
+
+  .tracks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .eligibility-grid {
@@ -491,6 +660,7 @@
   }
 
   .eligibility-grid,
+  .tracks-grid,
   .programs-grid {
     grid-template-columns: 1fr;
   }
@@ -508,13 +678,9 @@
     grid-template-columns: 1fr;
   }
 
-  .tracks-catalog-cta {
-    grid-template-columns: auto 1fr;
-  }
-
-  .tracks-catalog-cta .btn {
-    grid-column: 1 / -1;
-    justify-content: center;
+  .explorer-toolbar {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .search-box {

@@ -17,8 +17,9 @@ export class FinalResultCardComponent {
   status = input.required<string>(); 
   applicationId = input.required<string | null>();
 
-  trackName = input<string>('Selected track');
-  branchName = input<string>('Selected branch');
+  // Mock data for the UI representation
+  trackName = input<string>('Professional Web Development'); 
+  branchName = input<string>('Alexandria'); 
   waitlistPosition = input<number>(5);
 
   withdrawApplication(): void {

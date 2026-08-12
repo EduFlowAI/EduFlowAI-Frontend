@@ -22,12 +22,13 @@ export const routes: Routes = [
   {
     path: 'tracks',
     loadComponent: () =>
-      import('./core/layout/public-layout/public-layout').then(
-        (component) => component.PublicLayout,
+      import('./features/landing/pages/landing-page/landing-page').then(
+        (component) => component.LandingPage,
       ),
     loadChildren: () =>
       import('./features/admission/catalog/routes').then(
         (catalogRoutes) => catalogRoutes.TRACK_CATALOG_ROUTES),
+    title: 'ITI Admissions through EduFlowAI',
   },
   {
     path: 'auth',
