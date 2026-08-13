@@ -1,4 +1,11 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 
@@ -25,6 +32,12 @@ import { AssistantLauncherService } from '../../services/assistant-launcher.serv
   styleUrl: './assistant-page.scss',
 })
 export class AssistantPage {
+  @ViewChild('chatBody')
+  private chatBody?: ElementRef<HTMLElement>;
+
+  @ViewChild('messageInput')
+  private messageInput?: ElementRef<HTMLTextAreaElement>;
+
   private readonly assistantApi = inject(AssistantApiService);
 
   private readonly assistantLauncher =
@@ -115,6 +128,27 @@ export class AssistantPage {
     );
   }
 
+  handleComposerKeydown(event: KeyboardEvent): void {
+    if (
+      event.key !== 'Enter' ||
+      event.shiftKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    this.sendMessage();
+  }
+
+  autoResizeMessageInput(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+
+    textarea.style.height = 'auto';
+    textarea.style.height =
+      `${Math.min(textarea.scrollHeight, 112)}px`;
+  }
+
+
   recommendNow(): void {
     if (this.isSending()) {
       return;
@@ -129,11 +163,18 @@ export class AssistantPage {
   }
 
   toggleChat(): void {
+    const wasOpen = this.isOpen();
+
     this.assistantLauncher.toggle();
+
+    if (!wasOpen) {
+      this.scheduleScrollToBottom();
+    }
   }
 
   toggleMaximize(): void {
     this.isMaximized.update(value => !value);
+    this.scheduleScrollToBottom();
   }
 
   closeChat(): void {
@@ -379,6 +420,29 @@ export class AssistantPage {
     };
   }
 
+  private scheduleScrollToBottom(): void {
+    setTimeout(() => {
+      const container = this.chatBody?.nativeElement;
+
+      if (!container) {
+        return;
+      }
+
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth',
+      });
+    });
+  }
+
+  private resetMessageInputHeight(): void {
+    const textarea = this.messageInput?.nativeElement;
+
+    if (textarea) {
+      textarea.style.height = 'auto';
+    }
+  }
+
   private sendAssistantRequest(
     message: string,
     recommendWithAvailableData: boolean,
@@ -393,7 +457,9 @@ export class AssistantPage {
       },
     ]);
 
+    this.resetMessageInputHeight();
     this.isSending.set(true);
+    this.scheduleScrollToBottom();
     this.errorMessage.set(null);
 
     this.assistantApi
@@ -471,6 +537,7 @@ export class AssistantPage {
               timestamp: response.timestamp,
             },
           ]);
+          this.scheduleScrollToBottom();
         },
         error: () => {
           this.activeRecommendationQuestionKey.set(null);
@@ -478,6 +545,7 @@ export class AssistantPage {
           this.errorMessage.set(
             'Could not send the message. Please try again.',
           );
+          this.scheduleScrollToBottom();
         },
       });
   }
