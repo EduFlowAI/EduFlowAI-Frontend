@@ -121,6 +121,33 @@
   color: #8290a3;
 }
 
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-block-end: 1.35rem;
+}
+
+.category-filters button {
+  min-height: 2.35rem;
+  border: 1px solid #cbd6e4;
+  border-radius: 999px;
+  background: #fff;
+  padding-inline: 0.85rem;
+  color: #425773;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.category-filters button:hover,
+.category-filters button.is-active {
+  border-color: #225b94;
+  background: #eaf3fb;
+  color: #174f82;
+}
+
 .track-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -176,15 +203,15 @@
   box-shadow: 0 0 0 0.22rem rgb(47 155 104 / 13%);
 }
 
-.track-card__icon {
-  display: grid;
-  width: 2.65rem;
-  height: 2.65rem;
-  place-items: center;
-  border-radius: 0.75rem;
-  background: #022448;
-  color: #fff;
-  font-size: 1.45rem;
+.track-card__category {
+  max-width: 65%;
+  overflow: hidden;
+  color: #305a82;
+  font-size: 0.7rem;
+  font-weight: 750;
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .track-card__body {
@@ -214,9 +241,48 @@
   line-height: 1.7;
 }
 
+.track-card__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.track-card__facts > div {
+  border: 1px solid #e1e8f0;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  padding: 0.7rem;
+}
+
+.track-card__facts dt {
+  color: #748296;
+  font-size: 0.66rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.track-card__facts dd {
+  margin: 0.25rem 0 0;
+  color: #263e5b;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
 .track-card__section {
   border-block-start: 1px solid #edf0f4;
   padding-block-start: 1rem;
+}
+
+.track-card__eligibility p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  color: #5f6e82;
+  font-size: 0.78rem;
+  line-height: 1.55;
 }
 
 .track-card__section h3 {
@@ -308,7 +374,8 @@
 }
 
 .capacity-summary,
-.track-card__footer a {
+.track-card__footer a,
+.track-card__actions {
   display: inline-flex;
   align-items: center;
   gap: 0.38rem;
@@ -329,6 +396,16 @@
   font-size: 0.78rem;
   font-weight: 800;
   text-decoration: none;
+}
+
+.track-card__actions {
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.track-card__official-link {
+  color: #48637e !important;
+  font-weight: 700 !important;
 }
 
 .track-card__footer a:hover {
@@ -482,6 +559,12 @@
   .track-card__footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .track-card__actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 }
 

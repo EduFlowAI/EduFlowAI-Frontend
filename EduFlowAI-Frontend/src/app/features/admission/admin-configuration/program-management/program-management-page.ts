@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
@@ -80,8 +73,7 @@ export class ProgramManagementPage implements OnInit {
           this.institutions.set(institutions);
           this.programs.set(programs);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to load programs.'),
+        error: (error: unknown) => this.showError(error, 'Unable to load programs.'),
       });
   }
 
@@ -153,17 +145,11 @@ export class ProgramManagementPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.copy.text(
-              'Program saved successfully.',
-              'تم حفظ البرنامج بنجاح.',
-            ),
-          );
+          this.success.set(this.copy.text('Program saved successfully.', 'تم حفظ البرنامج بنجاح.'));
           this.closeDrawer();
           this.loadData();
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to save program.'),
+        error: (error: unknown) => this.showError(error, 'Unable to save program.'),
       });
   }
 
@@ -197,8 +183,7 @@ export class ProgramManagementPage implements OnInit {
           );
           this.loadData();
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to delete program.'),
+        error: (error: unknown) => this.showError(error, 'Unable to delete program.'),
       });
   }
 

@@ -81,7 +81,7 @@ describe('AdmissionOverview', () => {
     fixture.detectChanges();
 
     expect(component).toBeTruthy();
-    expect(fixture.nativeElement.textContent).toContain('Admission overview');
+    expect(fixture.nativeElement.textContent).toContain('Admission Overview');
     expect(
       (fixture.nativeElement.querySelector('select') as HTMLSelectElement).value,
     ).toBe(programId);

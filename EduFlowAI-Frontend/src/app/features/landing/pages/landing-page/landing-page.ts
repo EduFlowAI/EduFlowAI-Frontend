@@ -1,24 +1,31 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 
 import { LocaleStore } from '../../../../core/i18n/locale.store';
 import { AssistantLauncherService } from '../../../ai/assistant/services/assistant-launcher.service';
+import { TrackCatalogService } from '../../../admission/catalog/data-access/track-catalog.service';
+import { TrackCatalogItem } from '../../../admission/catalog/models/track-catalog.model';
 
 type Theme = 'light' | 'dark';
-type TrackCategory = 'software' | 'data' | 'design' | 'infrastructure';
-type TrackFilter = 'all' | TrackCategory;
 
 interface ProgramFact {
   readonly labelKey: string;
   readonly valueKey: string;
+}
+
+interface TrackFilterOption {
+  readonly value: string;
+  readonly labelKey: string;
 }
 
 interface ProgramDefinition {
@@ -31,19 +38,8 @@ interface ProgramDefinition {
   readonly eligibility: readonly ProgramFact[];
 }
 
-interface TrackDefinition {
-  readonly id: string;
-  readonly category: TrackCategory;
-  readonly categoryKey: string;
-  readonly nameKey: string;
-  readonly descriptionKey: string;
-  readonly locationKey: string;
-  readonly durationMonths: 4 | 9;
-  readonly requirementKeys: readonly string[];
-  readonly isAi: boolean;
-}
-
 const THEME_STORAGE_KEY = 'iti-theme';
+const ALL_TRACKS_FILTER = 'all';
 
 const SHARED_ELIGIBILITY: readonly ProgramFact[] = [
   {
@@ -139,75 +135,6 @@ const PROGRAMS: readonly ProgramDefinition[] = [
   },
 ];
 
-const TRACKS: readonly TrackDefinition[] = [
-  {
-    id: 'fullstack',
-    category: 'software',
-    categoryKey: 'landing.tracks.software',
-    nameKey: 'landing.tracks.fullstack',
-    descriptionKey: 'landing.tracks.fullstackCopy',
-    locationKey: 'landing.tracks.threeBranches',
-    durationMonths: 9,
-    requirementKeys: ['landing.tracks.req.programming', 'landing.tracks.req.problemSolving'],
-    isAi: false,
-  },
-  {
-    id: 'data-ai',
-    category: 'data',
-    categoryKey: 'landing.tracks.dataAi',
-    nameKey: 'landing.tracks.data',
-    descriptionKey: 'landing.tracks.dataCopy',
-    locationKey: 'landing.tracks.cairoAlex',
-    durationMonths: 9,
-    requirementKeys: ['landing.tracks.req.math', 'landing.tracks.req.python'],
-    isAi: true,
-  },
-  {
-    id: 'cybersecurity',
-    category: 'infrastructure',
-    categoryKey: 'landing.tracks.infrastructure',
-    nameKey: 'landing.tracks.cyber',
-    descriptionKey: 'landing.tracks.cyberCopy',
-    locationKey: 'landing.tracks.smartVillage',
-    durationMonths: 9,
-    requirementKeys: ['landing.tracks.req.networks', 'landing.tracks.req.systems'],
-    isAi: false,
-  },
-  {
-    id: 'product-design',
-    category: 'design',
-    categoryKey: 'landing.tracks.design',
-    nameKey: 'landing.tracks.ux',
-    descriptionKey: 'landing.tracks.uxCopy',
-    locationKey: 'landing.tracks.allBranches',
-    durationMonths: 4,
-    requirementKeys: ['landing.tracks.req.portfolio', 'landing.tracks.req.communication'],
-    isAi: false,
-  },
-  {
-    id: 'cloud-devops',
-    category: 'infrastructure',
-    categoryKey: 'landing.tracks.infrastructure',
-    nameKey: 'landing.tracks.cloud',
-    descriptionKey: 'landing.tracks.cloudCopy',
-    locationKey: 'landing.tracks.cairo',
-    durationMonths: 4,
-    requirementKeys: ['landing.tracks.req.linux', 'landing.tracks.req.networks'],
-    isAi: false,
-  },
-  {
-    id: 'embedded-iot',
-    category: 'software',
-    categoryKey: 'landing.tracks.software',
-    nameKey: 'landing.tracks.embedded',
-    descriptionKey: 'landing.tracks.embeddedCopy',
-    locationKey: 'landing.tracks.alex',
-    durationMonths: 4,
-    requirementKeys: ['landing.tracks.req.electronics', 'landing.tracks.req.c'],
-    isAi: false,
-  },
-];
-
 function initialTheme(): Theme {
   if (typeof localStorage !== 'undefined') {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
@@ -239,35 +166,45 @@ function initialTheme(): Theme {
 export class LandingPage {
   readonly locale = inject(LocaleStore);
   readonly programs = PROGRAMS;
-  readonly tracks = TRACKS;
-  readonly trackFilters: readonly {
-    value: TrackFilter;
-    labelKey: string;
-  }[] = [
-    { value: 'all', labelKey: 'landing.tracks.filterAll' },
-    { value: 'software', labelKey: 'landing.tracks.software' },
-    { value: 'data', labelKey: 'landing.tracks.dataAi' },
-    { value: 'design', labelKey: 'landing.tracks.design' },
-    {
-      value: 'infrastructure',
-      labelKey: 'landing.tracks.infrastructure',
-    },
-  ];
 
   private readonly title = inject(Title);
-  private readonly assistantLauncher =
-    inject(AssistantLauncherService);
+  private readonly assistantLauncher = inject(AssistantLauncherService);
+  private readonly trackCatalog = inject(TrackCatalogService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly theme = signal<Theme>(initialTheme());
   readonly mobileMenuOpen = signal(false);
-  readonly activeFilter = signal<TrackFilter>('all');
+  readonly tracks = signal<readonly TrackCatalogItem[]>([]);
+  readonly tracksLoading = signal(true);
+  readonly tracksLoadFailed = signal(false);
+  readonly activeFilter = signal<string>(ALL_TRACKS_FILTER);
   readonly trackSearch = signal('');
+
+  private readonly trackFilterOptions = computed<readonly TrackFilterOption[]>(() => {
+    const categories = Array.from(
+      new Set(
+        this.tracks()
+          .map((track) => track.category?.trim())
+          .filter((category): category is string => Boolean(category)),
+      ),
+    ).sort((left, right) => left.localeCompare(right));
+
+    return [
+      { value: ALL_TRACKS_FILTER, labelKey: 'landing.tracks.filterAll' },
+      ...categories.map((category) => ({ value: category, labelKey: category })),
+    ];
+  });
+
+  get trackFilters(): readonly TrackFilterOption[] {
+    return this.trackFilterOptions();
+  }
+
   readonly filteredTracks = computed(() => {
     const filter = this.activeFilter();
     const query = this.trackSearch().trim().toLocaleLowerCase();
 
-    return TRACKS.filter((track) => {
-      if (filter !== 'all' && track.category !== filter) {
+    return this.tracks().filter((track) => {
+      if (filter !== ALL_TRACKS_FILTER && track.category !== filter) {
         return false;
       }
 
@@ -276,13 +213,14 @@ export class LandingPage {
       }
 
       const searchableText = [
-        track.categoryKey,
-        track.nameKey,
-        track.descriptionKey,
-        track.locationKey,
-        ...track.requirementKeys,
+        track.name,
+        track.description,
+        track.category,
+        track.totalHours?.toString(),
+        ...track.prerequisiteTopics,
+        ...track.offerings.map((offering) => offering.branchName),
       ]
-        .map((key) => this.locale.t(key))
+        .filter((value): value is string => Boolean(value))
         .join(' ')
         .toLocaleLowerCase();
 
@@ -292,6 +230,7 @@ export class LandingPage {
 
   constructor() {
     effect(() => this.title.setTitle(this.locale.t('landing.pageTitle')));
+    this.loadTracks();
   }
 
   toggleTheme(): void {
@@ -315,7 +254,7 @@ export class LandingPage {
     this.mobileMenuOpen.set(false);
   }
 
-  setActiveFilter(filter: TrackFilter): void {
+  setActiveFilter(filter: string): void {
     this.activeFilter.set(filter);
   }
 
@@ -325,7 +264,37 @@ export class LandingPage {
     }
   }
 
+  availableBranchNames(track: TrackCatalogItem): readonly string[] {
+    return Array.from(
+      new Set(track.offerings.map((offering) => offering.branchName).filter(Boolean)),
+    );
+  }
+
+  formatTotalHours(track: TrackCatalogItem): string {
+    return track.totalHours === null ? '—' : `${track.totalHours.toLocaleString()}h`;
+  }
+
   openAssistant(): void {
     this.assistantLauncher.open();
+  }
+
+  private loadTracks(): void {
+    this.tracksLoading.set(true);
+    this.tracksLoadFailed.set(false);
+
+    this.trackCatalog
+      .getTracks()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (tracks) => {
+          this.tracks.set(tracks);
+          this.tracksLoading.set(false);
+        },
+        error: () => {
+          this.tracks.set([]);
+          this.tracksLoadFailed.set(true);
+          this.tracksLoading.set(false);
+        },
+      });
   }
 }

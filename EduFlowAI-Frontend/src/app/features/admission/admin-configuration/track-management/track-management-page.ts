@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
@@ -37,6 +30,7 @@ export class TrackManagementPage implements OnInit {
   protected readonly searchQuery = signal('');
   protected readonly drawerOpen = signal(false);
   protected readonly editingTrack = signal<AdminTrackDto | null>(null);
+  protected readonly editablePrograms = computed(() => this.programs());
 
   protected readonly filteredTracks = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -44,13 +38,21 @@ export class TrackManagementPage implements OnInit {
     if (!query) {
       return items;
     }
-    return items.filter(
-      (track) =>
-        track.name.toLowerCase().includes(query) ||
-        this.programName(track.programId).toLowerCase().includes(query) ||
-        track.prerequisiteTopics.some((topic) =>
-          topic.toLowerCase().includes(query),
-        ),
+    return items.filter((track) =>
+      [
+        track.name,
+        this.programName(track.programId),
+        track.category,
+        track.minimumGrade,
+        track.eligibilitySummary,
+        track.totalHours?.toString(),
+        track.intake?.toString(),
+        track.year?.toString(),
+        ...track.prerequisiteTopics,
+        ...track.locations.flatMap((location) => [location.branchName, location.governorate]),
+      ]
+        .filter((value): value is string => Boolean(value))
+        .some((value) => value.toLowerCase().includes(query)),
     );
   });
 
@@ -83,8 +85,7 @@ export class TrackManagementPage implements OnInit {
           this.programs.set(programs);
           this.tracks.set(tracks);
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to load tracks.'),
+        error: (error: unknown) => this.showError(error, 'Unable to load tracks.'),
       });
   }
 
@@ -103,12 +104,17 @@ export class TrackManagementPage implements OnInit {
         prerequisiteTopics: track.prerequisiteTopics.join(', '),
         isActive: track.isActive,
       });
-      // Disable programId when editing — tracks can't be moved between programs
+      // Tracks cannot be moved between programs after creation.
       this.trackForm.controls.programId.disable();
     } else {
+      const program = this.editablePrograms()[0];
+      if (!program) {
+        this.error.set(this.copy.text('Create a program before adding tracks.', 'أنشئ برنامجًا قبل إضافة المسارات.'));
+        return;
+      }
       this.editingTrack.set(null);
       this.trackForm.reset({
-        programId: this.programs()[0]?.id ?? '',
+        programId: program.id,
         name: '',
         description: '',
         prerequisiteTopics: '',
@@ -124,7 +130,7 @@ export class TrackManagementPage implements OnInit {
     this.editingTrack.set(null);
     this.trackForm.controls.programId.enable();
     this.trackForm.reset({
-      programId: this.programs()[0]?.id ?? '',
+      programId: this.editablePrograms()[0]?.id ?? '',
       name: '',
       description: '',
       prerequisiteTopics: '',
@@ -161,24 +167,16 @@ export class TrackManagementPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.copy.text(
-              'Track saved successfully.',
-              'تم حفظ المسار بنجاح.',
-            ),
-          );
+          this.success.set(this.copy.text('Track saved successfully.', 'تم حفظ المسار بنجاح.'));
           this.closeDrawer();
           this.loadData();
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to save track.'),
+        error: (error: unknown) => this.showError(error, 'Unable to save track.'),
       });
   }
 
   protected programName(programId: string): string {
-    return (
-      this.programs().find((program) => program.id === programId)?.name ?? ''
-    );
+    return this.programs().find((program) => program.id === programId)?.name ?? '';
   }
 
   private parseTopics(value: string): string[] {

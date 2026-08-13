@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -71,8 +64,7 @@ export class InstitutionManagementPage implements OnInit {
       )
       .subscribe({
         next: (institutions) => this.institutions.set(institutions),
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to load institutions.'),
+        error: (error: unknown) => this.showError(error, 'Unable to load institutions.'),
       });
   }
 
@@ -128,16 +120,12 @@ export class InstitutionManagementPage implements OnInit {
       .subscribe({
         next: () => {
           this.success.set(
-            this.copy.text(
-              'Institution saved successfully.',
-              'تم حفظ المؤسسة بنجاح.',
-            ),
+            this.copy.text('Institution saved successfully.', 'تم حفظ المؤسسة بنجاح.'),
           );
           this.closeDrawer();
           this.loadInstitutions();
         },
-        error: (error: unknown) =>
-          this.showError(error, 'Unable to save institution.'),
+        error: (error: unknown) => this.showError(error, 'Unable to save institution.'),
       });
   }
 
