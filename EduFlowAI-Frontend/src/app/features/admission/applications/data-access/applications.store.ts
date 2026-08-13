@@ -4,6 +4,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap, tap } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
 import { ApplicationService } from './application.service';
+import { extractErrorMessage } from '../../../../shared/utils/error.utils';
 import { ApplicationDashboardSummary } from '../models/application-dashboard-summary.model';
 import { 
   ApplicationDetailsDto, ApplicationRequestDto, UpdateApplicationPreferencesDto,
@@ -54,6 +55,7 @@ const initialState: ApplicationState = {
   error: null,
 };
   
+
 // 3. Create the SignalStore
 export const ApplicationsStore = signalStore(
   { providedIn: 'root' },
@@ -172,10 +174,15 @@ export const ApplicationsStore = signalStore(
               applicationDetails: response.data, 
               isLoading: false 
             }),
-            error: (err: any) => patchState(store, { 
-              error: err.error?.message || 'Failed to create application draft', 
-              isLoading: false 
-            })
+            error: (err: any) => {
+              // Use our smart extractor!
+              const errorMsg = extractErrorMessage(err, 'Failed to create application draft. Please try again.');
+
+              patchState(store, { 
+                error: errorMsg, 
+                isLoading: false 
+              });
+            }
           })
         ))
       )

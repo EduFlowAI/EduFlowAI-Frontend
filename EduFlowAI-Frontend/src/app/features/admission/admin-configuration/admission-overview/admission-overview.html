@@ -224,15 +224,32 @@
                 {{ data.activeCycle?.label || copy.text('No Active Cycle Configured', 'لا توجد دورة قبول نشطة') }}
               </h2>
             </div>
-            <a
-              routerLink="/admin/admission/cycles"
-              class="inline-flex shrink-0 items-center gap-1.5 rounded-card bg-primary px-4 py-2.5 text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-            >
-              <span class="material-symbols-outlined text-base" aria-hidden="true">
-                {{ data.activeCycle ? 'settings' : 'add_circle' }}
-              </span>
-              {{ data.activeCycle ? copy.text('Manage Active Cycle', 'إدارة الدورة النشطة') : copy.text('Launch New Cycle', 'إطلاق دورة جديدة') }}
-            </a>
+            
+            <!-- Buttons Container -->
+            <div class="flex flex-wrap items-center gap-3">
+              <!-- Demo/Simulate Button (Only visible if there is an active cycle) -->
+              @if (data.activeCycle) {
+                <a
+                  [routerLink]="['/admin/admission/assessment/simulate']"
+                  [queryParams]="{ cycleId: data.activeCycle.id }"
+                  class="inline-flex shrink-0 items-center gap-1.5 rounded-card border border-amber-200 bg-amber-50 px-4 py-2.5 text-label-md font-semibold text-amber-700 shadow-sm transition-colors hover:bg-amber-100"
+                >
+                  <span class="material-symbols-outlined text-base" aria-hidden="true">magic_button</span>
+                  {{ copy.text('Demo Tools', 'أدوات المحاكاة') }}
+                </a>
+              }
+              
+              <!-- Manage/Launch Cycle Button -->
+              <a
+                routerLink="/admin/admission/cycles"
+                class="inline-flex shrink-0 items-center gap-1.5 rounded-card bg-primary px-4 py-2.5 text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
+              >
+                <span class="material-symbols-outlined text-base" aria-hidden="true">
+                  {{ data.activeCycle ? 'settings' : 'add_circle' }}
+                </span>
+                {{ data.activeCycle ? copy.text('Manage Active Cycle', 'إدارة الدورة النشطة') : copy.text('Launch New Cycle', 'إطلاق دورة جديدة') }}
+              </a>
+            </div>
           </div>
 
           @if (data.activeCycle; as cycle) {

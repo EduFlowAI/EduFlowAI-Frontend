@@ -7,6 +7,8 @@ import { ApplicationService } from '../../applications/data-access/application.s
 import { SimulatedStageDto, SelectionStage } from '../../applications/models/application.model'; 
 import { AssessmentStageStatus } from '../../../../shared/ui/stage-stepper/stage-stepper'; 
 import { AssessmentService } from './assessment.service';
+import { extractErrorMessage } from '../../../../shared/utils/error.utils';
+
 
 // Define the shape of our state
 interface AssessmentState {
@@ -46,38 +48,6 @@ const initialState: AssessmentState = {
   allocationError: null,
   allocationSuccessMessage: null,
 };
-
-// Helper function placed OUTSIDE the store to extract error messages safely
-function extractErrorMessage(err: any, fallbackMessage: string): string {
-  if (!err) return fallbackMessage;
-  
-  // 1. If Angular successfully parsed the JSON body
-  if (err.error && typeof err.error === 'object' && err.error.message) {
-    return err.error.message;
-  }
-  
-  // 2. If the backend returned a stringified JSON that Angular didn't parse
-  if (err.error && typeof err.error === 'string') {
-    try {
-      const parsed = JSON.parse(err.error);
-      if (parsed.message) return parsed.message;
-    } catch {
-      return err.error; // Return the raw text if it's not JSON
-    }
-  }
-  
-  // 3. If an interceptor unwrapped the response or it's a standard Error object
-  if (err.message && !err.message.startsWith('Http failure response')) {
-    return err.message;
-  }
-  
-  // 4. Fallback for ASP.NET Core ProblemDetails
-  if (err.error && err.error.title) {
-    return err.error.title;
-  }
-  
-  return fallbackMessage;
-}
 
 // Helper function placed OUTSIDE the store to fix TypeScript Signal errors
 // It maps the C# StageResult Enum to the frontend AssessmentStageStatus
