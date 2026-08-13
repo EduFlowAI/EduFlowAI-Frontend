@@ -1,9 +1,10 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import { LocaleStore } from '../../../../core/i18n/locale.store';
-import { TrackCatalogService } from '../../../admission/catalog/data-access/track-catalog.service';
 import { TrackCatalogItem } from '../../../admission/catalog/models/track-catalog.model';
 import { LandingPage } from './landing-page';
 
@@ -72,32 +73,50 @@ const digitalIcTrack: TrackCatalogItem = {
 };
 
 describe('LandingPage', () => {
-  let trackCatalog: jasmine.SpyObj<TrackCatalogService>;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     localStorage.clear();
-    trackCatalog = jasmine.createSpyObj<TrackCatalogService>('TrackCatalogService', ['getTracks']);
-    trackCatalog.getTracks.and.returnValue(of([aiTrack, digitalIcTrack]));
 
     await TestBed.configureTestingModule({
       imports: [LandingPage],
       providers: [
         provideRouter([]),
-        { provide: TrackCatalogService, useValue: trackCatalog },
+        { provide: RuntimeConfig, useValue: { apiBaseUrl: '/api' } },
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
     }).compileComponents();
+
+    http = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
+    http.verify();
     TestBed.inject(LocaleStore).setLocale('en');
     localStorage.clear();
   });
 
-  it('keeps the existing static program section intact', () => {
+  function createWithTracks(tracks: readonly TrackCatalogItem[] = [aiTrack, digitalIcTrack]) {
     const fixture = TestBed.createComponent(LandingPage);
+    const request = http.expectOne('/api/tracks');
+
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      isSuccess: true,
+      data: tracks,
+      statusCode: 200,
+      message: '',
+    });
     fixture.detectChanges();
 
+    return fixture;
+  }
+
+  it('keeps the existing static program section intact', () => {
+    const fixture = createWithTracks();
     const root = fixture.nativeElement as HTMLElement;
+
     expect(root.querySelectorAll('.program-card')).toHaveLength(2);
     expect(root.querySelector('.program-card h3')?.textContent).toContain(
       'Professional Training Program (9 Months)',
@@ -105,11 +124,9 @@ describe('LandingPage', () => {
   });
 
   it('renders TrackCatalogService data instead of the six hardcoded demo tracks', () => {
-    const fixture = TestBed.createComponent(LandingPage);
-    fixture.detectChanges();
-
+    const fixture = createWithTracks();
     const root = fixture.nativeElement as HTMLElement;
-    expect(trackCatalog.getTracks).toHaveBeenCalledTimes(1);
+
     expect(root.querySelectorAll('.track-card')).toHaveLength(2);
     expect(root.textContent).toContain(aiTrack.name);
     expect(root.textContent).toContain(aiTrack.description!);
@@ -121,9 +138,7 @@ describe('LandingPage', () => {
   });
 
   it('renders multiple active offering branches on one card and ignores locations', () => {
-    const fixture = TestBed.createComponent(LandingPage);
-    fixture.detectChanges();
-
+    const fixture = createWithTracks();
     const cards = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.track-card'),
     );
@@ -136,9 +151,7 @@ describe('LandingPage', () => {
   });
 
   it('searches API-backed track data and active offering branches', () => {
-    const fixture = TestBed.createComponent(LandingPage);
-    fixture.detectChanges();
-
+    const fixture = createWithTracks();
     const root = fixture.nativeElement as HTMLElement;
     const search = root.querySelector<HTMLInputElement>('.search-box input')!;
 
@@ -155,11 +168,10 @@ describe('LandingPage', () => {
   });
 
   it('derives category filters from API-backed categories', () => {
-    const fixture = TestBed.createComponent(LandingPage);
-    fixture.detectChanges();
-
+    const fixture = createWithTracks();
     const root = fixture.nativeElement as HTMLElement;
     const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('.filter-btn'));
+
     expect(buttons.map((button) => button.textContent?.trim())).toEqual([
       'All tracks',
       'Artificial Intelligence',
@@ -173,12 +185,9 @@ describe('LandingPage', () => {
   });
 
   it('shows a safe empty state when the API returns no tracks', () => {
-    trackCatalog.getTracks.and.returnValue(of([]));
-
-    const fixture = TestBed.createComponent(LandingPage);
-    fixture.detectChanges();
-
+    const fixture = createWithTracks([]);
     const root = fixture.nativeElement as HTMLElement;
+
     expect(root.querySelectorAll('.track-card')).toHaveLength(0);
     expect(root.querySelector('.empty-state[role="status"]')?.textContent).toContain(
       'No tracks match your current search.',
@@ -186,9 +195,13 @@ describe('LandingPage', () => {
   });
 
   it('shows a safe error state when the track API fails', () => {
-    trackCatalog.getTracks.and.returnValue(throwError(() => new Error('catalog unavailable')));
-
     const fixture = TestBed.createComponent(LandingPage);
+    const request = http.expectOne('/api/tracks');
+
+    request.flush(null, {
+      status: 503,
+      statusText: 'Service Unavailable',
+    });
     fixture.detectChanges();
 
     const root = fixture.nativeElement as HTMLElement;
@@ -199,8 +212,7 @@ describe('LandingPage', () => {
   });
 
   it('keeps locale and theme behavior working', () => {
-    const fixture = TestBed.createComponent(LandingPage);
-    fixture.detectChanges();
+    const fixture = createWithTracks();
 
     fixture.componentInstance.toggleLocale();
     fixture.componentInstance.toggleTheme();
