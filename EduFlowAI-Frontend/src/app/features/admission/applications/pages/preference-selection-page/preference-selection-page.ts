@@ -7,7 +7,7 @@ import { TrackService } from '../../data-access/track.service';
 import { TrackDto, BranchOfferingDto } from '../../models/track.model';
 import { UpdateApplicationPreferencesDto, PreferenceDto } from '../../models/application.model';
 
-// Custom validator to ensure Preference 1 and 2 are different
+// Custom validator to ensure Preference 1 and 2 are different (Track + Branch combination)
 function distinctPreferencesValidator(control: AbstractControl): ValidationErrors | null {
   const track1 = control.get('preference1.trackId')?.value;
   const branch1 = control.get('preference1.branchId')?.value;
@@ -15,7 +15,6 @@ function distinctPreferencesValidator(control: AbstractControl): ValidationError
   const track2 = control.get('preference2.trackId')?.value;
   const branch2 = control.get('preference2.branchId')?.value;
 
-  // Check if both Track AND Branch are identical in both preferences
   if (track1 && track2 && branch1 && branch2 && (track1 === track2) && (branch1 === branch2)) {
     return { duplicatePreferences: true };
   }
@@ -29,14 +28,13 @@ function distinctPreferencesValidator(control: AbstractControl): ValidationError
   templateUrl: './preference-selection-page.html',
   styleUrl: './preference-selection-page.scss',
 })
-export class PreferenceSelectionPage implements OnInit{
+export class PreferenceSelectionPage implements OnInit {
   readonly store = inject(ApplicationsStore);
   private readonly trackService = inject(TrackService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
-  // Form initialization
   preferencesForm: FormGroup = this.fb.group({
     preference1: this.fb.group({
       trackId: ['', Validators.required],
@@ -48,27 +46,94 @@ export class PreferenceSelectionPage implements OnInit{
     })
   }, { validators: distinctPreferencesValidator });
 
-  // State signals for tracks and branches
   applicationId = signal<string>('');
   availableTracks = signal<TrackDto[]>([]);
 
+  // Flag to determine if the component is acting as an Edit page or Create page
+  isEditMode = signal<boolean>(false);
+
+  // Independent signals to track selections for Two-way filtering
   selectedTrackId1 = signal<string | null>(null);
+  selectedBranchId1 = signal<string | null>(null);
+  
   selectedTrackId2 = signal<string | null>(null);
+  selectedBranchId2 = signal<string | null>(null);
 
-  // Computed signals for branches based on selected tracks
-  availableBranches1 = computed(() => {
+  // Modal visibility signal
+  showPrerequisitesModal = signal<boolean>(false);
+
+  // --- Computed Properties for Two-Way Filtering ---
+
+  private allDistinctBranches = computed(() => {
+    const branchesMap = new Map<string, BranchOfferingDto>();
+    this.availableTracks().forEach(track => {
+      track.offerings?.forEach(offering => {
+        if (!branchesMap.has(offering.branchId)) {
+          branchesMap.set(offering.branchId, offering);
+        }
+      });
+    });
+    return Array.from(branchesMap.values());
+  });
+
+  // Preference 1 Filters
+  displayTracks1 = computed(() => {
+    const branchId = this.selectedBranchId1();
     const trackId = this.selectedTrackId1();
-    const track = this.availableTracks().find(t => t.id === trackId);
-    return track ? track.offerings : [];
+    
+    if (!branchId || trackId) return this.availableTracks();
+    return this.availableTracks().filter(t => t.offerings?.some(o => o.branchId === branchId));
   });
 
-  availableBranches2 = computed(() => {
+  displayBranches1 = computed(() => {
+    const trackId = this.selectedTrackId1();
+    if (trackId) {
+      const track = this.availableTracks().find(t => t.id.toLowerCase() === trackId.toLowerCase());
+      return track ? track.offerings : [];
+    }
+    return this.allDistinctBranches();
+  });
+
+  // Preference 2 Filters
+  displayTracks2 = computed(() => {
+    const branchId = this.selectedBranchId2();
     const trackId = this.selectedTrackId2();
-    const track = this.availableTracks().find(t => t.id === trackId);
-    return track ? track.offerings : [];
+    
+    if (!branchId || trackId) return this.availableTracks();
+    return this.availableTracks().filter(t => t.offerings?.some(o => o.branchId === branchId));
   });
 
-  // Calculate remaining days for the deadline banner
+  displayBranches2 = computed(() => {
+    const trackId = this.selectedTrackId2();
+    if (trackId) {
+      const track = this.availableTracks().find(t => t.id.toLowerCase() === trackId.toLowerCase());
+      return track ? track.offerings : [];
+    }
+    return this.allDistinctBranches();
+  });
+
+  // Computed property to aggregate prerequisites for selected tracks
+  prerequisitesList = computed(() => {
+    const list: { trackName: string, topics: string[] }[] = [];
+    const t1Id = this.selectedTrackId1();
+    const t2Id = this.selectedTrackId2();
+
+    if (t1Id) {
+      const t1 = this.availableTracks().find(t => t.id.toLowerCase() === t1Id.toLowerCase());
+      if (t1 && (t1 as any).prerequisiteTopics?.length > 0) {
+        list.push({ trackName: t1.name, topics: (t1 as any).prerequisiteTopics });
+      }
+    }
+    
+    if (t2Id && t2Id !== t1Id) {
+      const t2 = this.availableTracks().find(t => t.id.toLowerCase() === t2Id.toLowerCase());
+      if (t2 && (t2 as any).prerequisiteTopics?.length > 0) {
+        list.push({ trackName: t2.name, topics: (t2 as any).prerequisiteTopics });
+      }
+    }
+    return list;
+  });
+
   daysRemaining = computed(() => {
     const details = this.store.applicationDetails();
     if (!details || !details.cycleDeadlineUtc) return 0;
@@ -80,14 +145,12 @@ export class PreferenceSelectionPage implements OnInit{
   });
 
   constructor() {
-    // Effect to react to application details loaded in the store
     effect(() => {
       const details = this.store.applicationDetails();
       if (details) {
-        // Fetch tracks specific to this cycle
         this.loadTracksForCycle(details.cycleId);
         
-        // Patch form with existing preferences if any
+        // If there are existing preferences, patch the form automatically
         if (details.preferences && details.preferences.length > 0) {
           const pref1 = details.preferences.find((p: any) => p.rank === 1);
           const pref2 = details.preferences.find((p: any) => p.rank === 2);
@@ -97,25 +160,23 @@ export class PreferenceSelectionPage implements OnInit{
               trackId: pref1.trackId,
               branchId: pref1.branchId
             }, { emitEvent: false});
-            // Update signal to trigger computed branches evaluation
             this.selectedTrackId1.set(pref1.trackId);
+            this.selectedBranchId1.set(pref1.branchId);
           }
           if (pref2) {
             this.preferencesForm.get('preference2')?.patchValue({
               trackId: pref2.trackId,
               branchId: pref2.branchId
             }, { emitEvent: false });
-            // Update signal to trigger computed branches evaluation
             this.selectedTrackId2.set(pref2.trackId);
+            this.selectedBranchId2.set(pref2.branchId);
           }
         }
 
-        // Automatic routing based on the status after successful submission
         if (details.status === 'DocumentsRequired' || details.status === 'EligibilityFailed') {
           this.router.navigate(['/applications', details.id]);
         }
 
-        // Disable form if the application is not in an editable state (e.g., Expired/Closed)
         if (!this.store.canEdit()) {
           this.preferencesForm.disable();
         }
@@ -124,7 +185,9 @@ export class PreferenceSelectionPage implements OnInit{
   }
 
   ngOnInit(): void {
-    // Extract application ID from the route parameters and load details
+    // Check if the current URL contains '/edit' to set the mode flag dynamically
+    this.isEditMode.set(this.router.url.includes('/edit'));
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.applicationId.set(id);
@@ -132,7 +195,6 @@ export class PreferenceSelectionPage implements OnInit{
     }
   }
 
-  // Fetch tracks and handle the result
   private loadTracksForCycle(cycleId: string): void {
     this.trackService.getTracks(cycleId).subscribe({
       next: (response) => {
@@ -144,33 +206,75 @@ export class PreferenceSelectionPage implements OnInit{
     });
   }
 
-  // Handle track selection change to clear the corresponding branch
-  onTrackChange(preferenceIndex: 1 | 2): void {
-    const trackControl = this.preferencesForm.get(`preference${preferenceIndex}.trackId`);
-    const branchControl = this.preferencesForm.get(`preference${preferenceIndex}.branchId`);
+  // --- Event Handlers for Dropdowns ---
+
+  onTrackChange(prefIndex: 1 | 2): void {
+    const trackCtrl = this.preferencesForm.get(`preference${prefIndex}.trackId`);
+    const branchCtrl = this.preferencesForm.get(`preference${prefIndex}.branchId`);
+    const newTrackId = trackCtrl?.value || null;
     
-    // Update the corresponding reactive signal with the newly selected track ID
-    if (preferenceIndex === 1) {
-      this.selectedTrackId1.set(trackControl?.value || null);
-    } else {
-      this.selectedTrackId2.set(trackControl?.value || null);
-    }
-    // Reset the selected branch since the track has changed
-    branchControl?.setValue('');
-    
-    // If preference 2 track is selected, branch becomes required
-    if (preferenceIndex === 2) {
-      const trackId2 = trackControl?.value;
-      if (trackId2) {
-        branchControl?.setValidators(Validators.required);
-      } else {
-        branchControl?.clearValidators();
+    if (prefIndex === 1) this.selectedTrackId1.set(newTrackId);
+    else this.selectedTrackId2.set(newTrackId);
+
+    const currentBranchId = branchCtrl?.value;
+    if (newTrackId && currentBranchId) {
+      const track = this.availableTracks().find(t => t.id === newTrackId);
+      const isValid = track?.offerings?.some(o => o.branchId === currentBranchId);
+      
+      if (!isValid) {
+        branchCtrl?.setValue('');
+        if (prefIndex === 1) this.selectedBranchId1.set(null);
+        else this.selectedBranchId2.set(null);
       }
-      branchControl?.updateValueAndValidity();
+    }
+
+    this.handleBackupValidation(prefIndex, trackCtrl, branchCtrl);
+  }
+
+  onBranchChange(prefIndex: 1 | 2): void {
+    const trackCtrl = this.preferencesForm.get(`preference${prefIndex}.trackId`);
+    const branchCtrl = this.preferencesForm.get(`preference${prefIndex}.branchId`);
+    const newBranchId = branchCtrl?.value || null;
+
+    if (prefIndex === 1) this.selectedBranchId1.set(newBranchId);
+    else this.selectedBranchId2.set(newBranchId);
+
+    const currentTrackId = trackCtrl?.value;
+    if (newBranchId && currentTrackId) {
+      const track = this.availableTracks().find(t => t.id === currentTrackId);
+      const isValid = track?.offerings?.some(o => o.branchId === newBranchId);
+      
+      if (!isValid) {
+        trackCtrl?.setValue('');
+        if (prefIndex === 1) this.selectedTrackId1.set(null);
+        else this.selectedTrackId2.set(null);
+      }
+    }
+
+    this.handleBackupValidation(prefIndex, trackCtrl, branchCtrl);
+  }
+
+  private handleBackupValidation(prefIndex: number, trackCtrl: any, branchCtrl: any): void {
+    if (prefIndex === 2) {
+      if (trackCtrl?.value) {
+        branchCtrl?.setValidators(Validators.required);
+      } else {
+        branchCtrl?.clearValidators();
+      }
+      branchCtrl?.updateValueAndValidity();
     }
   }
 
-  // Prepare DTO and dispatch to store
+  // --- Modal Logic ---
+  openPrerequisitesModal(): void {
+    this.showPrerequisitesModal.set(true);
+  }
+
+  closePrerequisitesModal(): void {
+    this.showPrerequisitesModal.set(false);
+  }
+
+  // --- API Actions ---
   savePreferences(): void {
     if (this.preferencesForm.invalid) {
       this.preferencesForm.markAllAsTouched();
@@ -180,58 +284,24 @@ export class PreferenceSelectionPage implements OnInit{
     const formValue = this.preferencesForm.value;
     const preferences: PreferenceDto[] = [];
 
-    // Map Preference 1
     if (formValue.preference1.trackId && formValue.preference1.branchId) {
-      preferences.push({
-        trackId: formValue.preference1.trackId,
-        branchId: formValue.preference1.branchId,
-        rank: 1
-      });
+      preferences.push({ trackId: formValue.preference1.trackId, branchId: formValue.preference1.branchId, rank: 1 });
     }
-
-    // Map Preference 2 (if provided)
     if (formValue.preference2.trackId && formValue.preference2.branchId) {
-      preferences.push({
-        trackId: formValue.preference2.trackId,
-        branchId: formValue.preference2.branchId,
-        rank: 2
-      });
+      preferences.push({ trackId: formValue.preference2.trackId, branchId: formValue.preference2.branchId, rank: 2 });
     }
 
-    const payload: UpdateApplicationPreferencesDto = { preferences };
-    
-    // Dispatch to store to update backend
-    this.store.updatePreferences({ 
-      applicationId: this.applicationId(), 
-      request: payload 
-    });
-
-    // Mark form as pristine to prevent duplicate submissions on double clicks
+    this.store.updatePreferences({ applicationId: this.applicationId(), request: { preferences } });
     this.preferencesForm.markAsPristine();
   }
 
-  // Trigger the final submission and automatic evaluation
   submitApplication(): void {
     if (this.preferencesForm.valid && this.store.canEdit() && !this.preferencesForm.dirty) {
       this.store.submitApplication(this.applicationId());
     }
   }
 
-  // Navigation handlers
   goBack(): void {
     this.router.navigate(['/applications', this.applicationId()]);
   }
-
-  // goNext(): void {
-  //   if (this.preferencesForm.valid && this.store.canEdit()) {
-  //     // Only fire the save API if the user has actually made changes 
-  //     // or hasn't clicked "Save Draft" just now.
-  //     if (this.preferencesForm.dirty) {
-  //       this.savePreferences();
-  //     }
-      
-  //     // Navigate to Documents step (Milestone 4 placeholder)
-  //     this.router.navigate(['/applications', this.applicationId(), 'documents']);
-  //   }
-  // }
 }
