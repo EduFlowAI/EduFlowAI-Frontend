@@ -16,6 +16,7 @@
                 [ngClass]="{
                 'bg-emerald-100 border-emerald-500 text-emerald-600': step.state === 'Passed',
                 'bg-primary border-primary text-on-primary': step.state === 'InProgress',
+                'bg-error-container border-error text-error': step.state === 'Failed',
                 'bg-surface border-outline-variant text-outline': step.state === 'Pending'
                 }">
             <span class="material-symbols-outlined text-[18px]" [class.animate-pulse]="step.state === 'InProgress'">
@@ -33,6 +34,7 @@
                 [ngClass]="{
                 'text-emerald-600': step.state === 'Passed',
                 'text-primary': step.state === 'InProgress',
+                'text-error': step.state === 'Failed',
                 'text-outline': step.state === 'Pending'
                 }">
             {{ step.state === 'InProgress' ? 'In Progress' : step.state }}
