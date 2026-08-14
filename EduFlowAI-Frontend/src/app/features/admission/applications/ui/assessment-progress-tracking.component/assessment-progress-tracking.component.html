@@ -99,6 +99,17 @@
                     }
                 </div>
             </div>
+        } @empty {
+            <!-- Empty State: Displayed when there are no assessment stages yet -->
+            <div class="flex flex-col items-center justify-center py-12 text-center animate-in fade-in duration-500">
+                <div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-5 border border-outline-variant/50">
+                    <span class="material-symbols-outlined text-4xl text-primary/60" style="font-variation-settings: 'FILL' 0;">assignment_add</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-2">No Assessments Assigned Yet</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+                    You currently do not have any active or completed assessment stages. Once your exams are scheduled and evaluated, the results will automatically appear here.
+                </p>
+            </div>
         }
     </div>
 </div>
