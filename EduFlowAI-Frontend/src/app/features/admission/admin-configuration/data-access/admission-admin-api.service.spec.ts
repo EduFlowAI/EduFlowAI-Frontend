@@ -91,6 +91,17 @@ describe('AdmissionAdminApiService', () => {
     request.flush({ isSuccess: true, data: true, statusCode: 200, message: '' });
   });
 
+  it('deletes the selected draft cycle with the expected endpoint', () => {
+    const cycleId = '22222222-2222-2222-2222-222222222222';
+
+    service.deleteCycle(cycleId).subscribe();
+
+    const request = http.expectOne(`${apiBaseUrl}/admin/cycles/${cycleId}`);
+    expect(request.request.method).toBe('DELETE');
+    expect(request.request.body).toBeNull();
+    request.flush({ isSuccess: true, data: true, statusCode: 200, message: '' });
+  });
+
   it('replaces program document requirements with the backend contract', () => {
     const programId = '11111111-1111-1111-1111-111111111111';
     const body = {
