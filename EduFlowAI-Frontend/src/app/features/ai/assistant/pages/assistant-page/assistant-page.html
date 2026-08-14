@@ -36,7 +36,7 @@
       </div>
     </header>
 
-    <main class="chat-body">
+    <main class="chat-body" #chatBody>
       <div class="chat-welcome">
         <p>
           Welcome to the EduFlowAI Admission Assistant.
@@ -253,14 +253,18 @@
         class="chat-composer__form"
         (ngSubmit)="sendMessage()"
       >
-        <input
-          type="text"
+        <textarea
+          #messageInput
           name="message"
+          rows="1"
           [(ngModel)]="message"
           placeholder="Type your inquiry here..."
           autocomplete="off"
           [disabled]="isSending()"
-        />
+          (input)="autoResizeMessageInput($event)"
+          (keydown)="handleComposerKeydown($event)"
+          aria-label="Message"
+        ></textarea>
 
         <button
           type="submit"
