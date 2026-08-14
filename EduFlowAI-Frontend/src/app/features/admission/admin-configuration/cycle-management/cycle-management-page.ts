@@ -391,6 +391,45 @@ export class CycleManagementPage implements OnInit {
       });
   }
 
+  protected deleteCycle(): void {
+    this.clearMessages();
+    const cycle = this.selectedCycle();
+
+    if (!cycle || cycle.status !== CycleStatus.Draft) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      this.copy.text(
+        `Delete "${cycle.label}"?\n\nThis will permanently remove this draft cycle and its configuration.\nThis action cannot be undone.`,
+        `هل تريد حذف "${cycle.label}"؟\n\nسيؤدي هذا إلى حذف الدورة المسودة وإعداداتها نهائيًا.\nلا يمكن التراجع عن هذا الإجراء.`,
+      ),
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    this.busy.set(true);
+    this.api
+      .deleteCycle(cycle.id)
+      .pipe(
+        finalize(() => this.busy.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.cycles.update((cycles) => cycles.filter((item) => item.id !== cycle.id));
+          this.selectedCycleId.set('');
+          this.activeSubTab.set('overview');
+          this.setConfigurationFormsEditable(false);
+          this.success.set(
+            this.copy.text('Draft cycle deleted successfully.', 'تم حذف الدورة المسودة بنجاح.'),
+          );
+        },
+        error: (error: unknown) => this.showError(error, 'Unable to delete cycle.'),
+      });
+  }
+
   protected activateCycle(): void {
     const cycle = this.selectedCycle();
     if (!cycle || cycle.status !== CycleStatus.Draft) {
