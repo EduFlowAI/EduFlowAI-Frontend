@@ -252,6 +252,16 @@
               <span class="material-symbols-outlined" aria-hidden="true">play_circle</span>
               {{ copy.text('Activate cycle', 'تفعيل الدورة') }}
             </button>
+            <button
+              class="danger-button"
+              data-testid="delete-cycle"
+              type="button"
+              (click)="deleteCycle()"
+              [disabled]="busy()"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+              {{ copy.text('Delete cycle', 'حذف الدورة') }}
+            </button>
           } @else if (cycle.status === CycleStatus.Active) {
             <button class="danger-button" type="button" (click)="closeCycle()" [disabled]="busy()">
               <span class="material-symbols-outlined" aria-hidden="true">lock</span>
