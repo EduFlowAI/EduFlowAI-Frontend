@@ -561,8 +561,8 @@
             {{ locale.t('common.unexpected') }}
           </div>
         } @else if (filteredTracks().length > 0) {
-          <div class="tracks-grid">
-            @for (track of filteredTracks(); track track.id) {
+          <div class="tracks-grid" id="landing-track-grid">
+            @for (track of visibleTracks(); track track.id) {
               <article class="track-card">
                 <div class="track-top-line"></div>
                 <div class="track-main">
@@ -606,6 +606,20 @@
               </article>
             }
           </div>
+
+          @if (canToggleTracks()) {
+            <div class="hero-actions" style="justify-content: center">
+              <button
+                class="btn btn-secondary"
+                type="button"
+                (click)="toggleTracks()"
+                [attr.aria-expanded]="tracksExpanded()"
+                aria-controls="landing-track-grid"
+              >
+                {{ trackExpansionLabel() }}
+              </button>
+            </div>
+          }
         } @else {
           <div class="empty-state" role="status">
             {{ locale.t('landing.tracks.noResults') }}
