@@ -132,6 +132,10 @@ export class AdmissionAdminApiService {
     return this.post<AdmissionCycleDto>('/api/admin/cycles', request);
   }
 
+  deleteCycle(cycleId: string): Observable<boolean> {
+    return this.delete<boolean>(`/api/admin/cycles/${cycleId}`);
+  }
+
   updateEligibilityRule(
     cycleId: string,
     request: UpdateCycleEligibilityRuleRequest,
