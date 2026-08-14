@@ -2,11 +2,6 @@ import { Component, ChangeDetectionStrategy, input, computed } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { ApplicationDashboardSummary } from '../../../features/admission/applications/models/application-dashboard-summary.model';
 
-// export type ApplicationStatus = 'Draft' | 'DocumentsRequired' | 'EligibilityFailed'
-//   | 'UnderDocumentVerification' | 'NeedsHumanReview' | 'DocumentRejected' 
-//   | 'AssessmentInProgress' | 'Admitted' | 'Waitlisted'
-//   | 'NotSelected' | 'Withdrawn' | 'Expired';
-
 // Define the shape of a single step in our timeline
 interface TimelineStep{
   id: string;
@@ -48,9 +43,21 @@ export class StatusTimeline {
       if (cleanState === 'passed' || cleanState === 'success' || cleanState === 'completed') {
         return 'Passed';
       }
+      if (cleanState === 'failed' || cleanState === 'rejected' || cleanState === 'not eligible') {
+        return 'Failed';
+      }
       
       // Strict fallback to ensure ngClass always finds a valid match
       return 'Pending';
+    };
+
+    /**
+     * Helper function to determine the correct icon dynamically based on state.
+    */ 
+    const getDynamicIcon = (state: string, defaultIcon: string): string => {
+      if (state === 'Passed') return 'check';
+      if (state === 'Failed') return 'close';
+      return defaultIcon;
     };
 
     // Pre-calculate all states cleanly before building the array
@@ -64,29 +71,28 @@ export class StatusTimeline {
       final: normalizeState(data.finalResultPhaseStatus)
     };
 
-    // We create the base steps. Later we will change their 'state' based on currentStatus
     // Build the timeline using the strictly normalized states
     const timeline: TimelineStep[] = [
       { id: 'app', labelEn: 'Application', labelAr: 'التقديم',
-        icon: states.app === 'Passed' ? 'check' : 'edit_document', 
+        icon: getDynamicIcon(states.app, 'edit_document'), 
         state: states.app },
       { id: 'eligibility', labelEn: 'Eligibility', labelAr: 'الأهلية',
-        icon: states.elig === 'Passed' ? 'check' : 'rule', 
+        icon: getDynamicIcon(states.elig, 'rule'), 
         state: states.elig },
       { id: 'verification', labelEn: 'Verification', labelAr: 'المراجعة',
-        icon: states.verif === 'Passed' ? 'check' : 'hourglass_top', 
+        icon: getDynamicIcon(states.verif, 'hourglass_top'), 
         state: states.verif },
       { id: 'englishIq', labelEn: 'English/IQ', labelAr: 'الإنجليزي والذكاء',
-        icon: states.eng === 'Passed' ? 'check' : 'psychology', 
+        icon: getDynamicIcon(states.eng, 'psychology'), 
         state: states.eng },
       { id: 'technical', labelEn: 'Technical', labelAr: 'التقني',
-        icon: states.tech === 'Passed' ? 'check' : 'terminal', 
+        icon: getDynamicIcon(states.tech, 'terminal'), 
         state: states.tech },
       { id: 'interviews', labelEn: 'Interviews', labelAr: 'المقابلات', 
-        icon: states.int === 'Passed' ? 'check' : 'groups', 
+        icon: getDynamicIcon(states.int, 'groups'), 
         state: states.int },
       { id: 'final', labelEn: 'Final Result', labelAr: 'النتيجة', 
-        icon: states.final === 'Passed' ? 'check' : 'military_tech', 
+        icon: getDynamicIcon(states.final, 'military_tech'), 
         state: states.final }
     ];
 

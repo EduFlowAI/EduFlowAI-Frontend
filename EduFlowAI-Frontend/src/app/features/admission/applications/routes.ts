@@ -32,6 +32,14 @@ export default [
             .then(c => c.PreferenceSelectionPage),
           title: 'Select Preferences'
         },
+        // Route for editing an existing draft application
+        {
+          path: ':id/edit',
+          loadComponent: () => 
+            import('./pages/preference-selection-page/preference-selection-page')
+            .then(c => c.PreferenceSelectionPage),
+          title: 'Edit Application'
+        },
         // Route for the applicant-documents feature (owned by Mansy — features/documents/applicant-documents/)
         {
           path: ':id/documents',
@@ -48,13 +56,13 @@ export default [
           title: 'Application Status Details'
         },
         // Route for editing an existing draft application
-        {
-          path: ':id/edit',
-          loadComponent: () => 
-            import('./pages/application-edit-page/application-edit-page')
-            .then(c => c.ApplicationEditPage),
-          title: 'Edit Application'
-        },
+        // {
+        //   path: ':id/edit',
+        //   loadComponent: () => 
+        //     import('./pages/application-edit-page/application-edit-page')
+        //     .then(c => c.ApplicationEditPage),
+        //   title: 'Edit Application'
+        // },
         // Route for the enrollment cheklist page of an admitted application
         {
           path: ':id/enrollment',

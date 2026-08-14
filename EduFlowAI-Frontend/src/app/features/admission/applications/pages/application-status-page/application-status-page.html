@@ -37,10 +37,10 @@
     </app-eligibility-result>
     }
     @case ('DocumentRejected') {
-    <!-- <app-document-upload-management [applicationId]="applicationId" mode="revision"></app-document-upload-management> -->
-    <div class="p-8 text-center text-on-surface-variant border-2 border-dashed border-outline-variant rounded-xl">
-      [Document Revision Component Placeholder]
-    </div>
+      <app-document-upload-management 
+        [applicationId]="applicationId" 
+        mode="revision">
+      </app-document-upload-management>
     }
 
     <!-- Phase 2: Eligibility Results -->

@@ -4,13 +4,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApplicationsStore } from '../../data-access/applications.store';
 import { EligibilityResultComponent } from './../../ui/eligibility-result.component/eligibility-result.component';
 import { AssessmentProgressTrackingComponent } from './../../ui/assessment-progress-tracking.component/assessment-progress-tracking.component';
+import { DocumentUploadManagementComponent } from '../../ui/document-upload-management.component/document-upload-management.component';
 
 @Component({
   selector: 'app-application-status-page',
   standalone: true,
   imports: [
     CommonModule, RouterLink, EligibilityResultComponent,
-    AssessmentProgressTrackingComponent
+    AssessmentProgressTrackingComponent, DocumentUploadManagementComponent
   ],
   templateUrl: './application-status-page.html',
   styleUrls: ['./application-status-page.scss']
