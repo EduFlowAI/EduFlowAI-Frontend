@@ -1,6 +1,6 @@
 import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { AdmissionAdminCopy } from '../admission-admin.copy';
 import { AdmissionAdminApiService } from '../data-access/admission-admin-api.service';
@@ -57,6 +57,7 @@ describe('CycleManagementPage', () => {
     getTracks: () => of(tracks),
     getBranches: () => of(branches),
     getCycles: () => of(cycles),
+    deleteCycle: vi.fn((_cycleId: string) => of(true)),
   };
 
   const copy = {
@@ -67,6 +68,8 @@ describe('CycleManagementPage', () => {
   beforeEach(() => {
     tracks = [];
     branches = [];
+    vi.clearAllMocks();
+    api.deleteCycle.mockReturnValue(of(true));
   });
 
   async function render() {
@@ -101,7 +104,10 @@ describe('CycleManagementPage', () => {
     fixture.detectChanges();
   }
 
-  afterEach(() => TestBed.resetTestingModule());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    TestBed.resetTestingModule();
+  });
 
   it('does not display unsaved defaults as a stored rule on an Active cycle', async () => {
     cycles = [cycle(CycleStatus.Active, null)];
@@ -296,5 +302,91 @@ describe('CycleManagementPage', () => {
 
     expect(optionLabels).toEqual(['Select branch', 'Smart Village']);
     expect(branchSelect.value).toBe('smart-village');
+  });
+
+  it('shows Delete only for a Draft cycle', async () => {
+    cycles = [cycle(CycleStatus.Draft, null)];
+
+    const draftFixture = await render();
+    const draftHost: HTMLElement = draftFixture.nativeElement;
+    selectFirstCycle(draftHost, draftFixture);
+    expect(draftHost.querySelector('[data-testid="delete-cycle"]')).not.toBeNull();
+
+    TestBed.resetTestingModule();
+    cycles = [cycle(CycleStatus.Active, null)];
+    const activeFixture = await render();
+    const activeHost: HTMLElement = activeFixture.nativeElement;
+    selectFirstCycle(activeHost, activeFixture);
+    expect(activeHost.querySelector('[data-testid="delete-cycle"]')).toBeNull();
+
+    TestBed.resetTestingModule();
+    cycles = [cycle(CycleStatus.Closed, null)];
+    const closedFixture = await render();
+    const closedHost: HTMLElement = closedFixture.nativeElement;
+    selectFirstCycle(closedHost, closedFixture);
+    expect(closedHost.querySelector('[data-testid="delete-cycle"]')).toBeNull();
+  });
+
+  it('requires confirmation and cancel does not call the delete API', async () => {
+    cycles = [cycle(CycleStatus.Draft, null)];
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    const fixture = await render();
+    const host: HTMLElement = fixture.nativeElement;
+    selectFirstCycle(host, fixture);
+
+    (host.querySelector('[data-testid="delete-cycle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(confirm.mock.calls[0]?.[0]).toContain('Delete "Intake 46"?');
+    expect(confirm.mock.calls[0]?.[0]).toContain('cannot be undone');
+    expect(api.deleteCycle).not.toHaveBeenCalled();
+    expect(host.querySelector('.cycle-detail')).not.toBeNull();
+  });
+
+  it('confirmed deletion calls the correct cycle and removes it from the list', async () => {
+    cycles = [cycle(CycleStatus.Draft, null)];
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    const fixture = await render();
+    const host: HTMLElement = fixture.nativeElement;
+    selectFirstCycle(host, fixture);
+
+    (host.querySelector('[data-testid="delete-cycle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(api.deleteCycle).toHaveBeenCalledTimes(1);
+    expect(api.deleteCycle).toHaveBeenCalledWith(cycleId);
+    expect(host.querySelector('.cycle-detail')).toBeNull();
+    expect(host.querySelector('.cycles-table')).toBeNull();
+    expect(host.textContent).toContain('Draft cycle deleted successfully.');
+    expect(host.textContent).toContain('No admission cycles are configured.');
+  });
+
+  it('shows the backend rejection safely and keeps the Draft cycle selected', async () => {
+    cycles = [cycle(CycleStatus.Draft, null)];
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    api.deleteCycle.mockReturnValueOnce(
+      throwError(
+        () =>
+          new Error(
+            'Admission cycle cannot be deleted because admission activity already exists for this cycle.',
+          ),
+      ),
+    );
+
+    const fixture = await render();
+    const host: HTMLElement = fixture.nativeElement;
+    selectFirstCycle(host, fixture);
+
+    (host.querySelector('[data-testid="delete-cycle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(api.deleteCycle).toHaveBeenCalledWith(cycleId);
+    expect(host.querySelector('.cycle-detail')).not.toBeNull();
+    expect(host.querySelector('[role="alert"]')?.textContent).toContain(
+      'Admission cycle cannot be deleted because admission activity already exists for this cycle.',
+    );
   });
 });
