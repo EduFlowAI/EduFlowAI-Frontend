@@ -18,7 +18,7 @@ describe('HumanReviewApi', () => {
 
   afterEach(() => http.verify());
 
-  it('sends combined backend pagination, search, filters, and sort parameters', () => {
+  it('sends the configured backend URL and supported queue query parameters', () => {
     api
       .getReviews({
         page: 2,
@@ -26,17 +26,18 @@ describe('HumanReviewApi', () => {
         search: 'sarah',
         type: 'NationalId',
         status: 'NeedsHumanReview',
-        sort: 'newest',
       })
       .subscribe();
 
     const request = http.expectOne((candidate) => candidate.url.endsWith('/document-reviews'));
+    expect(request.request.url).toContain('/api/operations/HumanReview/document-reviews');
+    expect(request.request.url.startsWith('http')).toBe(true);
     expect(request.request.params.get('Page')).toBe('2');
     expect(request.request.params.get('PageSize')).toBe('10');
     expect(request.request.params.get('Search')).toBe('sarah');
     expect(request.request.params.get('Type')).toBe('NationalId');
     expect(request.request.params.get('Status')).toBe('NeedsHumanReview');
-    expect(request.request.params.get('Sort')).toBe('newest');
+    expect(request.request.params.has('Sort')).toBe(false);
     request.flush({ data: [], currentPage: 2, totalPages: 2, pageSize: 10, totalCount: 12 });
   });
 
@@ -61,7 +62,10 @@ describe('HumanReviewApi', () => {
       })
       .subscribe();
 
-    const request = http.expectOne('/api/ReplacementRequest/send-replacement-request');
+    const request = http.expectOne((candidate) =>
+      candidate.url.endsWith('/api/ReplacementRequest/send-replacement-request'),
+    );
+    expect(request.request.url.startsWith('http')).toBe(true);
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({
       documentId: 'document-1',

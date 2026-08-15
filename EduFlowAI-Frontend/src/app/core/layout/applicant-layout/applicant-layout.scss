@@ -24,32 +24,34 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   padding-inline: 0.5rem;
   color: #022448;
   text-decoration: none;
 }
 
-.brand__mark {
-  display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
-  flex: none;
-  place-items: center;
-  border-radius: 0.5rem;
-  background: #022448;
-  color: #fff;
-  font-weight: 700;
+.brand__logo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 166px;
+  height: 50px;
 }
 
-.brand strong,
-.brand small,
+.brand__logo img {
+  position: absolute;
+  inset-block-start: -3px;
+  inset-inline-start: -12px;
+  display: block;
+  width: 188px;
+  max-width: none;
+  height: auto;
+}
+
 .account-copy strong,
 .account-copy small {
   display: block;
 }
 
-.brand small,
 .account-copy small {
   overflow: hidden;
   color: #505f76;

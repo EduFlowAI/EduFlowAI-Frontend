@@ -1,10 +1,8 @@
 <div class="role-shell" [attr.dir]="locale.isRtl() ? 'rtl' : 'ltr'">
   <header>
-    <a class="brand" routerLink="/admin/admission">
-      <span class="brand__mark" aria-hidden="true">EF</span>
-      <span>
-        <strong>{{ locale.t('app.name') }}</strong>
-        <small>{{ locale.t('layout.admin.title') }}</small>
+    <a class="brand" routerLink="/admin/admission" [attr.aria-label]="locale.t('app.name')">
+      <span class="brand__logo" aria-hidden="true">
+        <img src="/edu-logo-dark.png" alt="" width="1536" height="1024" />
       </span>
     </a>
     <div class="actions">

@@ -64,14 +64,6 @@
       </select>
     </label>
 
-    <label class="select-field">
-      <span>{{ copy().queue.sort }}</span>
-      <select [formControl]="sortControl">
-        <option value="newest">{{ copy().queue.newest }}</option>
-        <option value="oldest">{{ copy().queue.oldest }}</option>
-      </select>
-    </label>
-
     @if (hasFilters()) {
       <button class="clear-button" type="button" (click)="clearFilters()">
         {{ copy().queue.clearFilters }}
