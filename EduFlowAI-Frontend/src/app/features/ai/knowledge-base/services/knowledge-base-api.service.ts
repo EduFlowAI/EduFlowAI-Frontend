@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../../../../environments/environment';
 import {
   AddKnowledgeBaseTextRequest,
   KnowledgeBaseDocument,
@@ -15,7 +15,8 @@ import {
 export class KnowledgeBaseApiService {
   private readonly http = inject(HttpClient);
 
-  private readonly baseUrl = '/api/admin/knowledge-base';
+  // private readonly baseUrl = '/api/admin/knowledge-base';
+  private readonly baseUrl = `${environment.apiUrl}/admin/knowledge-base`;
 
   getDocuments(): Observable<KnowledgeBaseDocument[]> {
     return this.http.get<KnowledgeBaseDocument[]>(
