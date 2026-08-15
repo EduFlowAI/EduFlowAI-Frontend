@@ -1,10 +1,13 @@
 <div class="workspace-shell">
   <aside class="sidebar" [class.sidebar--open]="menuOpen()" [attr.aria-label]="locale.t('layout.applicant.navigation')">
-    <a class="brand" routerLink="/applicant/profile" (click)="closeMenu()">
-      <span class="brand__mark" aria-hidden="true">EF</span>
-      <span>
-        <strong>{{ locale.t('app.name') }}</strong>
-        <small>{{ locale.t('layout.applicant.portal') }}</small>
+    <a
+      class="brand"
+      routerLink="/applicant/profile"
+      [attr.aria-label]="locale.t('app.name')"
+      (click)="closeMenu()"
+    >
+      <span class="brand__logo" aria-hidden="true">
+        <img src="/edu-logo-dark.png" alt="" width="1536" height="1024" />
       </span>
     </a>
 

@@ -19,6 +19,10 @@ describe('ApplicantLayout', () => {
   });
 
   it('should create', () => {
+    const element = fixture.nativeElement as HTMLElement;
     expect(component).toBeTruthy();
+    expect(element.querySelector<HTMLImageElement>('.brand__logo img')?.src).toContain(
+      '/edu-logo-dark.png',
+    );
   });
 });

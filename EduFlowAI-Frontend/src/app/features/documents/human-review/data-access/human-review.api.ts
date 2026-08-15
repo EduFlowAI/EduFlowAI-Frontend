@@ -2,6 +2,7 @@ import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
+import { RuntimeConfig } from '../../../../core/config/runtime-config';
 import {
   DocumentReviewDto,
   DocumentStatus,
@@ -46,13 +47,11 @@ const DOCUMENT_STATUS_BY_VALUE: Record<number, DocumentStatus> = {
 @Injectable({ providedIn: 'root' })
 export class HumanReviewApi {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/operations/HumanReview';
+  private readonly apiBaseUrl = inject(RuntimeConfig).apiBaseUrl;
+  private readonly baseUrl = `${this.apiBaseUrl}/operations/HumanReview`;
 
   getReviews(query: HumanReviewQuery): Observable<PaginatedResult<HumanReviewDto>> {
-    let params = new HttpParams()
-      .set('Page', query.page)
-      .set('PageSize', query.pageSize)
-      .set('Sort', query.sort);
+    let params = new HttpParams().set('Page', query.page).set('PageSize', query.pageSize);
 
     if (query.search.trim()) {
       params = params.set('Search', query.search.trim());
@@ -100,9 +99,13 @@ export class HumanReviewApi {
   }
 
   requestReplacement(request: ReplacementRequestDto): Observable<string> {
-    return this.http.post('/api/ReplacementRequest/send-replacement-request', request, {
-      responseType: 'text',
-    });
+    return this.http.post(
+      `${this.apiBaseUrl}/ReplacementRequest/send-replacement-request`,
+      request,
+      {
+        responseType: 'text',
+      },
+    );
   }
 }
 

@@ -22,7 +22,6 @@ import {
   HumanReviewDto,
   PaginatedResult,
   REVIEW_QUEUE_STATUSES,
-  ReviewSort,
 } from '../../models/human-review.model';
 import { HUMAN_REVIEW_COPY } from '../../human-review.copy';
 
@@ -41,7 +40,6 @@ export class ReviewQueuePage implements OnInit {
   protected readonly searchControl = new FormControl('', { nonNullable: true });
   protected readonly typeControl = new FormControl('', { nonNullable: true });
   protected readonly statusControl = new FormControl('', { nonNullable: true });
-  protected readonly sortControl = new FormControl<ReviewSort>('newest', { nonNullable: true });
 
   protected readonly page = signal<PaginatedResult<HumanReviewDto> | null>(null);
   protected readonly currentPage = signal(1);
@@ -79,7 +77,7 @@ export class ReviewQueuePage implements OnInit {
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.filtersChanged());
 
-    for (const control of [this.typeControl, this.statusControl, this.sortControl]) {
+    for (const control of [this.typeControl, this.statusControl]) {
       control.valueChanges
         .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.filtersChanged());
@@ -100,7 +98,6 @@ export class ReviewQueuePage implements OnInit {
               search: this.searchControl.value,
               type: this.typeControl.value,
               status: this.statusControl.value,
-              sort: this.sortControl.value,
             })
             .pipe(catchError(() => of(null))),
         ),
@@ -127,7 +124,6 @@ export class ReviewQueuePage implements OnInit {
     this.searchControl.setValue('', { emitEvent: false });
     this.typeControl.setValue('', { emitEvent: false });
     this.statusControl.setValue('', { emitEvent: false });
-    this.sortControl.setValue('newest', { emitEvent: false });
     this.currentPage.set(1);
     this.reload.next();
   }

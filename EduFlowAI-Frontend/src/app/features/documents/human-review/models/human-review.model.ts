@@ -16,7 +16,6 @@ export const DOCUMENT_STATUSES = [
 
 export type DocumentType = 'None' | (typeof DOCUMENT_TYPES)[number];
 export type DocumentStatus = 'None' | (typeof DOCUMENT_STATUSES)[number];
-export type ReviewSort = 'newest' | 'oldest';
 
 export const REVIEW_QUEUE_STATUSES = [
   'NeedsHumanReview',
@@ -57,7 +56,6 @@ export interface HumanReviewQuery {
   search: string;
   status: string;
   type: string;
-  sort: ReviewSort;
 }
 
 export interface ReplacementRequestDto {
