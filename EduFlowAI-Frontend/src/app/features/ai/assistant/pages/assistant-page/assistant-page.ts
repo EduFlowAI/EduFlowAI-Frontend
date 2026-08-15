@@ -443,8 +443,7 @@ export class AssistantPage {
     }
   }
 
-  // crypto.randomUUID only exists in a secure context. The deployed site is served over plain HTTP,
-  // where it is undefined, so calling it threw before the request was ever sent and the chat looked dead.
+  // crypto.randomUUID is undefined outside a secure context, and the site is served over HTTP.
   private createMessageId(): string {
     if (
       typeof crypto !== 'undefined' &&
