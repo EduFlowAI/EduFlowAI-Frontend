@@ -40,6 +40,11 @@ interface ProgramDefinition {
 
 const THEME_STORAGE_KEY = 'iti-theme';
 const ALL_TRACKS_FILTER = 'all';
+const TRACK_PREVIEW_LIMIT = 9;
+const TRACK_EXPANSION_LABELS = {
+  en: { showMore: 'Show more', showLess: 'Show less' },
+  ar: { showMore: 'عرض المزيد', showLess: 'عرض أقل' },
+} as const;
 
 const SHARED_ELIGIBILITY: readonly ProgramFact[] = [
   {
@@ -179,6 +184,7 @@ export class LandingPage {
   readonly tracksLoadFailed = signal(false);
   readonly activeFilter = signal<string>(ALL_TRACKS_FILTER);
   readonly trackSearch = signal('');
+  readonly tracksExpanded = signal(false);
 
   private readonly trackFilterOptions = computed<readonly TrackFilterOption[]>(() => {
     const categories = Array.from(
@@ -228,6 +234,19 @@ export class LandingPage {
     });
   });
 
+  readonly visibleTracks = computed(() =>
+    this.tracksExpanded()
+      ? this.filteredTracks()
+      : this.filteredTracks().slice(0, TRACK_PREVIEW_LIMIT),
+  );
+
+  readonly canToggleTracks = computed(() => this.filteredTracks().length > TRACK_PREVIEW_LIMIT);
+
+  readonly trackExpansionLabel = computed(() => {
+    const labels = TRACK_EXPANSION_LABELS[this.locale.locale()];
+    return this.tracksExpanded() ? labels.showLess : labels.showMore;
+  });
+
   constructor() {
     effect(() => this.title.setTitle(this.locale.t('landing.pageTitle')));
     this.loadTracks();
@@ -256,11 +275,29 @@ export class LandingPage {
 
   setActiveFilter(filter: string): void {
     this.activeFilter.set(filter);
+    this.tracksExpanded.set(false);
   }
 
   updateTrackSearch(event: Event): void {
     if (event.target instanceof HTMLInputElement) {
       this.trackSearch.set(event.target.value);
+      this.tracksExpanded.set(false);
+    }
+  }
+
+  toggleTracks(): void {
+    if (!this.tracksExpanded()) {
+      this.tracksExpanded.set(true);
+      return;
+    }
+
+    this.tracksExpanded.set(false);
+
+    if (typeof document !== 'undefined') {
+      document.getElementById('tracks')?.scrollIntoView?.({
+        behavior: 'smooth',
+        block: 'start',
+      });
     }
   }
 
@@ -288,10 +325,12 @@ export class LandingPage {
       .subscribe({
         next: (tracks) => {
           this.tracks.set(tracks);
+          this.tracksExpanded.set(false);
           this.tracksLoading.set(false);
         },
         error: () => {
           this.tracks.set([]);
+          this.tracksExpanded.set(false);
           this.tracksLoadFailed.set(true);
           this.tracksLoading.set(false);
         },

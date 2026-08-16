@@ -72,6 +72,33 @@ const digitalIcTrack: TrackCatalogItem = {
   ],
 };
 
+function createTrackSet(count: number): TrackCatalogItem[] {
+  return Array.from({ length: count }, (_, index) => {
+    const trackNumber = index + 1;
+
+    return {
+      ...digitalIcTrack,
+      id: `api-track-${trackNumber}`,
+      officialTrackId: `official-track-${trackNumber}`,
+      officialTrackUrl: `https://iti.gov.eg/tracks/${trackNumber}`,
+      name: `API Track ${trackNumber}`,
+      description: `Description for API Track ${trackNumber}.`,
+      category: trackNumber % 2 === 0 ? 'Category B' : 'Category A',
+      prerequisiteTopics: [`Topic ${trackNumber}`],
+      locations: [],
+      offerings: [
+        {
+          offeringId: `offering-${trackNumber}`,
+          branchId: `branch-${trackNumber}`,
+          branchName: `Branch ${trackNumber}`,
+          governorate: null,
+          capacity: 20 + trackNumber,
+        },
+      ],
+    };
+  });
+}
+
 describe('LandingPage', () => {
   let http: HttpTestingController;
 
@@ -184,6 +211,66 @@ describe('LandingPage', () => {
     expect(root.querySelector('.track-card')?.textContent).toContain('Digital IC Design');
   });
 
+  it('shows every returned track and no expansion control when there are nine or fewer tracks', () => {
+    const tracks = createTrackSet(9);
+    const fixture = createWithTracks(tracks);
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelectorAll('.track-card')).toHaveLength(9);
+    expect(root.querySelector('button[aria-controls="landing-track-grid"]')).toBeNull();
+    expect(fixture.componentInstance.tracks()).toHaveLength(9);
+  });
+
+  it('shows only the first nine tracks and Show more when more than nine tracks are returned', () => {
+    const tracks = createTrackSet(12);
+    const fixture = createWithTracks(tracks);
+    const root = fixture.nativeElement as HTMLElement;
+    const toggle = root.querySelector<HTMLButtonElement>('button[aria-controls="landing-track-grid"]');
+
+    expect(root.querySelectorAll('.track-card')).toHaveLength(9);
+    expect(toggle?.textContent?.trim()).toBe('Show more');
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(fixture.componentInstance.tracks()).toHaveLength(12);
+    expect(fixture.componentInstance.tracks().map((track) => track.name)).toEqual(
+      tracks.map((track) => track.name),
+    );
+  });
+
+  it('reveals all returned tracks and changes the control to Show less', () => {
+    const tracks = createTrackSet(12);
+    const fixture = createWithTracks(tracks);
+    const root = fixture.nativeElement as HTMLElement;
+    const toggle = root.querySelector<HTMLButtonElement>('button[aria-controls="landing-track-grid"]')!;
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(root.querySelectorAll('.track-card')).toHaveLength(12);
+    expect(toggle.textContent?.trim()).toBe('Show less');
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.componentInstance.tracks()).toHaveLength(12);
+  });
+
+  it('collapses back to nine tracks without removing data from the returned collection', () => {
+    const tracks = createTrackSet(12);
+    const fixture = createWithTracks(tracks);
+    const root = fixture.nativeElement as HTMLElement;
+    const toggle = root.querySelector<HTMLButtonElement>('button[aria-controls="landing-track-grid"]')!;
+
+    toggle.click();
+    fixture.detectChanges();
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(root.querySelectorAll('.track-card')).toHaveLength(9);
+    expect(toggle.textContent?.trim()).toBe('Show more');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(fixture.componentInstance.tracks()).toHaveLength(12);
+    expect(fixture.componentInstance.tracks().map((track) => track.id)).toEqual(
+      tracks.map((track) => track.id),
+    );
+  });
+
   it('shows a safe empty state when the API returns no tracks', () => {
     const fixture = createWithTracks([]);
     const root = fixture.nativeElement as HTMLElement;
@@ -212,16 +299,19 @@ describe('LandingPage', () => {
   });
 
   it('keeps locale and theme behavior working', () => {
-    const fixture = createWithTracks();
+    const fixture = createWithTracks(createTrackSet(10));
 
     fixture.componentInstance.toggleLocale();
     fixture.componentInstance.toggleTheme();
     fixture.detectChanges();
 
     const root = (fixture.nativeElement as HTMLElement).querySelector('.landing-page');
+    const toggle = root?.querySelector<HTMLButtonElement>('button[aria-controls="landing-track-grid"]');
+
     expect(document.documentElement.dir).toBe('rtl');
     expect(localStorage.getItem('eduflow.locale')).toBe('ar');
     expect(localStorage.getItem('iti-theme')).toBe('dark');
     expect(root?.getAttribute('data-theme')).toBe('dark');
+    expect(toggle?.textContent?.trim()).toBe('عرض المزيد');
   });
 });
