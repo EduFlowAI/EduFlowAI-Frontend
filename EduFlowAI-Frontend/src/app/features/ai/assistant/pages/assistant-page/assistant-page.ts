@@ -443,6 +443,20 @@ export class AssistantPage {
     }
   }
 
+  // crypto.randomUUID is undefined outside a secure context, and the site is served over HTTP.
+  private createMessageId(): string {
+    if (
+      typeof crypto !== 'undefined' &&
+      typeof crypto.randomUUID === 'function'
+    ) {
+      return crypto.randomUUID();
+    }
+
+    return `${Date.now().toString(36)}-${Math.random()
+      .toString(36)
+      .slice(2, 12)}`;
+  }
+
   private sendAssistantRequest(
     message: string,
     recommendWithAvailableData: boolean,
@@ -450,7 +464,7 @@ export class AssistantPage {
     this.messages.update(messages => [
       ...messages,
       {
-        id: crypto.randomUUID(),
+        id: this.createMessageId(),
         role: 'user',
         content: message,
         timestamp: new Date().toISOString(),
@@ -531,7 +545,7 @@ export class AssistantPage {
           this.messages.update(messages => [
             ...messages,
             {
-              id: crypto.randomUUID(),
+              id: this.createMessageId(),
               role: 'assistant',
               response,
               timestamp: response.timestamp,
