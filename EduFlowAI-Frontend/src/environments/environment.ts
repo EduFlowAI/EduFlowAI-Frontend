@@ -1,6 +1,7 @@
 // environment.ts
 export const environment = {
-    production: true,
-    // Replace with the production URL
-    apiUrl: 'http://eduflowai-alb-322584300.us-east-1.elb.amazonaws.com'
-  };
+  production: true,
+  // Empty string enables same-origin relative /api calls routed via CloudFront for zero-CORS latency & HTTP/2 speed
+  apiUrl: ''
+};
+
