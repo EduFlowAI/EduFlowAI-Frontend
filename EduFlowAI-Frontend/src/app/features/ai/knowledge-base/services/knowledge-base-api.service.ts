@@ -15,8 +15,7 @@ import {
 export class KnowledgeBaseApiService {
   private readonly http = inject(HttpClient);
 
-  // private readonly baseUrl = '/api/admin/knowledge-base';
-  private readonly baseUrl = `${environment.apiUrl}/admin/knowledge-base`;
+  private readonly baseUrl = `${environment.apiUrl}/api/admin/knowledge-base`;
 
   getDocuments(): Observable<KnowledgeBaseDocument[]> {
     return this.http.get<KnowledgeBaseDocument[]>(
